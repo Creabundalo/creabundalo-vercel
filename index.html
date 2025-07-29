@@ -1,6 +1,92 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
+  <meta charset="UTF-8">
+  <title>Creabundalo Preview v0.2</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #f0f0f0;
+    }
+    header {
+      background: #4c00a0;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .warning {
+      background: orange;
+      color: black;
+      text-align: center;
+      padding: 10px;
+      font-weight: bold;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      padding: 20px;
+      text-align: center;
+      transition: 0.2s ease-in-out;
+    }
+    .card:hover {
+      transform: scale(1.03);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+    .card a {
+      text-decoration: none;
+      color: #4c00a0;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="warning">
+    ⚠️ Dit is een demo/testversie op de productieomgeving ⚠️
+  </div>
+  <header>
+    <h1>Welkom bij Crea Bundelow</h1>
+    <p>Interactieve preview – versie 0.2 – 29 juli 2025</p>
+  </header>
+  <main class="grid">
+    <div class="card">
+      <h2>Over Crea Bundelow</h2>
+      <a href="#">Lees meer →</a>
+    </div>
+    <div class="card">
+      <h2>Profielpagina</h2>
+      <a href="#">Bekijk profiel →</a>
+    </div>
+    <div class="card">
+      <h2>Spiritueel dashboard</h2>
+      <a href="#">Open dashboard →</a>
+    </div>
+    <div class="card">
+      <h2>Toolkit</h2>
+      <a href="#">Start toolkit →</a>
+    </div>
+    <div class="card">
+      <h2>Community module</h2>
+      <a href="#">Toegang aanvragen →</a>
+    </div>
+    <div class="card">
+      <h2>Instellingen</h2>
+      <a href="#">Open instellingen →</a>
+    </div>
+  </main>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="nl">
+<head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Creabundalo – Insource your Reality</title>
