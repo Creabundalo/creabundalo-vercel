@@ -1,181 +1,23 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <title>Creabundalo Preview v0.2</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: #f0f0f0;
-    }
-    header {
-      background: #4c00a0;
-      color: white;
-      padding: 20px;
-      text-align: center;
-    }
-    .warning {
-      background: orange;
-      color: black;
-      text-align: center;
-      padding: 10px;
-      font-weight: bold;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-      gap: 20px;
-      padding: 20px;
-    }
-    .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      padding: 20px;
-      text-align: center;
-      transition: 0.2s ease-in-out;
-    }
-    .card:hover {
-      transform: scale(1.03);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-    .card a {
-      text-decoration: none;
-      color: #4c00a0;
-      font-weight: bold;
-    }
-  </style>
-</head>
-<body>
-  <div class="warning">
-    ⚠️ Dit is een demo/testversie op de productieomgeving ⚠️
-  </div>
-  <header>
-    <h1>Welkom bij Crea Bundelow</h1>
-    <p>Interactieve preview – versie 0.2 – 29 juli 2025</p>
-  </header>
-  <main class="grid">
-    <div class="card">
-      <h2>Over Crea Bundelow</h2>
-      <a href="#">Lees meer →</a>
-    </div>
-    <div class="card">
-      <h2>Profielpagina</h2>
-      <a href="#">Bekijk profiel →</a>
-    </div>
-    <div class="card">
-      <h2>Spiritueel dashboard</h2>
-      <a href="#">Open dashboard →</a>
-    </div>
-    <div class="card">
-      <h2>Toolkit</h2>
-      <a href="#">Start toolkit →</a>
-    </div>
-    <div class="card">
-      <h2>Community module</h2>
-      <a href="#">Toegang aanvragen →</a>
-    </div>
-    <div class="card">
-      <h2>Instellingen</h2>
-      <a href="#">Open instellingen →</a>
-    </div>
-  </main>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="nl">
-<head>
   <meta charset="UTF-8" />
+  <title>Creabundalo Prototype</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Creabundalo – Insource your Reality</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f4f7fa;
-      color: #333;
-    }
-    header {
-      background: #1a1a1a;
-      color: #fff;
-      padding: 2rem;
-      text-align: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 2rem;
-    }
-    header p {
-      margin-top: 0.5rem;
-      font-style: italic;
-    }
-    main {
-      max-width: 800px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-      line-height: 1.6;
-    }
-    section {
-      margin-bottom: 2rem;
-    }
-    h2 {
-      color: #004d66;
-    }
-    footer {
-      text-align: center;
-      font-size: 0.9rem;
-      color: #777;
-      margin: 4rem 0 1rem;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
     <h1>Creabundalo</h1>
     <p>Insource your Reality</p>
   </header>
-
-  <main>
-    <section>
-      <h2>Welkom bij Creabundalo</h2>
-      <p>
-        Creabundalo is meer dan een platform – het is een beweging. Gebaseerd op de principes van autonomie, wederkerigheid en zelfbewustzijn,
-        bouwen we samen aan een toekomst waarin technologie, menselijkheid en spiritualiteit elkaar versterken.
-      </p>
-    </section>
-
-    <section>
-      <h2>Wat we doen</h2>
-      <ul>
-        <li>🌍 Een community voor bewuste denkers en doeners</li>
-        <li>⚙️ Tools die je helpen je eigen werkelijkheid vorm te geven</li>
-        <li>💡 Kennisdeling via AI, archieven en persoonlijke reflectie</li>
-        <li>💞 Een veilige ruimte voor verbinding, ontwikkeling en vrijheid</li>
-      </ul>
-    </section>
-
-    <section>
-      <h2>Wie zijn wij?</h2>
-      <p>
-        Creabundalo is ontstaan vanuit een verlangen naar creatieve vrijheid, innerlijke groei en samenwerking buiten de gebaande paden.
-        De naam is geïnspireerd op kinderlijke verwondering en oerinstinct: het roept de energie op van kracht, verbinding en speelsheid.
-        Initiatiefnemer Edwin is systeemalchemist, bouwer en visionair achter het platform.
-      </p>
-    </section>
-
-    <section>
-      <h2>Sluit je aan</h2>
-      <p>
-        We nodigen je uit om deel te worden van dit levende experiment. Ontdek, reflecteer, bouw, verbind.
-        Want: <strong>waarde ontstaat door verbinding, niet door bezit.</strong>
-      </p>
-    </section>
+  <main class="grid">
+    <a class="tile" href="over.html">Over Crea Bundelow<br><span>Lees meer →</span></a>
+    <a class="tile" href="profiel.html">Profielpagina<br><span>Bekijk profiel →</span></a>
+    <a class="tile" href="dashboard.html">Spiritueel dashboard<br><span>Open dashboard →</span></a>
+    <a class="tile" href="toolkit.html">Toolkit<br><span>Start toolkit →</span></a>
+    <a class="tile" href="community.html">Community module<br><span>Toegang aanvragen →</span></a>
+    <a class="tile" href="instellingen.html">Instellingen<br><span>Open instellingen →</span></a>
   </main>
-
-  <footer>
-    &copy; 2025 Creabundalo – Ontwerp & visie: Edwin Nijssen – versie 0.2
-  </footer>
 </body>
 </html>
