@@ -1,0 +1,30 @@
+name: K24 Preview Gate
+on:
+  push:
+    branches: ["k24/rebuild-5.0"]
+  pull_request:
+    branches: ["main"]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify K24 semantic UI
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          html=Path('index.html').read_text()
+          css=Path('style.css').read_text()
+          required=['NU','SPORT','PODCASTS','YOUTUBE','PUBLIEK','COMMERCIEEL','BUITENLAND','Mijn werelden','Mijn kluis']
+          missing=[x for x in required if x not in html]
+          assert not missing, f'Missing semantic UI: {missing}'
+          assert 'data-theme="light"' in html, 'Light must be default'
+          assert '--bg:#fff' in css, 'White light baseline missing'
+          assert 'linear-gradient' not in css and 'box-shadow' not in css, 'No gradients/shadows in house style'
+          print('K24 semantic + house-style gate PASS')
+          PY
+      - name: Publish traceability summary
+        run: |
+          echo "## K24 Preview Gate" >> "$GITHUB_STEP_SUMMARY"
+          echo "Commit: $GITHUB_SHA" >> "$GITHUB_STEP_SUMMARY"
+          echo "Meaning → UI → house style: PASS" >> "$GITHUB_STEP_SUMMARY"
