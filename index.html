@@ -1,23 +1,22 @@
-<!DOCTYPE html>
-<html lang="nl">
-<head>
-  <meta charset="UTF-8" />
-  <title>Creabundalo Prototype</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="style.css" />
-</head>
+<!doctype html>
+<html lang="nl" data-theme="light">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>K24 — Creabundalo</title><link rel="stylesheet" href="style.css"></head>
 <body>
-  <header>
-    <h1>Creabundalo</h1>
-    <p>Insource your Reality</p>
-  </header>
-  <main class="grid">
-    <a class="tile" href="over.html">Over Crea Bundelow<br><span>Lees meer →</span></a>
-    <a class="tile" href="profiel.html">Profielpagina<br><span>Bekijk profiel →</span></a>
-    <a class="tile" href="dashboard.html">Spiritueel dashboard<br><span>Open dashboard →</span></a>
-    <a class="tile" href="toolkit.html">Toolkit<br><span>Start toolkit →</span></a>
-    <a class="tile" href="community.html">Community module<br><span>Toegang aanvragen →</span></a>
-    <a class="tile" href="instellingen.html">Instellingen<br><span>Open instellingen →</span></a>
-  </main>
-</body>
-</html>
+<header class="mast"><div><span class="brand">CREABUNDALO</span><strong>K24</strong></div><button id="theme" aria-label="Licht/donker">☾</button></header>
+<nav class="nav"><button class="active" data-view="nu">NU</button><button data-view="sport">SPORT</button><button data-view="podcasts">PODCASTS</button><button data-view="youtube">YOUTUBE</button></nav>
+<main>
+<section class="view active" id="nu"><p class="eyebrow">CONTENT · K24</p><h1>Wat wil je kijken?</h1><p class="lead">Niet zoeken per aanbieder. Begin bij wat je wilt.</p>
+<section class="group"><h2>PUBLIEK</h2><div class="cards"><article><small>NPO</small><h3>Publieke televisie</h3><p>Wat is er nu en vanavond?</p><button>Open NPO ↗</button></article><article><small>VRT</small><h3>België</h3><p>Publieke programma’s en live aanbod.</p><button>Open VRT ↗</button></article></div></section>
+<section class="group"><h2>COMMERCIEEL</h2><div class="cards"><article><small>RTL</small><h3>RTL</h3><p>Programma’s en beschikbare officiële routes.</p><button>Open dienst ↗</button></article><article><small>KIJK</small><h3>KIJK</h3><p>Talpa-programma’s via de officiële omgeving.</p><button>Open dienst ↗</button></article></div></section>
+<section class="group"><h2>BUITENLAND</h2><div class="regions"><button>Duitsland</button><button>België</button><button>UK</button><button>Frankrijk</button></div></section></section>
+<section class="view" id="sport"><p class="eyebrow">K24 · SPORT</p><h1>Welke sport?</h1><p class="lead">Kies de sport. K24 zoekt daarachter de beste geldige bron.</p><div class="regions"><button>Voetbal</button><button>Wielrennen</button><button>Formule 1</button><button>Tennis</button></div></section>
+<section class="view" id="podcasts"><p class="eyebrow">K24 · PODCASTS</p><h1>Waar wil je naar luisteren?</h1><p class="lead">Zoek op onderwerp, maker of titel.</p><input placeholder="Zoek podcasts"></section>
+<section class="view" id="youtube"><p class="eyebrow">K24 · YOUTUBE</p><h1>Wat wil je zien?</h1><p class="lead">YouTube als bron achter jouw onderwerp.</p><input placeholder="Onderwerp of kanaal"></section>
+</main>
+<footer><button>Mijn werelden</button><button>Mijn kluis</button><span>K24 · rebuild 5.0</span></footer>
+<script>
+const root=document.documentElement, theme=document.getElementById('theme');
+const saved=localStorage.getItem('k24-theme')||'light'; root.dataset.theme=saved; theme.textContent=saved==='light'?'☾':'☀';
+theme.onclick=()=>{const n=root.dataset.theme==='light'?'dark':'light';root.dataset.theme=n;localStorage.setItem('k24-theme',n);theme.textContent=n==='light'?'☾':'☀'};
+document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.nav button,.view').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById(b.dataset.view).classList.add('active')});
+</script></body></html>
