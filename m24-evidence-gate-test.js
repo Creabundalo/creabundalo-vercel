@@ -8,7 +8,7 @@ const test=`
   const rec=(id,type,data)=>({id,type,data});
   const complete=[
     rec('p','LAB_RESULT_PRIMARY',{caseId:caseSchema.id}),
-    rec('m','MEANING_WORLD_CONTEXT',{caseId:caseSchema.id,sources:[{id:'s1',publishedAt:'2021-11-09T10:00:00Z'}]}),
+    rec('m','MEANING_WORLD_CONTEXT',{caseId:caseSchema.id,sources:[{id:'s1',publishedAt:'2021-11-09T10:00:00Z'}],firstTop:{count:1},secondTop:{count:1}}),
     rec('d','DERIVATIVES_CONTEXT',{caseId:caseSchema.id,firstTop:{count:3},secondTop:{count:3}}),
     rec('a','ARCHIVE_DERIVATIVES_CONTEXT',{caseId:caseSchema.id,gaps:[]}),
     rec('x','MACRO_CROSS_ASSET_CONTEXT',{caseId:caseSchema.id,series:[{key:'DOLLAR'}],gaps:[]}),
@@ -18,6 +18,11 @@ const test=`
   const ok=M24EvidenceGate.assess(complete,caseSchema);
   check(ok.calibrationEligible===true,'source-complete case should be eligible');
   check(ok.missingLayers.length===0,'complete case should have no missing layers');
+
+  const noSecondMeaning=complete.map(x=>x.id==='m'?rec('m','MEANING_WORLD_CONTEXT',{caseId:caseSchema.id,sources:[{id:'s1'}],firstTop:{count:1},secondTop:{count:0}}):x);
+  const meaningIncomplete=M24EvidenceGate.assess(noSecondMeaning,caseSchema);
+  check(meaningIncomplete.calibrationEligible===false,'missing second-top meaning evidence must block promotion');
+  check(meaningIncomplete.layers.MEANING_WORLD.state==='INCOMPLETE','meaning top coverage gap should be explicit');
 
   const noArchive=complete.filter(x=>x.type!=='ARCHIVE_DERIVATIVES_CONTEXT');
   const incomplete=M24EvidenceGate.assess(noArchive,caseSchema);
@@ -46,7 +51,7 @@ const test=`
   const sparse=M24EvidenceGate.assess(priceOnly,caseSchema);
   check(sparse.calibrationEligible===false,'price-only case must never calibrate');
   check(sparse.missingLayers.includes('MEANING_WORLD')&&sparse.missingLayers.includes('MACRO'),'missing layers not explicit');
-  console.log('M24 evidence gate test OK',JSON.stringify({complete:ok.state,resolved:resolved.layers.DERIVATIVES.state,priceOnly:sparse.state,blocked:blocked.layers.DERIVATIVES.state}));
+  console.log('M24 evidence gate test OK',JSON.stringify({complete:ok.state,meaning:meaningIncomplete.layers.MEANING_WORLD.state,resolved:resolved.layers.DERIVATIVES.state,priceOnly:sparse.state,blocked:blocked.layers.DERIVATIVES.state}));
 })();
 `;
 try{vm.runInThisContext(`${source}\n${test}`,{filename:'m24-evidence-gate-test-bundle.js'})}catch(err){console.error(err);process.exit(1)}
