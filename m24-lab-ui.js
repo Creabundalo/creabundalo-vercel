@@ -64,6 +64,7 @@ globalThis.M24LabUI = (() => {
     const button=$('#runPrimaryCompare');
     if(button) button.addEventListener('click',()=>runPrimaryComparison().catch(()=>{}));
     loadAuxUI('m24-derivatives-ui.js','M24DerivativesUI');
+    loadAuxUI('m24-binance-vision-ui.js','M24BinanceVisionUI');
     loadAuxUI('m24-macro-ui.js','M24MacroUI');
     loadAuxUI('m24-meaning-ui.js','M24MeaningUI');
     loadAuxUI('m24-trickster-ui.js','M24TricksterUI');
