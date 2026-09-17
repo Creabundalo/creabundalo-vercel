@@ -1,10 +1,37 @@
 globalThis.M24Cases = (() => {
+  const sharedRules=Object.freeze({
+    supportBreak:'FIRST_CLOSE_BELOW_SUPPORT_LOW_AFTER_SECOND_TOP',
+    momentum:'WILDER_RSI_14',
+    participation:'COMPARE_VOLUME_AT_RESOLVED_TOP_BARS'
+  });
+
+  const topMarkdown=(spec)=>Object.freeze({
+    analysis:'TOP_MARKDOWN',
+    resolutionIndependent:true,
+    providerFamily:'COINBASE_EXCHANGE',
+    status:'EXECUTABLE_PRIMARY',
+    calibrationEligible:false,
+    requiredLayers:['PRICE','MEANING_WORLD','DERIVATIVES','MACRO'],
+    rules:sharedRules,
+    ...spec,
+    note:`${spec.note||''} Checkpoint windows are search spaces; source data resolves the actual bars. Calibration eligibility remains false until required evidence layers are source-complete.`.trim()
+  });
+
   const cases = Object.freeze({
-    'BTC-2021-2022-TOP-MARKDOWN': Object.freeze({
-      id:'BTC-2021-2022-TOP-MARKDOWN',
-      asset:'BTC',
-      analysis:'TOP_MARKDOWN',
-      resolutionIndependent:true,
+    'BTC-2019-TOP-MARKDOWN': topMarkdown({
+      id:'BTC-2019-TOP-MARKDOWN',asset:'BTC',
+      window:{from:'2019-05-01',to:'2019-12-31'},
+      checkpointWindows:{
+        firstTop:{from:'2019-06-20',to:'2019-06-30',select:'MAX_HIGH'},
+        automaticReaction:{from:'2019-07-01',to:'2019-07-05',select:'MIN_LOW'},
+        supportReference:{from:'2019-07-01',to:'2019-07-05',select:'MIN_LOW'},
+        secondTop:{from:'2019-07-06',to:'2019-07-15',select:'MAX_HIGH'},
+        markdownOutcome:{from:'2019-07-16',to:'2019-12-31',select:'MIN_LOW'}
+      },
+      note:'2019 BTC local-top / lower-high markdown candidate.'
+    }),
+    'BTC-2021-2022-TOP-MARKDOWN': topMarkdown({
+      id:'BTC-2021-2022-TOP-MARKDOWN',asset:'BTC',
       window:{from:'2021-01-01',to:'2022-06-30'},
       checkpointWindows:{
         firstTop:{from:'2021-04-01',to:'2021-05-09',select:'MAX_HIGH'},
@@ -13,18 +40,40 @@ globalThis.M24Cases = (() => {
         secondTop:{from:'2021-10-01',to:'2021-11-30',select:'MAX_HIGH'},
         markdownOutcome:{from:'2021-12-01',to:'2022-06-30',select:'MIN_LOW'}
       },
-      rules:{
-        supportBreak:'FIRST_CLOSE_BELOW_SUPPORT_LOW_AFTER_SECOND_TOP',
-        momentum:'WILDER_RSI_14',
-        participation:'COMPARE_VOLUME_AT_RESOLVED_TOP_BARS'
+      note:'Existing BTC double-top / distribution regression case.'
+    }),
+    'ETH-2021-2022-TOP-MARKDOWN': topMarkdown({
+      id:'ETH-2021-2022-TOP-MARKDOWN',asset:'ETH',
+      window:{from:'2021-03-01',to:'2022-06-30'},
+      checkpointWindows:{
+        firstTop:{from:'2021-04-15',to:'2021-05-31',select:'MAX_HIGH'},
+        automaticReaction:{from:'2021-05-13',to:'2021-07-25',select:'MIN_LOW'},
+        supportReference:{from:'2021-09-01',to:'2021-09-30',select:'MIN_LOW'},
+        secondTop:{from:'2021-10-01',to:'2021-11-30',select:'MAX_HIGH'},
+        markdownOutcome:{from:'2021-12-01',to:'2022-06-30',select:'MIN_LOW'}
       },
-      note:'Checkpoint windows identify market structure semantically; individual source resolutions select their own bars inside the same windows.'
+      note:'ETH 2021 first-peak / second-peak / 2022 markdown candidate.'
+    }),
+    'SOL-2021-2022-TOP-MARKDOWN': topMarkdown({
+      id:'SOL-2021-2022-TOP-MARKDOWN',asset:'SOL',
+      window:{from:'2021-07-01',to:'2022-06-30'},
+      checkpointWindows:{
+        firstTop:{from:'2021-08-15',to:'2021-09-20',select:'MAX_HIGH'},
+        automaticReaction:{from:'2021-09-10',to:'2021-10-05',select:'MIN_LOW'},
+        supportReference:{from:'2021-09-20',to:'2021-10-20',select:'MIN_LOW'},
+        secondTop:{from:'2021-10-20',to:'2021-11-20',select:'MAX_HIGH'},
+        markdownOutcome:{from:'2021-12-01',to:'2022-06-30',select:'MIN_LOW'}
+      },
+      note:'SOL 2021 multi-peak / 2022 markdown candidate.'
     })
   });
 
   const clone=value=>structuredClone(value);
   function get(id){return cases[id]?clone(cases[id]):null}
-  function list(){return Object.values(cases).map(clone)}
+  function list({asset=null,status=null}={}){
+    return Object.values(cases).filter(x=>(!asset||x.asset===asset)&&(!status||x.status===status)).map(clone);
+  }
+  function calibrationCandidates(){return list().filter(x=>x.calibrationEligible===true)}
 
-  return {get,list};
+  return {get,list,calibrationCandidates};
 })();
