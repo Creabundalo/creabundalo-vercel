@@ -31,7 +31,10 @@
 - [x] MarketDataProvider contract exists
 - [x] MockProvider adapter exists
 - [x] HistoricalProvider adapter exists
+- [x] CoinbaseHistoricalProvider primary-exchange adapter exists
+- [x] Coinbase long ranges are chunked below documented 300-candle request maximum
 - [x] Historical fixture carries explicit provenance and source quality
+- [x] Coinbase adapter carries explicit primary-exchange provenance
 - [x] M24Lab RSI/top/volume/support/outcome analysis exists
 - [x] Provider-independent Runtime exists
 - [x] Technical design documented
@@ -45,6 +48,7 @@
 - [x] Ownership never implies actor attribution
 - [x] A rejected historical indicator hypothesis is retained instead of rewritten
 - [x] Weekly RSI is not mislabeled as daily RSI
+- [x] Primary exchange bars and secondary regression fixture remain distinct provenance classes
 
 ## Learning
 - [x] Forecasts are first-class Qubus instances
@@ -65,10 +69,10 @@
 - [x] JavaScript syntax checks cover renderer/core/providers/lab
 - [x] Architecture contract checks defined
 - [x] Historical runtime smoke test defined
+- [x] Coinbase adapter deterministic contract test defined
 - [x] Safety contract checks defined
 - [x] Interaction contract checks defined
-- [x] GitHub Actions M24 Release Gate green on historical Lab slice (run 19)
-- [x] ACTIO Release Gate remains green on same head (run 26)
+- [ ] Latest GitHub Actions M24 Release Gate green after Coinbase adapter commit
 - [ ] Visual browser/Vercel preview review completed
 
 ## Historical BTC fixture status
@@ -78,7 +82,9 @@
 - [x] RSI(14) bearish-divergence hypothesis rejected for this weekly fixture
 - [x] First weekly support break after second top measured
 - [x] Subsequent markdown outcome measured
-- [ ] Replace/augment secondary fixture with authoritative historical market-data adapter before calibration decisions
+- [x] Primary-exchange historical market-data adapter implemented (Coinbase Exchange)
+- [ ] Make case checkpoint definitions resolution-independent
+- [ ] Run source comparison: weekly regression fixture versus Coinbase daily bars
 - [ ] Add derivatives/open-interest/funding history
 - [ ] Add macro/cross-asset history
 - [ ] Add timestamped narrative/source history
