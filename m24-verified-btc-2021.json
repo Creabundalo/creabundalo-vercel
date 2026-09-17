@@ -2,6 +2,7 @@
   "type": "VERIFIED_SOURCE_SNAPSHOT",
   "caseId": "BTC-2021-2022-TOP-MARKDOWN",
   "asset": "BTC",
+  "coverageProfile": "EXTENDED_DERIVATIVES",
   "verification": {
     "workflow": "M24 Source E2E",
     "workflowRunId": 35277917562,
@@ -22,8 +23,8 @@
   },
   "evidenceLayers": {
     "PRICE": {"state":"COMPLETE","note":"Measured price structure exists."},
-    "MEANING_WORLD": {"state":"COMPLETE","note":"6 timestamped source item(s)."},
-    "DERIVATIVES": {"state":"COMPLETE","note":"Funding plus archived positioning complete; recent-API retention gap resolved by Binance Vision archive."},
+    "MEANING_WORLD": {"state":"COMPLETE","note":"6 scoped timestamped source item(s); top coverage 2/2."},
+    "DERIVATIVES": {"state":"COMPLETE","extensionState":"COMPLETE","note":"Core funding and extended archived positioning complete; recent-API retention gap resolved by Binance Vision archive."},
     "MACRO": {"state":"COMPLETE","note":"7 source-backed series."},
     "DECISION_SNAPSHOT": {"state":"COMPLETE","note":"No-lookahead decision snapshot exists."},
     "BACKTEST_OUTCOME": {"state":"COMPLETE","note":"Later outcome exists separately from decision input."}
@@ -38,16 +39,14 @@
       {"id":"STRONGER_DOLLAR","weight":0.5},
       {"id":"TIGHTER_FINANCIAL_CONDITIONS","weight":0.5}
     ],
-    "confirmations": [
-      {"id":"TAKER_BUY_CONFIRMATION"}
-    ]
+    "confirmations": [{"id":"TAKER_BUY_CONFIRMATION"}]
   },
   "sourceNotes": {
     "price": "Coinbase Exchange historical candles",
     "funding": "Binance Vision monthly fundingRate archives with SHA-256 verification",
     "derivativesArchive": "Binance Vision daily metrics with SHA-256 verification",
     "macro": "Official-source series via FRED",
-    "meaning": "Timestamped source fixture with provenance"
+    "meaning": "BTC-scoped timestamped source fixture with provenance"
   },
-  "note": "Pinned output of a successful real-source E2E run. It proves source completeness for this historical case; it does not itself provide a calibrated probability or a live trading signal."
+  "note": "Pinned output of a successful real-source E2E run. Coverage profile is EXTENDED_DERIVATIVES. It proves source completeness for this historical case; it does not itself provide a calibrated probability or a live trading signal."
 }
