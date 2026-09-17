@@ -78,6 +78,7 @@ globalThis.M24Lab = (() => {
   }
 
   function analyzeTopMarkdown(caseDef, caseSchema=null) {
+    caseSchema=caseSchema||globalThis.M24Cases?.get?.(caseDef.id)||null;
     const bars=caseDef.bars||[];
     if(!bars.length) throw new Error('Historical case has no bars.');
     const checkpoints=resolveCheckpoints(caseDef,caseSchema);
