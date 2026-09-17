@@ -1,0 +1,19 @@
+{
+  "name": "Creabundalo ACTIO",
+  "short_name": "ACTIO",
+  "description": "Local-first persoonlijke invoerterminal voor P24.",
+  "start_url": "./actio.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f110d",
+  "theme_color": "#11130f",
+  "icons": [
+    {
+      "src": "actio-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
