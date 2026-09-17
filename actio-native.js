@@ -120,6 +120,18 @@
           }
         } else if(op.kind==='ALARM'){
           const alarmEpoch=resolveAlarmEpoch(tx.intent,op.payload.time);
+          const alarmId=executeAlarm(op,parentId,tx.id);
+          writtenIds.push(alarmId);
+          if(!alarmEpoch){
+            nativeChecks.push(false);
+            addLog('ANDROID_ALARM_DEFERRED','doeldatum/tijd kon niet veilig worden bepaald',tx.id);
+            continue;
+          }
+          if(alarmEpoch>Date.now()+(26*60*60*1000)){
+            nativeChecks.push(false);
+            addLog('ANDROID_ALARM_DEFERRED','meer dan 26 uur vooruit; geen fout dagalarm gezet',tx.id);
+            continue;
+          }
           const result=callNative('createAlarm',{
             time:op.payload.time,
             targetMillis:alarmEpoch,
@@ -129,7 +141,7 @@
           if(!result.ok) throw new Error(`ALARM:${result.error||'failed'}`);
           nativeChecks.push(result.dispatched===true);
           addLog('ANDROID_ALARM_OK',`${result.provider||'clock'} · ${result.verification||'DISPATCHED'}`,tx.id);
-          const alarmId=executeAlarm(op,parentId,tx.id); writtenIds.push(alarmId);
+          if(result.warning) addLog('ANDROID_ALARM_WARN',result.warning,tx.id);
         }
       }
     }catch(err){
@@ -141,7 +153,7 @@
     persist();
     const localOk=verifyTransaction(tx.id,writtenIds);
     const nativeOk=nativeChecks.every(Boolean);
-    addLog(nativeOk?'VERIFY_ANDROID_OK':'VERIFY_ANDROID_PARTIAL',nativeOk?'native records/dispatch bevestigd':'minstens één native verificatie ontbreekt',tx.id);
+    addLog(nativeOk?'VERIFY_ANDROID_OK':'VERIFY_ANDROID_PARTIAL',nativeOk?'native records/dispatch bevestigd':'minstens één native verificatie of toekomstalarm staat nog open',tx.id);
     connectionState.textContent=localOk&&nativeOk?'ANDROID LIVE':'CONTROLEER LOG';
     store.pending=null;
     clearAttachment();
@@ -157,6 +169,7 @@
     providers.calendar={name:'Android Calendar',mode:'ANDROID_LIVE'};
     providers.alarm={name:'Android Clock',mode:'ANDROID_LIVE'};
     connectionState.textContent='ANDROID LIVE';
+    if($('versionLabel')) $('versionLabel').textContent='P24 · ACTIO v0.4';
     addLog('ANDROID_BRIDGE',caps.ok?`v${caps.version||'?'} · live`:'bridge gevonden',null);
   }catch(_){ }
 
