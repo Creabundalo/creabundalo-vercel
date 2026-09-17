@@ -10,6 +10,7 @@ on:
       - 'm24-derivatives.js'
       - 'm24-derivatives-lab.js'
       - 'm24-binance-vision.js'
+      - 'm24-funding-archive.js'
       - 'm24-binance-vision-lab.js'
       - 'm24-macro.js'
       - 'm24-macro-lab.js'
