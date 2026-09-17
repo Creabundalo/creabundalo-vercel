@@ -21,6 +21,7 @@ Responsibilities:
 - Legacy / M24 / AI-native interpretation lenses
 - overlays and flags
 - paper-transaction rows and drill-down
+- projection of measured historical Lab results
 
 The renderer does not own market meaning or execution logic.
 
@@ -36,7 +37,11 @@ Responsibilities:
 - safety policy: no live execution in v0.1
 
 ### Provider layer
-`m24-data.js` initially supplies deterministic mock data through provider contracts.
+`m24-data.js` supplies deterministic mock data through provider contracts.
+
+`m24-historical.js` adds a replaceable historical adapter. Its first fixture is a weekly BTC/USD OHLCV dataset for the 2021→2022 lab case. The fixture is explicitly tagged `PUBLIC_REPRODUCIBLE_FIXTURE` / `SECONDARY`; it is useful for deterministic development and regression tests but is not treated as an authoritative calibration source.
+
+`m24-lab.js` contains historical measurement logic such as Wilder RSI, top-to-top comparisons, volume comparison, support-break detection and post-signal outcome measurement.
 
 Future adapters:
 - `MarketDataProvider`: price, volume, bars, order flow, market depth
@@ -68,7 +73,7 @@ Every meaningful object is an instance.
 ```
 
 Core types include:
-`ASSET`, `MARKET_STATE`, `MACRO_FACTOR`, `REGIME`, `POSITIONING_STATE`, `FLOW_STATE`, `MEANING_STATE`, `TRICKSTER_ASSESSMENT`, `PRICE_STRUCTURE`, `PATTERN_INSTANCE`, `SIGNAL_INSTANCE`, `FIBONACCI_INSTANCE`, `HISTORICAL_CASE`, `FORECAST_INSTANCE`, `ACTION_CANDIDATE`, `TRANSACTION_INSTANCE`, `OUTCOME_INSTANCE`, `SOURCE`, `USER_OBSERVATION`.
+`ASSET`, `MARKET_STATE`, `MACRO_FACTOR`, `REGIME`, `POSITIONING_STATE`, `FLOW_STATE`, `MEANING_STATE`, `TRICKSTER_ASSESSMENT`, `PRICE_STRUCTURE`, `PATTERN_INSTANCE`, `SIGNAL_INSTANCE`, `FIBONACCI_INSTANCE`, `HISTORICAL_CASE`, `LAB_RESULT`, `FORECAST_INSTANCE`, `ACTION_CANDIDATE`, `TRANSACTION_INSTANCE`, `OUTCOME_INSTANCE`, `SOURCE`, `USER_OBSERVATION`.
 
 ## 4. Evidence model
 Trickster and actor attribution use explicit evidence states:
@@ -80,6 +85,8 @@ Trickster and actor attribution use explicit evidence states:
 
 `INTENT_UNKNOWN` is the default whenever a trap/manipulation interpretation is suggested without hard attribution evidence.
 
+A Lab hypothesis may also be rejected. A rejected indicator hypothesis is retained as a measured result rather than silently removed or rewritten.
+
 ## 5. Time model
 Time window and resolution are separate.
 
@@ -87,6 +94,8 @@ Hierarchy:
 `LIFE CYCLE → CYCLE → REGIME → EPISODE → EVENT → MICRO`
 
 A drill-down creates/selects a child window. Changing resolution only changes sample density inside that selected window.
+
+Historical Lab tests must record their actual resolution. A weekly fixture cannot be presented as a daily RSI result.
 
 ## 6. Trickster engine
 Input:
@@ -119,6 +128,8 @@ Learning pipeline:
 
 No calibration candidate may silently change live-money execution.
 
+Historical tests separate information available at a checkpoint from later outcome data. Post-event drawdown may score a prior candidate; it may not be fed back into the original signal as if it had been known at the time.
+
 ## 8. Transactions
 Human status:
 `KANDIDAAT → KLAAR → OPEN → DEELS → GESLOTEN`
@@ -132,19 +143,41 @@ A transaction row is a projection of a `TRANSACTION_INSTANCE`; drill-down shows 
 In v0.1 `COMMIT` is paper-state mutation only. There is no broker-submit action.
 
 ## 9. First historical case
-`BTC-2021-2022-TOP-MARKDOWN` is the first lab case. v0.1 stores the case structure and signal checkpoints; authoritative historical bars and source provenance are connected in the next data phase.
+`BTC-2021-2022-TOP-MARKDOWN` is the first lab case.
 
-Target checkpoints:
-- first major top
-- automatic reaction / correction
-- second top
-- momentum/participation comparison
-- support break
-- failed recovery / markdown
+Current deterministic development fixture:
+- weekly BTC/USD OHLCV
+- 2021-01-04 through 2022-06-27
+- source copied from public `alpharithms/data` dataset
+- source quality: `SECONDARY`
+- purpose: regression/development, not final calibration
+
+Measured checkpoints currently include:
+- first major top: week of 2021-04-12
+- second top: week of 2021-11-08
+- support reference: week of 2021-09-20
+- first weekly close below that support after the second top: 2022-01-17
+- post-second-top trough inside the fixture: week of 2022-06-13
+
+The first measurement is intentionally hypothesis-testing rather than story-confirming. In this weekly fixture the second high is higher and weekly volume is materially lower, while RSI(14) does **not** show the assumed bearish divergence. That RSI hypothesis is therefore stored as rejected for this fixture/resolution instead of being promoted to fact.
+
+Next data step: replace/augment the development fixture with authoritative historical bars and then add derivatives, macro, cross-asset and timestamped narrative sources.
 
 The purpose is to test whether the combined M24 state is more useful than any single Elliott/Wyckoff/RSI/Fibonacci label.
 
-## 10. Safety boundary
+## 10. Automated validation
+`m24-smoke-test.js` executes the domain/runtime historical path in Node and asserts that:
+- historical bars are present
+- provenance is present
+- second-top price comparison is measured
+- lower weekly volume is detected
+- the weekly RSI divergence hypothesis is not falsely confirmed
+- the defined support break is found
+- the later markdown outcome is measurable
+
+GitHub Actions runs syntax, architecture, historical runtime, safety and interaction gates on M24 changes.
+
+## 11. Safety boundary
 Hard v0.1 invariants:
 - `SIMULATED_ONLY` always visible
 - no broker credentials
