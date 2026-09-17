@@ -13,7 +13,7 @@ const test=`
     toProvenance:s=>({sourceId:s.id})
   };
   globalThis.M24DerivativesLab={
-    runCase:async()=>({caseId:caseSchema.id,asset:'BTC',fundingContext:{caseId:caseSchema.id,firstTop:{asOf:'2021-04-14T23:59:59.999Z'},secondTop:{asOf:'2021-11-10T23:59:59.999Z'},comparison:{crowdingShift:'MORE_POSITIVE_AT_SECOND_TOP'}},openInterestGap:{caseId:caseSchema.id,metric:'OPEN_INTEREST',reason:'HISTORY_WINDOW_EXCEEDED',recommendedSource:'BINANCE_VISION_METRICS'}}),
+    runCase:async()=>({caseId:caseSchema.id,asset:'BTC',fundingContext:{caseId:caseSchema.id,firstTop:{count:3,asOf:'2021-04-14T23:59:59.999Z'},secondTop:{count:3,asOf:'2021-11-10T23:59:59.999Z'},comparison:{crowdingShift:'MORE_POSITIVE_AT_SECOND_TOP'}},openInterestGap:{caseId:caseSchema.id,domain:'DERIVATIVES',metric:'OPEN_INTEREST',reason:'HISTORY_WINDOW_EXCEEDED',recommendedSource:'BINANCE_VISION_METRICS'}}),
     toRecordPayloads:r=>[
       {type:'DERIVATIVES_CONTEXT',data:r.fundingContext,evidenceStatus:'MECHANISM_VISIBLE',confidence:1,provenance:[]},
       {type:'SOURCE_GAP',data:r.openInterestGap,evidenceStatus:'MECHANISM_VISIBLE',confidence:1,provenance:[]}
