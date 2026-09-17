@@ -12,6 +12,7 @@ on:
       - 'm24-historical.js'
       - 'm24-lab.js'
       - 'm24-primary-lab.js'
+      - 'm24-lab-ui.js'
       - 'm24-smoke-test.js'
       - 'm24-resolution-test.js'
       - 'm24-coinbase.js'
@@ -40,6 +41,7 @@ jobs:
           test -f m24-historical.js
           test -f m24-lab.js
           test -f m24-primary-lab.js
+          test -f m24-lab-ui.js
           test -f m24-smoke-test.js
           test -f m24-resolution-test.js
           test -f m24-coinbase.js
@@ -57,6 +59,7 @@ jobs:
           node --check m24-historical.js
           node --check m24-lab.js
           node --check m24-primary-lab.js
+          node --check m24-lab-ui.js
           node --check m24-smoke-test.js
           node --check m24-resolution-test.js
           node --check m24-coinbase.js
@@ -75,6 +78,7 @@ jobs:
           grep -q 'selectCheckpoint' m24-lab.js
           grep -q 'compareSourceResults' m24-lab.js
           grep -q 'runBtcCase' m24-primary-lab.js
+          grep -q 'runPrimaryComparison' m24-lab-ui.js
           grep -q 'class HistoricalProvider' m24-historical.js
           grep -q 'class CoinbaseHistoricalProvider' m24-coinbase.js
           grep -q 'AUTHORITATIVE_EXCHANGE_API' m24-coinbase.js
@@ -96,7 +100,8 @@ jobs:
           grep -q 'no broker execution' m24.html
           grep -q 'No broker order action exists' M24-REQUIREMENTS.md
           grep -q "mode='SIMULATED_ONLY'" m24-core.js
-          ! grep -Eqi 'placeOrder|submitOrder|transmit[[:space:]]*=[[:space:]]*true|LIVE_ORDER' m24.js m24-core.js m24-data.js m24-cases.js m24-historical.js m24-lab.js m24-primary-lab.js m24-coinbase.js
+          grep -q 'read-only historische bron' m24.html
+          ! grep -Eqi 'placeOrder|submitOrder|transmit[[:space:]]*=[[:space:]]*true|LIVE_ORDER' m24.js m24-core.js m24-data.js m24-cases.js m24-historical.js m24-lab.js m24-primary-lab.js m24-lab-ui.js m24-coinbase.js
 
       - name: Interaction contract
         run: |
@@ -106,6 +111,8 @@ jobs:
           grep -q 'data-mode="lab"' m24.html
           grep -q 'transactionList' m24.html
           grep -q 'Trickster-machine' m24.html
+          grep -q 'runPrimaryCompare' m24.html
+          grep -q 'sourceComparison' m24.html
           grep -q 'renderTransactions' m24.js
           grep -q 'getHistoricalCase' m24-data.js
           grep -q "mode:state.mode" m24.js
