@@ -21,7 +21,16 @@ globalThis.M24Backtest = (() => {
   function verifiedFundingContext(derivativesContext,cutoffMs){
     if(!derivativesContext?.secondTop?.asOf||!derivativesContext?.firstTop?.asOf) return null;
     if(asTime(derivativesContext.secondTop.asOf)>cutoffMs||asTime(derivativesContext.firstTop.asOf)>cutoffMs) return null;
+    if(Number(derivativesContext.firstTop.count||0)<1||Number(derivativesContext.secondTop.count||0)<1) return null;
     return clone({firstTop:derivativesContext.firstTop,secondTop:derivativesContext.secondTop,comparison:derivativesContext.comparison,cutoffPolicy:derivativesContext.cutoffPolicy||null});
+  }
+
+  function verifiedArchiveContext(archiveContext,cutoffMs){
+    if(!archiveContext?.firstTop||!archiveContext?.secondTop) return null;
+    if(archiveContext.firstTop.status!=='OK'||archiveContext.secondTop.status!=='OK') return null;
+    if((archiveContext.gaps||[]).length) return null;
+    if(!archiveContext.secondTop.date||asTime(endOfDay(archiveContext.secondTop.date))>cutoffMs) return null;
+    return {firstTop:clone(archiveContext.firstTop),secondTop:clone(archiveContext.secondTop),deltas:clone(archiveContext.deltas||{})};
   }
 
   function buildDecisionSnapshot({caseSchema,labResult,meaningContext=null,derivativesContext=null,archiveDerivativesContext=null,macroContext=null,asOf=null}={}){
@@ -33,7 +42,7 @@ globalThis.M24Backtest = (() => {
 
     const meaning=meaningContext?aggregateMeaningSources(meaningContext.sources,cutoff):null;
     const funding=verifiedFundingContext(derivativesContext,cutoffMs);
-    const archiveSecond=archiveDerivativesContext?.secondTop?.date&&asTime(endOfDay(archiveDerivativesContext.secondTop.date))<=cutoffMs?clone(archiveDerivativesContext.secondTop):null;
+    const archive=verifiedArchiveContext(archiveDerivativesContext,cutoffMs);
     const macro=macroContext?macroSecondTop(macroContext,cutoffMs):null;
 
     const snapshot={
@@ -50,12 +59,12 @@ globalThis.M24Backtest = (() => {
       },
       meaning,
       funding,
-      archiveDerivatives:archiveSecond?{secondTop:archiveSecond,deltas:clone(archiveDerivativesContext.deltas||{})}:null,
+      archiveDerivatives:archive,
       macro,
-      coverage:{price:true,meaning:Boolean(meaning),funding:Boolean(funding),archiveDerivatives:Boolean(archiveSecond),macro:Boolean(macro?.length)},
+      coverage:{price:true,meaning:Boolean(meaning),funding:Boolean(funding),archiveDerivatives:Boolean(archive),macro:Boolean(macro?.length)},
       excludedFutureFields:['support.firstCloseBelow','support.firstWeeklyCloseBelow','outcome.troughDate','outcome.troughLow','outcome.drawdownFromSecondHighPct'],
-      rejectedUnverifiableAggregates:{funding:Boolean(derivativesContext)&&!funding,macro:Boolean(macroContext)&&!macro?.length},
-      rule:'Only information provably available by asOf may enter this record. Outcome is evaluated later in a separate record.'
+      rejectedUnverifiableAggregates:{funding:Boolean(derivativesContext)&&!funding,archiveDerivatives:Boolean(archiveDerivativesContext)&&!archive,macro:Boolean(macroContext)&&!macro?.length},
+      rule:'Only information provably available by asOf may enter this record. Outcome is evaluated later in a separate record; source-gap archive objects do not count as loaded evidence.'
     };
     return snapshot;
   }
@@ -100,5 +109,5 @@ globalThis.M24Backtest = (() => {
     return {caseId:snapshot.caseId,snapshot,candidate,outcome};
   }
 
-  return {aggregateMeaningSources,macroSecondTop,verifiedFundingContext,buildDecisionSnapshot,scoreCandidate,evaluateOutcome,run};
+  return {aggregateMeaningSources,macroSecondTop,verifiedFundingContext,verifiedArchiveContext,buildDecisionSnapshot,scoreCandidate,evaluateOutcome,run};
 })();
