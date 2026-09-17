@@ -12,7 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: JavaScript syntax
-        run: node --check actio.js
+        run: |
+          node --check actio.js
+          node --check actio-native.js
+          node --check watch.js
       - name: Manifest JSON
         run: node -e "JSON.parse(require('fs').readFileSync('actio.webmanifest','utf8')); console.log('manifest ok')"
       - name: Required shell files
@@ -20,9 +23,12 @@ jobs:
           test -f actio.html
           test -f actio.css
           test -f actio.js
+          test -f actio-native.js
           test -f actio-sw.js
           test -f actio.webmanifest
           test -f actio-icon.svg
+          test -f watch.css
+          test -f watch.js
           test -f ANDROID-BRIDGE.md
       - name: Interaction contract
         run: |
@@ -36,9 +42,12 @@ jobs:
           grep -q 'actio.html' actio-sw.js
           grep -q 'actio.css' actio-sw.js
           grep -q 'actio.js' actio-sw.js
+          grep -q 'actio-native.js' actio-sw.js
+          grep -q 'watch.js' actio-sw.js
           grep -q 'actio.webmanifest' actio-sw.js
           grep -q 'actio-icon.svg' actio-sw.js
       - name: Provider safety gate
         run: |
           grep -q 'LOCAL_MOCK' actio.js
+          grep -q 'ANDROID_LIVE' actio-native.js
           grep -q 'VERIFY' actio.js
