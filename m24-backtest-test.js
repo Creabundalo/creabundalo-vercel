@@ -15,16 +15,29 @@ const test=`
   };
   const meaning={sources:[
     {id:'a',publishedAt:'2021-11-09T10:00:00Z',direction:0.8,frames:['INFLATION_HEDGE']},
+    {id:'post-top-window',publishedAt:'2021-11-20T10:00:00Z',direction:-0.9,frames:['POST_TOP_FRAME']},
     {id:'future',publishedAt:'2021-12-10T10:00:00Z',direction:-1,frames:['FUTURE_FRAME']}
   ]};
-  const derivatives={firstTop:{count:2},secondTop:{count:2},comparison:{crowdingShift:'MORE_POSITIVE_AT_SECOND_TOP'}};
+  const derivatives={
+    firstTop:{count:2,asOf:'2021-04-14T23:59:59.999Z'},
+    secondTop:{count:2,asOf:'2021-11-10T23:59:59.999Z'},
+    comparison:{crowdingShift:'MORE_POSITIVE_AT_SECOND_TOP'},
+    cutoffPolicy:'RESOLVED_CHECKPOINT_DATE'
+  };
   const archive={firstTop:{date:'2021-04-14',summary:{globalLongShort:0.9,takerLongShortVolume:0.9}},secondTop:{date:'2021-11-10',summary:{globalLongShort:1.2,takerLongShortVolume:1.1}},deltas:{globalLongShort:0.3,takerLongShortVolume:0.2,sumOpenInterest:100}};
-  const macro={series:[{key:'DOLLAR',status:'COMPARABLE',delta:2.5,secondTop:{date:'2021-11-09',value:114}},{key:'FIN_CONDITIONS',status:'COMPARABLE',delta:0.2,secondTop:{date:'2021-11-05',value:-0.35}}]};
+  const macro={series:[
+    {key:'DOLLAR',status:'COMPARABLE',delta:2.5,secondTop:{date:'2021-11-09',value:114}},
+    {key:'FIN_CONDITIONS',status:'COMPARABLE',delta:0.2,secondTop:{date:'2021-11-05',value:-0.35}},
+    {key:'FUTURE_MACRO',status:'COMPARABLE',delta:99,secondTop:{date:'2021-11-20',value:999}}
+  ]};
 
   const run=M24Backtest.run({caseSchema,labResult:baseLab,meaningContext:meaning,derivativesContext:derivatives,archiveDerivativesContext:archive,macroContext:macro});
   const snapshotJson=JSON.stringify(run.snapshot);
+  check(run.snapshot.asOf.startsWith('2021-11-10'),'default decision cutoff must be resolved second-top date, not window end');
   check(!snapshotJson.includes('troughDate')&&!snapshotJson.includes('drawdownFromSecondHighPct')&&!snapshotJson.includes('firstCloseBelow'),'future outcome leaked into decision snapshot');
-  check(run.snapshot.meaning.count===1&&!run.snapshot.meaning.sourceIds.includes('future'),'future meaning source leaked into snapshot');
+  check(run.snapshot.meaning.count===1&&run.snapshot.meaning.sourceIds.length===1&&run.snapshot.meaning.sourceIds[0]==='a','post-top meaning source leaked into snapshot');
+  check(!(run.snapshot.macro||[]).some(x=>x.key==='FUTURE_MACRO'),'post-top macro source leaked into snapshot');
+  check(run.snapshot.coverage.funding===true,'verified checkpoint-bounded funding should be admitted');
   check(run.candidate.action==='DOWNSIDE_WATCH','expected historical downside watch candidate');
   check(!run.candidate.evidence.some(x=>x.id==='WEAK_RSI'),'rejected RSI divergence must not be scored');
   check(run.outcome.supportBreakAfterDecision===true,'later support break should be outcome-only scoring data');
@@ -35,9 +48,14 @@ const test=`
   check(JSON.stringify(run.candidate)===JSON.stringify(run2.candidate),'changing future outcome must not change candidate');
   check(run.outcome.drawdownFromSecondHighPct!==run2.outcome.drawdownFromSecondHighPct,'outcome test fixture must actually differ');
 
+  const unverifiableFunding={firstTop:{count:2},secondTop:{count:2},comparison:{crowdingShift:'MORE_POSITIVE_AT_SECOND_TOP'}};
+  const run3=M24Backtest.run({caseSchema,labResult:baseLab,meaningContext:meaning,derivativesContext:unverifiableFunding,archiveDerivativesContext:archive,macroContext:macro});
+  check(run3.snapshot.coverage.funding===false,'unverifiable aggregated funding must be rejected');
+  check(run3.snapshot.rejectedUnverifiableAggregates.funding===true,'rejected aggregate must be visible in snapshot');
+
   const sparse=M24Backtest.run({caseSchema,labResult:baseLab});
   check(sparse.candidate.action==='INSUFFICIENT_CONTEXT','sparse context must not become a directional candidate');
-  console.log('M24 no-lookahead backtest test OK',JSON.stringify({action:run.candidate.action,score:run.candidate.score,coverage:run.candidate.coverage,sparse:sparse.candidate.action}));
+  console.log('M24 no-lookahead backtest test OK',JSON.stringify({asOf:run.snapshot.asOf,action:run.candidate.action,score:run.candidate.score,coverage:run.candidate.coverage,sparse:sparse.candidate.action}));
 })();
 `;
 try{vm.runInThisContext(`${source}\n${test}`,{filename:'m24-backtest-test-bundle.js'})}catch(err){console.error(err);process.exit(1)}
