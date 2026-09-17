@@ -65,6 +65,8 @@ globalThis.M24LabUI = (() => {
     if(button) button.addEventListener('click',()=>runPrimaryComparison().catch(()=>{}));
     loadAuxUI('m24-derivatives-ui.js','M24DerivativesUI');
     loadAuxUI('m24-macro-ui.js','M24MacroUI');
+    loadAuxUI('m24-meaning-ui.js','M24MeaningUI');
+    loadAuxUI('m24-trickster-ui.js','M24TricksterUI');
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
