@@ -1,0 +1,55 @@
+name: M24 Release Gate
+
+on:
+  push:
+    branches:
+      - main
+      - 'feature/m24-*'
+    paths:
+      - 'm24.*'
+      - 'm24-*'
+      - 'M24-*'
+      - '.github/workflows/m24-release-gate.yml'
+  pull_request:
+    paths:
+      - 'm24.*'
+      - 'm24-*'
+      - 'M24-*'
+      - '.github/workflows/m24-release-gate.yml'
+
+jobs:
+  m24-static-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JavaScript syntax
+        run: node --check m24.js
+
+      - name: Mock data parses
+        run: python3 -m json.tool m24-mock-data.json >/dev/null
+
+      - name: HTML contract
+        run: |
+          grep -q 'm24.css' m24.html
+          grep -q 'm24.js' m24.html
+          grep -q 'SIMULATED_ONLY' m24.html
+          grep -q 'Story' m24.html
+          grep -q 'Analysis' m24.html
+          grep -q 'Lab' m24.html
+          grep -q 'Trickster' m24.html
+
+      - name: Safety contract
+        run: |
+          grep -q 'SIMULATED_ONLY' M24-REQUIREMENTS.md
+          grep -q 'INTENT_UNKNOWN' M24-REQUIREMENTS.md
+          ! grep -Eiq 'placeOrder|submitOrder|live trading execution' m24.js
+
+      - name: Required files
+        run: |
+          test -s m24.html
+          test -s m24.css
+          test -s m24.js
+          test -s m24-mock-data.json
+          test -s M24-REQUIREMENTS.md
+          test -s M24-RELEASE-CHECKLIST.md

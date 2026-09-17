@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>M24 — Augmented Market Viewer</title>
+  <link rel="stylesheet" href="m24.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">CREABUNDALO · M24</p>
+        <h1>Augmented Market Viewer</h1>
+        <p class="sub">Prijs als canvas. Betekenis, mechanisme en historische echo’s als lagen.</p>
+      </div>
+      <div class="safety" title="Geen live brokeruitvoering in v0.1">SIMULATED_ONLY</div>
+    </header>
+
+    <section class="controls card">
+      <label>Asset
+        <select id="assetSelect">
+          <option value="BTC">Bitcoin</option>
+          <option value="TSLA">Tesla</option>
+          <option value="OIL">Oil / WTI</option>
+        </select>
+      </label>
+      <div class="segmented" id="modeTabs" aria-label="Kijkmodus">
+        <button data-mode="story" class="active">Story</button>
+        <button data-mode="analysis">Analysis</button>
+        <button data-mode="lab">Lab</button>
+      </div>
+      <div class="segmented" id="lensTabs" aria-label="Model-lens">
+        <button data-lens="legacy">Legacy</button>
+        <button data-lens="m24" class="active">M24</button>
+        <button data-lens="ai">AI-native</button>
+      </div>
+    </section>
+
+    <section class="timebar card">
+      <div>
+        <span class="mini">WINDOW / CONTEXT</span>
+        <div id="crumbs" class="crumbs"></div>
+      </div>
+      <div>
+        <span class="mini">DETAIL / RESOLUTION</span>
+        <div class="segmented compact" id="resolutionTabs">
+          <button data-resolution="week">week</button>
+          <button data-resolution="day" class="active">day</button>
+          <button data-resolution="4h">4h</button>
+          <button data-resolution="1h">1h</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="hero-grid">
+      <article class="chart-card card">
+        <div class="chart-head">
+          <div>
+            <span class="mini" id="assetName">Bitcoin</span>
+            <div class="price-line"><strong id="priceValue">—</strong><span id="trendValue">—</span></div>
+          </div>
+          <div class="regime"><span>REGIME</span><strong id="regimeValue">—</strong></div>
+        </div>
+
+        <div class="chart-wrap">
+          <svg id="priceChart" viewBox="0 0 1000 430" role="img" aria-label="M24 prijsweergave"></svg>
+          <div id="flagPopover" class="popover hidden"></div>
+        </div>
+
+        <div class="layer-row" id="layerToggles">
+          <button data-layer="momentum" class="on">Momentum</button>
+          <button data-layer="flow" class="on">Flow</button>
+          <button data-layer="structure" class="on">Structuur</button>
+          <button data-layer="pattern">Elliott/Wyckoff</button>
+          <button data-layer="fibonacci">Fibonacci</button>
+          <button data-layer="macro">Macro</button>
+          <button data-layer="cross">Cross-asset</button>
+          <button data-layer="trickster" class="on">Trickster</button>
+        </div>
+      </article>
+
+      <aside class="story-card card">
+        <div class="section-title"><span class="dot"></span><h2>M24 leest</h2></div>
+        <dl class="story-list">
+          <div><dt>Wat zie je?</dt><dd id="storyWhat">—</dd></div>
+          <div><dt>Waarom?</dt><dd id="storyWhy">—</dd></div>
+          <div><dt>Betekenis</dt><dd id="storyMeaning">—</dd></div>
+        </dl>
+        <button id="addObservation" class="primary">+ Mijn vlag op dit punt</button>
+        <p id="observationNote" class="muted"></p>
+      </aside>
+    </section>
+
+    <section class="two-col">
+      <article class="card">
+        <div class="section-title"><span class="dot meaning-dot"></span><h2>Betekeniswereld</h2></div>
+        <p id="meaningWorld">—</p>
+        <div class="divider"></div>
+        <span class="mini">ONDERLIGGEND MECHANISME</span>
+        <p id="mechanism">—</p>
+      </article>
+
+      <article class="card trickster-card">
+        <div class="section-title"><span class="dot trick-dot"></span><h2>Trickster</h2></div>
+        <div class="status-row"><span id="trickStatus" class="badge">—</span><span id="trickIntent" class="badge ghost-badge">—</span></div>
+        <strong id="trickPattern">—</strong>
+        <p id="trickNote">—</p>
+        <p class="muted">Regel: mechanisme ≠ intentie. Actor-attributie alleen met bewijs.</p>
+      </article>
+    </section>
+
+    <section class="forecast-card card">
+      <div class="section-title"><span class="dot forecast-dot"></span><h2>Market weather</h2></div>
+      <p class="muted">Hoe verder vooruit, hoe breder het scenario en hoe lager de zekerheid.</p>
+      <div id="forecastStrip" class="forecast-strip"></div>
+    </section>
+
+    <section class="two-col mode-panel" data-panel="analysis">
+      <article class="card">
+        <div class="section-title"><h2>Cross-asset</h2></div>
+        <div id="crossAsset" class="cross-list"></div>
+      </article>
+      <article class="card">
+        <div class="section-title"><h2>Lens-uitleg</h2></div>
+        <p id="lensExplanation">M24 combineert oorzaak, regime, flow, betekeniswereld, Trickster en patroonbevestiging.</p>
+      </article>
+    </section>
+
+    <section class="card mode-panel" data-panel="lab">
+      <div class="section-title"><h2>Historical matches</h2></div>
+      <p class="muted">Seed-matches voor de eerste labvalidatie. Geen statistische claim totdat backtests zijn geladen.</p>
+      <div id="historicalMatches" class="match-grid"></div>
+    </section>
+
+    <footer>
+      <span>M24 v0.1 · mock Qubus data</span>
+      <span>CAUSE → REGIME → POSITIONING → FLOW → MEANING → TRICKSTER → PATTERN → FORECAST → LEARN</span>
+    </footer>
+  </main>
+  <script src="m24.js"></script>
+</body>
+</html>
