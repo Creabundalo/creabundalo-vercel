@@ -1,6 +1,6 @@
 globalThis.M24Backtest = (() => {
   const asTime=value=>new Date(value).getTime();
-  const endOfDay=date=>`${date}T23:59:59.999Z`;
+  const endOfDay=date=>/^\d{4}-\d{2}-\d{2}$/.test(String(date))?`${date}T23:59:59.999Z`:String(date);
   const clone=value=>structuredClone(value);
 
   function aggregateMeaningSources(sources,asOf){
@@ -12,19 +12,29 @@ globalThis.M24Backtest = (() => {
     return {count:available.length,direction,frames:Object.entries(frames).sort((a,b)=>b[1]-a[1]).map(([frame,count])=>({frame,count})),sourceIds:available.map(x=>x.id)};
   }
 
-  function macroSecondTop(macroContext){
-    return (macroContext?.series||[]).filter(x=>x.status==='COMPARABLE').map(x=>({key:x.key,seriesId:x.seriesId,secondTop:x.secondTop?{date:x.secondTop.date,value:x.secondTop.value,lagDays:x.secondTop.lagDays}:null,delta:x.delta,higherMeaning:x.higherMeaning}));
+  function macroSecondTop(macroContext,cutoffMs){
+    return (macroContext?.series||[])
+      .filter(x=>x.status==='COMPARABLE'&&x.secondTop?.date&&asTime(endOfDay(x.secondTop.date))<=cutoffMs)
+      .map(x=>({key:x.key,seriesId:x.seriesId,secondTop:{date:x.secondTop.date,value:x.secondTop.value,lagDays:x.secondTop.lagDays},delta:x.delta,higherMeaning:x.higherMeaning}));
+  }
+
+  function verifiedFundingContext(derivativesContext,cutoffMs){
+    if(!derivativesContext?.secondTop?.asOf||!derivativesContext?.firstTop?.asOf) return null;
+    if(asTime(derivativesContext.secondTop.asOf)>cutoffMs||asTime(derivativesContext.firstTop.asOf)>cutoffMs) return null;
+    return clone({firstTop:derivativesContext.firstTop,secondTop:derivativesContext.secondTop,comparison:derivativesContext.comparison,cutoffPolicy:derivativesContext.cutoffPolicy||null});
   }
 
   function buildDecisionSnapshot({caseSchema,labResult,meaningContext=null,derivativesContext=null,archiveDerivativesContext=null,macroContext=null,asOf=null}={}){
     if(!caseSchema||!labResult) throw new Error('Backtest requires case schema and measured price Lab result.');
-    const cutoff=asOf||endOfDay(caseSchema.checkpointWindows?.secondTop?.to||labResult.secondTop.date);
+    const cutoff=asOf||endOfDay(labResult.secondTop.date);
     const cutoffMs=asTime(cutoff);
     if(!Number.isFinite(cutoffMs)) throw new Error('Invalid backtest asOf.');
     if(asTime(endOfDay(labResult.secondTop.date))>cutoffMs) throw new Error('Backtest asOf precedes resolved second top.');
 
     const meaning=meaningContext?aggregateMeaningSources(meaningContext.sources,cutoff):null;
+    const funding=verifiedFundingContext(derivativesContext,cutoffMs);
     const archiveSecond=archiveDerivativesContext?.secondTop?.date&&asTime(endOfDay(archiveDerivativesContext.secondTop.date))<=cutoffMs?clone(archiveDerivativesContext.secondTop):null;
+    const macro=macroContext?macroSecondTop(macroContext,cutoffMs):null;
 
     const snapshot={
       type:'DECISION_SNAPSHOT',caseId:caseSchema.id,asset:caseSchema.asset,asOf:cutoff,
@@ -39,12 +49,13 @@ globalThis.M24Backtest = (() => {
         }
       },
       meaning,
-      funding:derivativesContext?clone({firstTop:derivativesContext.firstTop,secondTop:derivativesContext.secondTop,comparison:derivativesContext.comparison}):null,
+      funding,
       archiveDerivatives:archiveSecond?{secondTop:archiveSecond,deltas:clone(archiveDerivativesContext.deltas||{})}:null,
-      macro:macroContext?macroSecondTop(macroContext):null,
-      coverage:{price:true,meaning:Boolean(meaning),funding:Boolean(derivativesContext),archiveDerivatives:Boolean(archiveSecond),macro:Boolean(macroContext)},
+      macro,
+      coverage:{price:true,meaning:Boolean(meaning),funding:Boolean(funding),archiveDerivatives:Boolean(archiveSecond),macro:Boolean(macro?.length)},
       excludedFutureFields:['support.firstCloseBelow','support.firstWeeklyCloseBelow','outcome.troughDate','outcome.troughLow','outcome.drawdownFromSecondHighPct'],
-      rule:'Only information available by asOf may enter this record. Outcome is evaluated later in a separate record.'
+      rejectedUnverifiableAggregates:{funding:Boolean(derivativesContext)&&!funding,macro:Boolean(macroContext)&&!macro?.length},
+      rule:'Only information provably available by asOf may enter this record. Outcome is evaluated later in a separate record.'
     };
     return snapshot;
   }
@@ -54,7 +65,7 @@ globalThis.M24Backtest = (() => {
     const add=(id,weight,reason)=>{score+=weight;evidence.push({id,weight,reason})};
     if(snapshot.price.comparisons.volumeBearishDivergence) add('WEAK_PARTICIPATION',1,'Second top has lower measured volume than first top.');
     if(snapshot.price.comparisons.rsiBearishDivergence) add('WEAK_RSI',1,'Measured RSI bearish divergence is present.');
-    if(snapshot.meaning?.direction>0.25&&snapshot.funding?.comparison?.crowdingShift==='MORE_POSITIVE_AT_SECOND_TOP') add('BULLISH_NARRATIVE_LONG_CROWDING',1,'Positive framing coexists with more-positive funding.');
+    if(snapshot.meaning?.direction>0.25&&snapshot.funding?.comparison?.crowdingShift==='MORE_POSITIVE_AT_SECOND_TOP') add('BULLISH_NARRATIVE_LONG_CROWDING',1,'Positive framing coexists with more-positive funding available by the decision cutoff.');
     const archive=snapshot.archiveDerivatives;
     if(snapshot.meaning?.direction>0.25&&archive?.secondTop?.summary?.globalLongShort>1&&Number(archive?.deltas?.globalLongShort)>0) add('ARCHIVE_LONG_SKEW',1,'Positive framing coexists with increasingly long-skewed archived positioning.');
     if(archive?.secondTop?.summary?.takerLongShortVolume>1&&Number(archive?.deltas?.takerLongShortVolume)>0) confirmations.push({id:'TAKER_BUY_CONFIRMATION',reason:'Taker buy/sell ratio confirms buy-side aggression at the archived checkpoint.'});
@@ -89,5 +100,5 @@ globalThis.M24Backtest = (() => {
     return {caseId:snapshot.caseId,snapshot,candidate,outcome};
   }
 
-  return {aggregateMeaningSources,buildDecisionSnapshot,scoreCandidate,evaluateOutcome,run};
+  return {aggregateMeaningSources,macroSecondTop,verifiedFundingContext,buildDecisionSnapshot,scoreCandidate,evaluateOutcome,run};
 })();
