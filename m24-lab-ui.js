@@ -55,9 +55,17 @@ globalThis.M24LabUI = (() => {
     }
   }
 
+  function loadDerivativesUI(){
+    if(globalThis.M24DerivativesUI) return;
+    const script=document.createElement('script');
+    script.src='m24-derivatives-ui.js';script.async=false;
+    document.head.append(script);
+  }
+
   function wire(){
     const button=$('#runPrimaryCompare');
     if(button) button.addEventListener('click',()=>runPrimaryComparison().catch(()=>{}));
+    loadDerivativesUI();
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
