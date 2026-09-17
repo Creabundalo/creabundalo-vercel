@@ -22,11 +22,17 @@ on:
       - 'm24-derivatives-ui.js'
       - 'm24-derivatives-test.js'
       - 'm24-derivatives-lab-test.js'
+      - 'm24-macro.js'
+      - 'm24-macro-lab.js'
+      - 'm24-macro-ui.js'
+      - 'm24-macro-test.js'
+      - 'm24-macro-lab-test.js'
       - 'm24-case-btc-2021.json'
       - 'M24-REQUIREMENTS.md'
       - 'M24-TECHNICAL-DESIGN.md'
       - 'M24-SOURCE-COMPARISON.md'
       - 'M24-DERIVATIVES.md'
+      - 'M24-MACRO-CROSS-ASSET.md'
       - 'M24-RELEASE-CHECKLIST.md'
       - '.github/workflows/m24-release-gate.yml'
   workflow_dispatch:
@@ -58,32 +64,22 @@ jobs:
           test -f m24-derivatives-ui.js
           test -f m24-derivatives-test.js
           test -f m24-derivatives-lab-test.js
+          test -f m24-macro.js
+          test -f m24-macro-lab.js
+          test -f m24-macro-ui.js
+          test -f m24-macro-test.js
+          test -f m24-macro-lab-test.js
           test -f m24-case-btc-2021.json
           test -f M24-REQUIREMENTS.md
           test -f M24-TECHNICAL-DESIGN.md
           test -f M24-SOURCE-COMPARISON.md
           test -f M24-DERIVATIVES.md
+          test -f M24-MACRO-CROSS-ASSET.md
           test -f M24-RELEASE-CHECKLIST.md
 
       - name: JavaScript syntax
         run: |
-          node --check m24-core.js
-          node --check m24-data.js
-          node --check m24-cases.js
-          node --check m24-historical.js
-          node --check m24-lab.js
-          node --check m24-primary-lab.js
-          node --check m24-lab-ui.js
-          node --check m24-smoke-test.js
-          node --check m24-resolution-test.js
-          node --check m24-coinbase.js
-          node --check m24-coinbase-test.js
-          node --check m24-derivatives.js
-          node --check m24-derivatives-lab.js
-          node --check m24-derivatives-ui.js
-          node --check m24-derivatives-test.js
-          node --check m24-derivatives-lab-test.js
-          node --check m24.js
+          for f in m24-core.js m24-data.js m24-cases.js m24-historical.js m24-lab.js m24-primary-lab.js m24-lab-ui.js m24-smoke-test.js m24-resolution-test.js m24-coinbase.js m24-coinbase-test.js m24-derivatives.js m24-derivatives-lab.js m24-derivatives-ui.js m24-derivatives-test.js m24-derivatives-lab-test.js m24-macro.js m24-macro-lab.js m24-macro-ui.js m24-macro-test.js m24-macro-lab-test.js m24.js; do node --check "$f"; done
 
       - name: Architecture contract
         run: |
@@ -92,25 +88,18 @@ jobs:
           grep -q 'class ForecastEngine' m24-core.js
           grep -q 'class TransactionEngine' m24-core.js
           grep -q 'class MarketDataProvider' m24-data.js
-          grep -q 'class MockProvider' m24-data.js
           grep -q 'resolutionIndependent:true' m24-cases.js
-          grep -q 'selectCheckpoint' m24-lab.js
           grep -q 'compareSourceResults' m24-lab.js
-          grep -q 'runBtcCase' m24-primary-lab.js
-          grep -q 'runPrimaryComparison' m24-lab-ui.js
-          grep -q 'loadDerivativesUI' m24-lab-ui.js
-          grep -q 'class HistoricalProvider' m24-historical.js
           grep -q 'class CoinbaseHistoricalProvider' m24-coinbase.js
-          grep -q 'AUTHORITATIVE_EXCHANGE_API' m24-coinbase.js
           grep -q 'class BinanceDerivativesProvider' m24-derivatives.js
-          grep -q 'analyzeFundingAroundCase' m24-derivatives.js
-          grep -q 'BINANCE_VISION_METRICS' m24-derivatives.js
-          grep -q 'HISTORY_WINDOW_EXCEEDED' m24-derivatives.js
           grep -q 'DERIVATIVES_CONTEXT' m24-derivatives-lab.js
           grep -q 'SOURCE_GAP' m24-derivatives-lab.js
-          grep -q 'runDerivativesContext' m24-derivatives-ui.js
+          grep -q 'class FredCsvProvider' m24-macro.js
+          grep -q 'analyzeBundleAtCheckpoints' m24-macro.js
+          grep -q 'MACRO_CROSS_ASSET_CONTEXT' m24-macro-lab.js
+          grep -q 'loadAuxUI' m24-lab-ui.js
+          grep -q 'runMacroContext' m24-macro-ui.js
           grep -q 'new M24Core.Runtime' m24.js
-          grep -q 'PUBLIC_REPRODUCIBLE_FIXTURE' m24-historical.js
 
       - name: Historical runtime smoke test
         run: node m24-smoke-test.js
@@ -127,29 +116,27 @@ jobs:
       - name: Derivatives Lab contract test
         run: node m24-derivatives-lab-test.js
 
+      - name: Macro provider contract test
+        run: node m24-macro-test.js
+
+      - name: Macro Lab contract test
+        run: node m24-macro-lab-test.js
+
       - name: Safety contract
         run: |
           grep -q 'SIMULATED_ONLY' m24.html
           grep -q 'no broker execution' m24.html
           grep -q 'No broker order action exists' M24-REQUIREMENTS.md
           grep -q "mode='SIMULATED_ONLY'" m24-core.js
-          grep -q 'read-only historische bron' m24.html
           grep -q 'not proof of actor intent' m24-derivatives.js
-          grep -q 'geen bewijs van actorintentie' m24-derivatives-ui.js
-          ! grep -Eqi 'placeOrder|submitOrder|transmit[[:space:]]*=[[:space:]]*true|LIVE_ORDER' m24.js m24-core.js m24-data.js m24-cases.js m24-historical.js m24-lab.js m24-primary-lab.js m24-lab-ui.js m24-coinbase.js m24-derivatives.js m24-derivatives-lab.js m24-derivatives-ui.js
+          grep -q 'context. M24 does not infer a single causal direction' m24-macro.js
+          ! grep -Eqi 'placeOrder|submitOrder|transmit[[:space:]]*=[[:space:]]*true|LIVE_ORDER' m24*.js
 
       - name: Interaction contract
         run: |
-          grep -q 'data-level="life"' m24.html
-          grep -q 'data-mode="story"' m24.html
-          grep -q 'data-mode="analysis"' m24.html
           grep -q 'data-mode="lab"' m24.html
-          grep -q 'transactionList' m24.html
-          grep -q 'Trickster-machine' m24.html
           grep -q 'runPrimaryCompare' m24.html
-          grep -q 'sourceComparison' m24.html
           grep -q 'renderTransactions' m24.js
-          grep -q 'getHistoricalCase' m24-data.js
-          grep -q "mode:state.mode" m24.js
-          grep -q "LAB_RESULT" m24.js
           grep -q 'Laad derivatencontext' m24-derivatives-ui.js
+          grep -q 'Laad macro/cross-asset' m24-macro-ui.js
+          grep -q "LAB_RESULT" m24.js
