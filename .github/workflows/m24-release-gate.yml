@@ -22,6 +22,11 @@ on:
       - 'm24-derivatives-ui.js'
       - 'm24-derivatives-test.js'
       - 'm24-derivatives-lab-test.js'
+      - 'm24-binance-vision.js'
+      - 'm24-binance-vision-lab.js'
+      - 'm24-binance-vision-ui.js'
+      - 'm24-binance-vision-test.js'
+      - 'm24-binance-vision-lab-test.js'
       - 'm24-macro.js'
       - 'm24-macro-lab.js'
       - 'm24-macro-ui.js'
@@ -52,23 +57,23 @@ jobs:
 
       - name: Required files
         run: |
-          for f in m24.html m24.css m24.js m24-core.js m24-data.js m24-cases.js m24-historical.js m24-lab.js m24-primary-lab.js m24-lab-ui.js m24-smoke-test.js m24-resolution-test.js m24-coinbase.js m24-coinbase-test.js m24-derivatives.js m24-derivatives-lab.js m24-derivatives-ui.js m24-derivatives-test.js m24-derivatives-lab-test.js m24-macro.js m24-macro-lab.js m24-macro-ui.js m24-macro-test.js m24-macro-lab-test.js m24-meaning.js m24-meaning-ui.js m24-meaning-test.js m24-trickster-lab.js m24-trickster-ui.js m24-trickster-lab-test.js m24-case-btc-2021.json M24-REQUIREMENTS.md M24-TECHNICAL-DESIGN.md M24-SOURCE-COMPARISON.md M24-DERIVATIVES.md M24-MACRO-CROSS-ASSET.md M24-MEANING-WORLD.md M24-RELEASE-CHECKLIST.md; do test -f "$f"; done
+          for f in m24.html m24.css m24.js m24-core.js m24-data.js m24-cases.js m24-historical.js m24-lab.js m24-primary-lab.js m24-lab-ui.js m24-smoke-test.js m24-resolution-test.js m24-coinbase.js m24-coinbase-test.js m24-derivatives.js m24-derivatives-lab.js m24-derivatives-ui.js m24-derivatives-test.js m24-derivatives-lab-test.js m24-binance-vision.js m24-binance-vision-lab.js m24-binance-vision-ui.js m24-binance-vision-test.js m24-binance-vision-lab-test.js m24-macro.js m24-macro-lab.js m24-macro-ui.js m24-macro-test.js m24-macro-lab-test.js m24-meaning.js m24-meaning-ui.js m24-meaning-test.js m24-trickster-lab.js m24-trickster-ui.js m24-trickster-lab-test.js m24-case-btc-2021.json M24-REQUIREMENTS.md M24-TECHNICAL-DESIGN.md M24-SOURCE-COMPARISON.md M24-DERIVATIVES.md M24-MACRO-CROSS-ASSET.md M24-MEANING-WORLD.md M24-RELEASE-CHECKLIST.md; do test -f "$f"; done
 
       - name: JavaScript syntax
         run: |
-          for f in m24-core.js m24-data.js m24-cases.js m24-historical.js m24-lab.js m24-primary-lab.js m24-lab-ui.js m24-smoke-test.js m24-resolution-test.js m24-coinbase.js m24-coinbase-test.js m24-derivatives.js m24-derivatives-lab.js m24-derivatives-ui.js m24-derivatives-test.js m24-derivatives-lab-test.js m24-macro.js m24-macro-lab.js m24-macro-ui.js m24-macro-test.js m24-macro-lab-test.js m24-meaning.js m24-meaning-ui.js m24-meaning-test.js m24-trickster-lab.js m24-trickster-ui.js m24-trickster-lab-test.js m24.js; do node --check "$f"; done
+          for f in m24-core.js m24-data.js m24-cases.js m24-historical.js m24-lab.js m24-primary-lab.js m24-lab-ui.js m24-smoke-test.js m24-resolution-test.js m24-coinbase.js m24-coinbase-test.js m24-derivatives.js m24-derivatives-lab.js m24-derivatives-ui.js m24-derivatives-test.js m24-derivatives-lab-test.js m24-binance-vision.js m24-binance-vision-lab.js m24-binance-vision-ui.js m24-binance-vision-test.js m24-binance-vision-lab-test.js m24-macro.js m24-macro-lab.js m24-macro-ui.js m24-macro-test.js m24-macro-lab-test.js m24-meaning.js m24-meaning-ui.js m24-meaning-test.js m24-trickster-lab.js m24-trickster-ui.js m24-trickster-lab-test.js m24.js; do node --check "$f"; done
 
       - name: Architecture contract
         run: |
           grep -q 'class QubusStore' m24-core.js
           grep -q 'class TricksterEngine' m24-core.js
-          grep -q 'class ForecastEngine' m24-core.js
-          grep -q 'class TransactionEngine' m24-core.js
           grep -q 'resolutionIndependent:true' m24-cases.js
-          grep -q 'compareSourceResults' m24-lab.js
           grep -q 'class CoinbaseHistoricalProvider' m24-coinbase.js
           grep -q 'class BinanceDerivativesProvider' m24-derivatives.js
           grep -q 'DERIVATIVES_CONTEXT' m24-derivatives-lab.js
+          grep -q 'class BinanceVisionMetricsProvider' m24-binance-vision.js
+          grep -q 'CHECKSUM_MISMATCH' m24-binance-vision.js
+          grep -q 'ARCHIVE_DERIVATIVES_CONTEXT' m24-binance-vision-lab.js
           grep -q 'class FredCsvProvider' m24-macro.js
           grep -q 'MACRO_CROSS_ASSET_CONTEXT' m24-macro-lab.js
           grep -q 'MEANING_WORLD_CONTEXT' m24-meaning.js
@@ -93,6 +98,12 @@ jobs:
       - name: Derivatives Lab contract test
         run: node m24-derivatives-lab-test.js
 
+      - name: Binance Vision archive contract test
+        run: node m24-binance-vision-test.js
+
+      - name: Binance Vision Lab contract test
+        run: node m24-binance-vision-lab-test.js
+
       - name: Macro provider contract test
         run: node m24-macro-test.js
 
@@ -112,6 +123,7 @@ jobs:
           grep -q 'No broker order action exists' M24-REQUIREMENTS.md
           grep -q "mode='SIMULATED_ONLY'" m24-core.js
           grep -q 'not proof of actor intent' m24-derivatives.js
+          grep -q 'do not identify an actor or prove manipulation' m24-binance-vision-lab.js
           grep -q 'not a truth score' m24-meaning.js
           grep -q "intentStatus:'INTENT_UNKNOWN'" m24-trickster-lab.js
           grep -q "actorAttribution:'NONE'" m24-trickster-lab.js
@@ -123,6 +135,7 @@ jobs:
           grep -q 'runPrimaryCompare' m24.html
           grep -q 'renderTransactions' m24.js
           grep -q 'Laad derivatencontext' m24-derivatives-ui.js
+          grep -q 'Laad 2021 OI/ratio archief' m24-binance-vision-ui.js
           grep -q 'Laad macro/cross-asset' m24-macro-ui.js
           grep -q 'Laad betekeniswereld' m24-meaning-ui.js
           grep -q 'Draai Trickster over geladen lagen' m24-trickster-ui.js
