@@ -9,7 +9,7 @@ const test=`
 
   globalThis.M24PrimaryLab={runCase:async()=>({result:labResult})};
   globalThis.M24Meaning={
-    analyzeCase:()=>({type:'MEANING_WORLD_CONTEXT',caseId:caseSchema.id,asset:'BTC',sources:[{id:'s1',publishedAt:'2021-11-09T10:00:00Z'}]}),
+    analyzeCase:()=>({type:'MEANING_WORLD_CONTEXT',caseId:caseSchema.id,asset:'BTC',sources:[{id:'s1',publishedAt:'2021-11-09T10:00:00Z'}],firstTop:{count:1},secondTop:{count:1}}),
     toProvenance:s=>({sourceId:s.id})
   };
   globalThis.M24DerivativesLab={
@@ -44,6 +44,7 @@ const test=`
   check(store.list('MACRO_CROSS_ASSET_CONTEXT').length===1,'macro record missing');
   check(store.list('DECISION_SNAPSHOT').length===1&&store.list('BACKTEST_OUTCOME').length===1,'backtest split missing');
   const evidence=store.list('CASE_EVIDENCE_STATUS').at(-1).data;
+  check(evidence.layers.MEANING_WORLD.state==='COMPLETE','top-scoped meaning evidence missing');
   check(evidence.layers.DERIVATIVES.state==='COMPLETE','archive should resolve recent API retention gap');
   check(evidence.layers.DERIVATIVES.resolvedGapIds.length===1,'resolved source gap must remain auditable');
   console.log('M24 enrichment test OK',JSON.stringify({state:result.state,eligible:result.calibrationEligible,records:store.records.length}));
