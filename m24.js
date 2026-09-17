@@ -1,4 +1,4 @@
-const M24 = (() => {
+globalThis.M24 = (() => {
   const state = {
     asset:'BTC', lens:'m24', mode:'story', level:'episode', resolution:'D',
     overlays:{momentum:true,fibonacci:true,trickster:true,cross:true,patterns:true}
@@ -7,16 +7,19 @@ const M24 = (() => {
   let snapshot=null;
   let forecasts=[];
   let transactions=[];
+  let labResult=null;
 
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
   const svgNS='http://www.w3.org/2000/svg';
 
+  function binding(name){try{return eval(name)}catch{return null}}
   function loadScript(src, globalName){
-    if (window[globalName]) return Promise.resolve(window[globalName]);
+    const existing=binding(globalName);
+    if (existing) return Promise.resolve(existing);
     return new Promise((resolve,reject)=>{
       const s=document.createElement('script');s.src=src;s.async=false;
-      s.onload=()=>window[globalName]?resolve(window[globalName]):reject(new Error(`${globalName} did not initialize`));
+      s.onload=()=>{const value=binding(globalName);value?resolve(value):reject(new Error(`${globalName} did not initialize`))};
       s.onerror=()=>reject(new Error(`Cannot load ${src}`));document.head.append(s);
     });
   }
@@ -24,7 +27,10 @@ const M24 = (() => {
   async function initRuntime(){
     await loadScript('m24-core.js','M24Core');
     await loadScript('m24-data.js','M24Data');
-    runtime=new M24Core.Runtime({provider:new M24Data.MockProvider()});
+    await loadScript('m24-historical.js','M24Historical');
+    await loadScript('m24-lab.js','M24Lab');
+    const provider=new M24Historical.HistoricalProvider({fallback:new M24Data.MockProvider()});
+    runtime=new M24Core.Runtime({provider});
     transactions=M24Data.paperTransactions.map(spec=>runtime.transactions.create({
       asset:spec.asset,direction:spec.direction,strategy:spec.strategy,entry:spec.entry,size:spec.size,
       userStatus:spec.userStatus,auditStatus:spec.auditStatus,pnl:spec.pnl,why:spec.why,risk:spec.risk,
@@ -53,10 +59,10 @@ const M24 = (() => {
   function fallbackFlag(a,pts){return {i:Math.floor(pts.length*.55),label:'context',title:'Contextpunt',evidence:'PLAUSIBLE_INTERPRETATION',action:'WAIT',what:'Contextpunt in de geselecteerde marktstate.',why:'Deze asset krijgt later echte historische en live signalen.',meaning:snapshot.meaning.narrative,reading:a.mechanism}}
   function renderFlags(pts,a){
     const layer=$('#flagLayer');clear(layer);const flags=a.flags?.length?a.flags:[fallbackFlag(a,pts)];
-    flags.forEach((f,idx)=>{const p=pts[Math.min(f.i,pts.length-1)],g=svg('g',{class:'flag','data-flag':idx,tabindex:'0'});g.append(svg('line',{x1:p.x,y1:p.y-45,x2:p.x,y2:p.y-6}));g.append(svg('circle',{cx:p.x,cy:p.y-49,r:8}));const t=svg('text',{x:p.x+12,y:p.y-45});t.textContent=f.label;g.append(t);g.addEventListener('click',()=>showStory(f));g.addEventListener('keydown',e=>{if(e.key==='Enter')showStory(f)});layer.append(g)});
+    flags.forEach((f,idx)=>{const p=pts[Math.min(Math.max(f.i,0),pts.length-1)],g=svg('g',{class:'flag','data-flag':idx,tabindex:'0'});g.append(svg('line',{x1:p.x,y1:p.y-45,x2:p.x,y2:p.y-6}));g.append(svg('circle',{cx:p.x,cy:p.y-49,r:8}));const t=svg('text',{x:p.x+12,y:p.y-45});t.textContent=f.label;g.append(t);g.addEventListener('click',()=>showStory(f));g.addEventListener('keydown',e=>{if(e.key==='Enter')showStory(f)});layer.append(g)});
   }
   function renderFib(){const l=$('#fibLayer');clear(l);l.style.display=state.overlays.fibonacci?'':'none';if(!state.overlays.fibonacci)return;[125,205].forEach((y,i)=>{const label=['1.272','1.618'][i];l.append(svg('line',{x1:620,y1:y,x2:950,y2:y,class:'fib-line'}));const t=svg('text',{x:900,y:y-7,class:'fib-text'});t.textContent=`Fib ${label}`;l.append(t)})}
-  function renderMomentum(pts){const l=$('#momentumLayer');clear(l);l.style.display=state.overlays.momentum?'':'none';if(!state.overlays.momentum)return;const a=pts[Math.floor(pts.length*.3)],b=pts[Math.floor(pts.length*.55)];l.append(svg('path',{d:`M ${a.x} ${Math.max(35,a.y-65)} Q ${(a.x+b.x)/2} ${Math.max(25,a.y-95)} ${b.x} ${Math.max(45,b.y-35)}`,class:'momentum-mark'}));const t=svg('text',{x:b.x-40,y:Math.max(35,b.y-50),class:'overlay-text'});t.textContent='momentum ↓';l.append(t)}
+  function renderMomentum(pts){const l=$('#momentumLayer');clear(l);l.style.display=state.overlays.momentum?'':'none';if(!state.overlays.momentum)return;const a=pts[Math.floor(pts.length*.3)],b=pts[Math.floor(pts.length*.55)];l.append(svg('path',{d:`M ${a.x} ${Math.max(35,a.y-65)} Q ${(a.x+b.x)/2} ${Math.max(25,a.y-95)} ${b.x} ${Math.max(45,b.y-35)}`,class:'momentum-mark'}));const t=svg('text',{x:b.x-40,y:Math.max(35,b.y-50),class:'overlay-text'});t.textContent=state.mode==='lab'?'RSI/volume test':'momentum ↓';l.append(t)}
   function renderTrickster(pts){const l=$('#tricksterLayer');clear(l);l.style.display=state.overlays.trickster?'':'none';if(!state.overlays.trickster)return;const p=pts[Math.floor(pts.length*.5)];l.append(svg('rect',{x:p.x-55,y:45,width:180,height:255,rx:18,class:'trickster-zone'}));const t=svg('text',{x:p.x-42,y:65,class:'overlay-text'});t.textContent='Trickster watch';l.append(t)}
 
   function showStory(f){
@@ -83,13 +89,17 @@ const M24 = (() => {
 
   function renderForecast(){
     const signalScore=snapshot.market.mechanismScore;
-    forecasts=runtime.forecast.create({subjectId:state.asset,signalScore,lens:state.lens,conditions:{level:state.level,resolution:state.resolution}});
+    forecasts=runtime.forecast.create({subjectId:state.asset,signalScore,lens:state.lens,conditions:{level:state.level,resolution:state.resolution,mode:state.mode}});
     forecasts.forEach(f=>runtime.store.add(f));
     $('#forecastGrid').innerHTML=forecasts.map(f=>{const c=Math.round((f.confidence||0)*100);const d=f.data.direction==='UP'?'↑':f.data.direction==='DOWN'?'↓':f.data.direction==='NEUTRAL'?'→':'scenario';return `<div class="forecast-item"><span>${f.data.horizon}</span><strong>${d}</strong><div class="confidence"><i style="width:${c}%"></i></div><span>${c}% modelzekerheid*</span></div>`}).join('');
   }
 
+  function money(n){return Number(n).toLocaleString('en-US',{maximumFractionDigits:0})}
+  function signed(n){return `${n>=0?'+':''}${Number(n).toFixed(1)}%`}
   function renderHistory(){
-    $('#historyList').innerHTML=M24Data.historicalCases.map(c=>`<div class="history-item"><span>${c.label}</span><strong>${c.pattern}</strong><p>${c.note}</p><small>${c.status}</small></div>`).join('');
+    const base=M24Data.historicalCases.map(c=>`<div class="history-item"><span>${c.label}</span><strong>${c.pattern}</strong><p>${c.note}</p><small>${c.status}</small></div>`).join('');
+    const measured=labResult?`<div class="history-item"><span>MEASURED / ${labResult.resolution}</span><strong>${labResult.caseId}</strong><p>2e top: ${signed(labResult.comparisons.priceHighChangePct)} · weekvolume: ${signed(labResult.comparisons.volumeChangePct)} · RSI14: ${labResult.firstTop.rsi14} → ${labResult.secondTop.rsi14}</p><p>RSI-divergentie: <strong>${labResult.comparisons.rsiBearishDivergence?'BEVESTIGD':'NIET BEVESTIGD'}</strong> · support-break: ${labResult.support.firstWeeklyCloseBelow||'geen'} · trough: $${money(labResult.outcome.troughLow)} (${signed(labResult.outcome.drawdownFromSecondHighPct)})</p><small>${labResult.provenance?.[0]?.sourceType||'fixture'} / ${labResult.provenance?.[0]?.quality||'unknown quality'}</small></div>`:'';
+    $('#historyList').innerHTML=measured+base;
   }
 
   function statusClass(s){if(s==='OPEN')return'status-open';if(s==='GESLOTEN')return'status-closed';return'status-candidate'}
@@ -113,7 +123,14 @@ const M24 = (() => {
   function renderAll(){renderChart();renderMeaning();renderCross();renderForecast();renderHistory();renderTransactions();renderObservations();renderBreadcrumb();renderMode();renderLens()}
 
   async function refresh(){
-    snapshot=await runtime.snapshot(state.asset,{window:state.level,resolution:state.resolution,lens:state.lens});
+    snapshot=await runtime.snapshot(state.asset,{window:state.level,resolution:state.resolution,lens:state.lens,mode:state.mode});
+    labResult=null;
+    if(state.mode==='lab'&&state.asset==='BTC'&&snapshot.market.bars){
+      const historicalCase=await runtime.provider.getHistoricalCase('BTC-2021-2022-TOP-MARKDOWN');
+      labResult=M24Lab.analyzeTopMarkdown(historicalCase);
+      const exists=runtime.store.where(r=>r.type==='LAB_RESULT'&&r.subjectId===state.asset&&r.data?.caseId===labResult.caseId).length>0;
+      if(!exists) runtime.store.add(M24Core.record('LAB_RESULT',labResult,{subjectId:state.asset,window:'2021-01/2022-06',resolution:'W',evidenceStatus:M24Core.EVIDENCE.MECHANISM_VISIBLE,confidence:1,provenance:labResult.provenance||[]}));
+    }
     renderAll();
   }
 
@@ -121,7 +138,7 @@ const M24 = (() => {
     $('#assetSelect').addEventListener('change',e=>{state.asset=e.target.value;refresh()});
     $('#resolutionSelect').addEventListener('change',e=>{state.resolution=e.target.value;refresh()});
     $$('.lens').forEach(b=>b.addEventListener('click',()=>{state.lens=b.dataset.lens;refresh()}));
-    $$('.mode').forEach(b=>b.addEventListener('click',()=>{state.mode=b.dataset.mode;renderMode()}));
+    $$('.mode').forEach(b=>b.addEventListener('click',()=>{state.mode=b.dataset.mode;if(state.mode==='lab'&&state.asset==='BTC'){state.resolution='W';$('#resolutionSelect').value='W'}refresh()}));
     $$('.breadcrumb button').forEach(b=>b.addEventListener('click',()=>{state.level=b.dataset.level;refresh()}));
     $$('[data-overlay]').forEach(i=>i.addEventListener('change',()=>{state.overlays[i.dataset.overlay]=i.checked;renderAll()}));
     $('#addObservation').addEventListener('click',addObservation);$('#observationInput').addEventListener('keydown',e=>{if(e.key==='Enter')addObservation()});
@@ -132,5 +149,5 @@ const M24 = (() => {
     catch(err){console.error(err);$('#storyTitle').textContent='M24 runtime fout';$('#storyBody').innerHTML=`<p>${err.message}</p>`}
   }
   boot();
-  return {state,refresh,get runtime(){return runtime}};
+  return {state,refresh,get runtime(){return runtime},get labResult(){return labResult}};
 })();
