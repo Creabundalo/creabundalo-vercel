@@ -7,7 +7,7 @@ on:
       - 'm24.css'
       - 'm24.js'
       - 'm24-*.js'
-      - 'm24-case-btc-2021.json'
+      - 'm24-*.json'
       - 'M24-*.md'
       - '.github/workflows/m24-release-gate.yml'
   workflow_dispatch:
@@ -33,6 +33,7 @@ jobs:
             m24-calibration.js m24-calibration-ui.js m24-calibration-test.js \
             m24-evidence-gate.js m24-evidence-gate-test.js m24-evidence-ui.js \
             m24-enrichment.js m24-enrichment-test.js m24-enrichment-ui.js \
+            m24-replay.js m24-replay-test.js m24-replay-e2e-test.js m24-verified-btc-2021.json \
             m24-cohort.js m24-cohort-test.js m24-cohort-ui.js \
             m24-case-btc-2021.json M24-REQUIREMENTS.md M24-TECHNICAL-DESIGN.md M24-SOURCE-COMPARISON.md M24-DERIVATIVES.md M24-MACRO-CROSS-ASSET.md M24-MEANING-WORLD.md M24-BACKTEST.md M24-RELEASE-CHECKLIST.md; do test -f "$f"; done
 
@@ -69,6 +70,8 @@ jobs:
           grep -q 'DEFAULT_MIN_SAMPLES=30' m24-calibration.js
           grep -q 'CASE_EVIDENCE_STATUS' m24-evidence-gate.js
           grep -q 'CASE_ENRICHMENT_RESULT' m24-enrichment.js
+          grep -q 'HISTORICAL_REPLAY_RESULT' m24-replay.js
+          grep -q 'VERIFIED_SOURCE_SNAPSHOT' m24-verified-btc-2021.json
           grep -q 'new M24Core.Runtime' m24.js
 
       - name: Historical runtime smoke test
@@ -103,6 +106,8 @@ jobs:
         run: node m24-evidence-gate-test.js
       - name: Source-complete enrichment contract test
         run: node m24-enrichment-test.js
+      - name: Verified replay contract test
+        run: node m24-replay-test.js
       - name: Historical cohort contract test
         run: node m24-cohort-test.js
 
@@ -121,6 +126,7 @@ jobs:
           grep -q 'Outcome is scoring data only' m24-backtest.js
           grep -q 'Do not display a probability before the minimum sample threshold is met' m24-calibration.js
           grep -q 'never set manually' m24-enrichment.js
+          grep -q 'n=1 remains INSUFFICIENT_SAMPLE' m24-replay-e2e-test.js
           ! grep -Eqi 'placeOrder|submitOrder|transmit[[:space:]]*=[[:space:]]*true|LIVE_ORDER' m24*.js
 
       - name: Interaction contract
