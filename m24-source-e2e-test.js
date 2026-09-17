@@ -2,6 +2,7 @@ const fs=require('fs');
 const vm=require('vm');
 const {webcrypto}=require('crypto');
 if(!globalThis.crypto?.subtle) globalThis.crypto=webcrypto;
+globalThis.__m24fs=fs;
 
 const files=[
   'm24-core.js','m24-cases.js','m24-lab.js','m24-primary-lab.js','m24-coinbase.js',
@@ -52,7 +53,7 @@ const test=`
     },
     rule:'This snapshot may increment historical calibration n only when calibrationEligible=true. It remains SIMULATED_ONLY and contains no live-order action.'
   };
-  fs.writeFileSync('m24-btc-2021-source-snapshot.json',JSON.stringify(summary,null,2));
+  globalThis.__m24fs.writeFileSync('m24-btc-2021-source-snapshot.json',JSON.stringify(summary,null,2));
   check(store.list('LAB_RESULT_PRIMARY').length===1,'primary price record missing');
   check(store.list('MEANING_WORLD_CONTEXT').length===1,'meaning-world record missing');
   check(store.list('DERIVATIVES_CONTEXT').length===1,'funding context missing');
@@ -64,7 +65,7 @@ const test=`
   console.log(JSON.stringify(summary));
 })().catch(err=>{
   const failure={type:'M24_REAL_SOURCE_ENRICHMENT_FAILURE',at:new Date().toISOString(),message:String(err?.message||err),stack:String(err?.stack||'')};
-  fs.writeFileSync('m24-btc-2021-source-snapshot.json',JSON.stringify(failure,null,2));
+  globalThis.__m24fs.writeFileSync('m24-btc-2021-source-snapshot.json',JSON.stringify(failure,null,2));
   console.error(err);
   process.exit(1);
 });
