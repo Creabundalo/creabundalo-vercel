@@ -41,6 +41,8 @@ Responsibilities:
 
 `m24-historical.js` adds a replaceable historical adapter. Its first fixture is a weekly BTC/USD OHLCV dataset for the 2021→2022 lab case. The fixture is explicitly tagged `PUBLIC_REPRODUCIBLE_FIXTURE` / `SECONDARY`; it is useful for deterministic development and regression tests but is not treated as an authoritative calibration source.
 
+`m24-coinbase.js` implements a primary-exchange historical-bar adapter for Coinbase Exchange. It maps M24 assets to exchange product IDs, normalizes Coinbase candle arrays to M24 bar objects, sorts/deduplicates bars, records primary-source provenance and chunks long ranges below Coinbase's documented 300-candle request maximum. The adapter is deliberately separate from the deterministic fixture: automated regression tests never depend on an external network call.
+
 `m24-lab.js` contains historical measurement logic such as Wilder RSI, top-to-top comparisons, volume comparison, support-break detection and post-signal outcome measurement.
 
 Future adapters:
@@ -96,6 +98,8 @@ Hierarchy:
 A drill-down creates/selects a child window. Changing resolution only changes sample density inside that selected window.
 
 Historical Lab tests must record their actual resolution. A weekly fixture cannot be presented as a daily RSI result.
+
+Coinbase Exchange currently supports candle granularities `60`, `300`, `900`, `3600`, `21600`, and `86400` seconds. The initial M24 primary-source path uses daily bars (`86400`) and splits longer periods into subrequests so each remains within the 300-candle limit.
 
 ## 6. Trickster engine
 Input:
@@ -161,7 +165,17 @@ Measured checkpoints currently include:
 
 The first measurement is intentionally hypothesis-testing rather than story-confirming. In this weekly fixture the second high is higher and weekly volume is materially lower, while RSI(14) does **not** show the assumed bearish divergence. That RSI hypothesis is therefore stored as rejected for this fixture/resolution instead of being promoted to fact.
 
-Next data step: replace/augment the development fixture with authoritative historical bars and then add derivatives, macro, cross-asset and timestamped narrative sources.
+Primary-source adapter status:
+- Coinbase Exchange candle adapter implemented
+- BTC maps to `BTC-USD`
+- daily historical ranges are normalized and chunked
+- source provenance is tagged `AUTHORITATIVE_EXCHANGE_API` / `PRIMARY_EXCHANGE`
+- deterministic contract test uses injected fake fetch; CI does not depend on Coinbase availability
+- next integration step is to make the BTC case checkpoint definitions resolution-independent, then compare the weekly fixture against Coinbase daily bars without changing Lab semantics
+
+Coinbase notes that historical candle data can omit intervals where there are no ticks, so completeness remains a source property rather than an assumption.
+
+After the primary-bar comparison, add derivatives, macro, cross-asset and timestamped narrative sources.
 
 The purpose is to test whether the combined M24 state is more useful than any single Elliott/Wyckoff/RSI/Fibonacci label.
 
@@ -175,7 +189,15 @@ The purpose is to test whether the combined M24 state is more useful than any si
 - the defined support break is found
 - the later markdown outcome is measurable
 
-GitHub Actions runs syntax, architecture, historical runtime, safety and interaction gates on M24 changes.
+`m24-coinbase-test.js` contract-tests the primary exchange adapter without network access and asserts:
+- ranges over 300 daily candles are chunked
+- Coinbase candle order is normalized to ascending time
+- `[time, low, high, open, close, volume]` is mapped correctly
+- BTC resolves to `BTC-USD`
+- primary-exchange provenance is attached
+- unsupported granularities are rejected
+
+GitHub Actions runs syntax, architecture, historical runtime, Coinbase adapter, safety and interaction gates on M24 changes.
 
 ## 11. Safety boundary
 Hard v0.1 invariants:
