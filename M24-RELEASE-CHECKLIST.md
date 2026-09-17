@@ -112,7 +112,8 @@
 - [x] Interaction contract checks defined
 - [x] M24 Release Gate green after derivatives Lab/UI integration (run 53)
 - [x] ACTIO Release Gate remains green on derivatives checkpoint (run 60)
-- [ ] M24 Release Gate green after macro/cross-asset integration
+- [x] M24 Release Gate green after macro/cross-asset integration (run 63)
+- [x] ACTIO Release Gate remains green on macro/cross-asset checkpoint (run 70)
 - [ ] Visual browser/Vercel preview review completed
 
 ## Historical BTC case status
