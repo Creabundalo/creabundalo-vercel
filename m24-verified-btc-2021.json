@@ -1,0 +1,53 @@
+{
+  "type": "VERIFIED_SOURCE_SNAPSHOT",
+  "caseId": "BTC-2021-2022-TOP-MARKDOWN",
+  "asset": "BTC",
+  "verification": {
+    "workflow": "M24 Source E2E",
+    "workflowRunId": 35277917562,
+    "artifactId": 10521003056,
+    "artifactDigest": "sha256:c4cb14ee3e2e75cfa67c8be8fc88f9e3deb09b88cae0476e73e3916b53c0ea7e",
+    "headSha": "598c21a8a05702d2ee61a483b9cb7b6bcad8e7b7",
+    "verifiedAt": "2026-09-17T21:39:59.114Z",
+    "sourceComplete": true
+  },
+  "state": "SOURCE_COMPLETE",
+  "calibrationEligible": true,
+  "resolvedCheckpoints": {
+    "firstTop": "2021-04-14",
+    "secondTop": "2021-11-10",
+    "decisionAsOf": "2021-11-10T23:59:59.999Z",
+    "supportBreakDate": "2022-01-21",
+    "troughDate": "2022-06-18"
+  },
+  "evidenceLayers": {
+    "PRICE": {"state":"COMPLETE","note":"Measured price structure exists."},
+    "MEANING_WORLD": {"state":"COMPLETE","note":"6 timestamped source item(s)."},
+    "DERIVATIVES": {"state":"COMPLETE","note":"Funding plus archived positioning complete; recent-API retention gap resolved by Binance Vision archive."},
+    "MACRO": {"state":"COMPLETE","note":"7 source-backed series."},
+    "DECISION_SNAPSHOT": {"state":"COMPLETE","note":"No-lookahead decision snapshot exists."},
+    "BACKTEST_OUTCOME": {"state":"COMPLETE","note":"Later outcome exists separately from decision input."}
+  },
+  "actionCandidate": {
+    "action": "DOWNSIDE_WATCH",
+    "score": 3,
+    "coverage": 1,
+    "evidence": [
+      {"id":"WEAK_PARTICIPATION","weight":1},
+      {"id":"WEAK_RSI","weight":1},
+      {"id":"STRONGER_DOLLAR","weight":0.5},
+      {"id":"TIGHTER_FINANCIAL_CONDITIONS","weight":0.5}
+    ],
+    "confirmations": [
+      {"id":"TAKER_BUY_CONFIRMATION"}
+    ]
+  },
+  "sourceNotes": {
+    "price": "Coinbase Exchange historical candles",
+    "funding": "Binance Vision monthly fundingRate archives with SHA-256 verification",
+    "derivativesArchive": "Binance Vision daily metrics with SHA-256 verification",
+    "macro": "Official-source series via FRED",
+    "meaning": "Timestamped source fixture with provenance"
+  },
+  "note": "Pinned output of a successful real-source E2E run. It proves source completeness for this historical case; it does not itself provide a calibrated probability or a live trading signal."
+}
