@@ -4,16 +4,29 @@
   "asset": "BTC",
   "title": "Bitcoin 2021 double-peak to 2022 markdown",
   "purpose": "Test the combined M24 state around a first top, correction, second top and subsequent markdown without assuming Elliott, Wyckoff, RSI or Fibonacci is causal on its own.",
-  "dataStatus": "SEED_NEEDS_AUTHORITATIVE_BARS_AND_PROVENANCE",
+  "dataStatus": "PRIMARY_ADAPTER_AVAILABLE_FIXTURE_REMAINS_REGRESSION_BASELINE",
+  "resolutionIndependent": true,
   "window": {
     "from": "2021-01-01",
-    "to": "2022-12-31"
+    "to": "2022-06-30"
+  },
+  "checkpointWindows": {
+    "firstTop": {"from":"2021-04-01","to":"2021-05-09","select":"MAX_HIGH"},
+    "automaticReaction": {"from":"2021-05-10","to":"2021-07-25","select":"MIN_LOW"},
+    "supportReference": {"from":"2021-09-01","to":"2021-09-30","select":"MIN_LOW"},
+    "secondTop": {"from":"2021-10-01","to":"2021-11-30","select":"MAX_HIGH"},
+    "markdownOutcome": {"from":"2021-12-01","to":"2022-06-30","select":"MIN_LOW"}
+  },
+  "rules": {
+    "supportBreak": "FIRST_CLOSE_BELOW_SUPPORT_LOW_AFTER_SECOND_TOP",
+    "momentum": "WILDER_RSI_14",
+    "participation": "COMPARE_VOLUME_AT_RESOLVED_TOP_BARS"
   },
   "checkpoints": [
     {
       "id": "CP-01",
       "phase": "FIRST_TOP",
-      "windowHint": "2021-Q2",
+      "resolutionRule": "MAX_HIGH inside firstTop window",
       "questions": [
         "How high were momentum and participation?",
         "What did leverage and cross-asset context show?",
@@ -23,7 +36,7 @@
     {
       "id": "CP-02",
       "phase": "AUTOMATIC_REACTION",
-      "windowHint": "2021-Q2-Q3",
+      "resolutionRule": "MIN_LOW inside automaticReaction window",
       "questions": [
         "Was selling voluntary or forced/liquidation-driven?",
         "Where did support and liquidity form?",
@@ -33,7 +46,7 @@
     {
       "id": "CP-03",
       "phase": "SECOND_TOP",
-      "windowHint": "2021-Q4",
+      "resolutionRule": "MAX_HIGH inside secondTop window",
       "questions": [
         "Did price retest or exceed the prior top?",
         "Was RSI/momentum stronger or weaker than at the first top?",
@@ -46,7 +59,7 @@
     {
       "id": "CP-04",
       "phase": "TRICKSTER_TEST",
-      "windowHint": "around second top",
+      "resolutionRule": "Compare meaning-world narrative with measured flow around resolved secondTop",
       "questions": [
         "What did the visible bullish narrative imply?",
         "What did underlying flow/positioning imply?",
@@ -57,7 +70,7 @@
     {
       "id": "CP-05",
       "phase": "SUPPORT_BREAK",
-      "windowHint": "late 2021 to 2022",
+      "resolutionRule": "First close below resolved supportReference low after resolved secondTop",
       "questions": [
         "Which structural support failed?",
         "Was the break confirmed by volume, volatility, leverage or cross-asset stress?",
@@ -67,7 +80,7 @@
     {
       "id": "CP-06",
       "phase": "MARKDOWN_OUTCOME",
-      "windowHint": "2022",
+      "resolutionRule": "MIN_LOW inside markdownOutcome window",
       "questions": [
         "What happened after 1d, 3d, 5d, 20d and 60d?",
         "What was maximum adverse excursion and maximum favorable excursion?",
@@ -76,7 +89,8 @@
     }
   ],
   "requiredSources": [
-    "authoritative BTC OHLCV source",
+    "primary exchange BTC OHLCV source",
+    "deterministic regression fixture",
     "derivatives/open-interest/funding source where available",
     "macro rates/liquidity/credit sources",
     "cross-asset price sources",
