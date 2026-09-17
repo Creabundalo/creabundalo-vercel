@@ -2,6 +2,29 @@ globalThis.M24DerivativesUI = (() => {
   const $=selector=>document.querySelector(selector);
   const pct=value=>value==null?'—':`${(Number(value)*100).toFixed(3)}%`;
 
+  function loadScript(src,globalName){
+    if(globalThis[globalName]) return Promise.resolve(globalThis[globalName]);
+    return new Promise((resolve,reject)=>{
+      const s=document.createElement('script');s.src=src;s.async=false;
+      s.onload=()=>globalThis[globalName]?resolve(globalThis[globalName]):reject(new Error(`${globalName} did not initialize`));
+      s.onerror=()=>reject(new Error(`Cannot load ${src}`));
+      document.head.append(s);
+    });
+  }
+
+  async function ensureDependencies(){
+    await loadScript('m24-derivatives.js','M24Derivatives');
+    await loadScript('m24-derivatives-lab.js','M24DerivativesLab');
+  }
+
+  function ensureControls(){
+    const lab=$('#labPanel');
+    if(!lab||$('#runDerivativesContext')) return;
+    const wrap=document.createElement('div');
+    wrap.innerHTML=`<div class="observation-input"><button id="runDerivativesContext" class="primary">Laad derivatencontext</button><span id="derivativesStatus" class="muted">read-only funding / open-interest bronstatus</span></div><div id="derivativesContext" class="history-list"></div>`;
+    lab.append(...wrap.childNodes);
+  }
+
   function render(result){
     const target=$('#derivativesContext');
     if(!target) return;
@@ -25,6 +48,7 @@ globalThis.M24DerivativesUI = (() => {
     if(button) button.disabled=true;
     if(status) status.textContent='funding en broncapaciteit ophalen…';
     try{
+      await ensureDependencies();
       const caseSchema=M24Cases.get(M24DerivativesLab.caseId);
       const provider=new M24Derivatives.BinanceDerivativesProvider();
       const result=await M24DerivativesLab.runCase({provider,caseSchema});
@@ -46,7 +70,13 @@ globalThis.M24DerivativesUI = (() => {
     }
   }
 
-  function wire(){const button=$('#runDerivativesContext');if(button)button.addEventListener('click',()=>runDerivativesContext().catch(()=>{}));}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wire);else wire();
-  return {runDerivativesContext};
+  function wire(){
+    ensureControls();
+    const button=$('#runDerivativesContext');
+    if(button&&!button.dataset.wired){button.dataset.wired='1';button.addEventListener('click',()=>runDerivativesContext().catch(()=>{}));}
+  }
+
+  function boot(){wire();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+  return {runDerivativesContext,wire};
 })();
