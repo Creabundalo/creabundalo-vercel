@@ -1,0 +1,44 @@
+name: ACTIO Release Gate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [actio-mvp, main]
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: JavaScript syntax
+        run: node --check actio.js
+      - name: Manifest JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('actio.webmanifest','utf8')); console.log('manifest ok')"
+      - name: Required shell files
+        run: |
+          test -f actio.html
+          test -f actio.css
+          test -f actio.js
+          test -f actio-sw.js
+          test -f actio.webmanifest
+          test -f actio-icon.svg
+          test -f ANDROID-BRIDGE.md
+      - name: Interaction contract
+        run: |
+          grep -q 'PREVIEW' actio.html
+          grep -q 'Akkoord' actio.html
+          grep -q 'cameraButton' actio.html
+          grep -q 'functionButton' ANDROID-BRIDGE.md
+          grep -q 'double' ANDROID-BRIDGE.md
+      - name: Offline shell contract
+        run: |
+          grep -q 'actio.html' actio-sw.js
+          grep -q 'actio.css' actio-sw.js
+          grep -q 'actio.js' actio-sw.js
+          grep -q 'actio.webmanifest' actio-sw.js
+          grep -q 'actio-icon.svg' actio-sw.js
+      - name: Provider safety gate
+        run: |
+          grep -q 'LOCAL_MOCK' actio.js
+          grep -q 'VERIFY' actio.js

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#11130f" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="ACTIO" />
+  <title>P24 · ACTIO</title>
+  <link rel="manifest" href="actio.webmanifest" />
+  <link rel="icon" href="actio-icon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="actio.css" />
+  <link rel="stylesheet" href="watch.css" />
+</head>
+<body>
+  <section id="watchFace" class="watch-face" aria-label="P24 horlogescherm">
+    <div id="watchTime" class="watch-time">--:--</div>
+    <div id="watchDate" class="watch-date">---</div>
+    <div class="watch-state">P24 · gereed</div>
+    <div id="watchRecording" class="watch-recording"><span class="watch-dot"></span><span>ACTIO luistert</span></div>
+    <div class="watch-hint">Function = inspreken<br />Swipe omhoog = ACTIO</div>
+  </section>
+
+  <main class="app-shell watch-hidden">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">CREABUNDALO · ACTIO</p>
+        <h1>Vandaag</h1>
+      </div>
+      <div id="connectionState" class="status-pill">LOCAL FIRST</div>
+    </header>
+
+    <nav class="quick-nav" aria-label="Snelle functies">
+      <button id="watchBackButton">Horloge<span>terug naar tijd</span></button>
+      <button id="quickCameraButton">Camera<span>foto vastleggen</span></button>
+      <button id="otherAppsButton">Overig<span>Android-apps</span></button>
+    </nav>
+
+    <section class="capture-panel">
+      <button id="micButton" class="capture-button mic" aria-label="Spreek opdracht in">
+        <span class="capture-icon">●</span>
+        <span>Spreek</span>
+      </button>
+      <button id="cameraButton" class="capture-button" aria-label="Maak foto">
+        <span class="capture-icon">▣</span>
+        <span>Camera</span>
+      </button>
+      <input id="cameraInput" class="visually-hidden" type="file" accept="image/*" capture="environment" />
+    </section>
+
+    <section class="input-panel">
+      <textarea id="commandInput" rows="3" placeholder="Of typ hier wat je wilt doen…"></textarea>
+      <div id="attachmentStrip" class="attachment-strip hidden"></div>
+      <button id="prepareButton" class="primary full">Maak preview</button>
+    </section>
+
+    <section id="previewPanel" class="panel hidden">
+      <div class="panel-head">
+        <div>
+          <h2>Ter goedkeuring</h2>
+          <span id="txLabel" class="muted"></span>
+        </div>
+        <span class="step">PREVIEW</span>
+      </div>
+      <div id="previewContent" class="preview-content"></div>
+      <div class="actions">
+        <button id="rejectButton" class="ghost">Wijzigen</button>
+        <button id="approveButton" class="primary">Akkoord</button>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Vandaag</h2>
+        <span id="todayCount" class="muted">0 open</span>
+      </div>
+      <div id="todayList" class="list"></div>
+    </section>
+
+    <section class="utility-bar">
+      <button id="wakeButton" class="utility-button" aria-pressed="false">○ Blijf wakker</button>
+      <button id="installButton" class="utility-button hidden">＋ Installeer app</button>
+    </section>
+
+    <details class="panel log-panel">
+      <summary>
+        <span>Log</span>
+        <span class="muted">controleerbaar</span>
+      </summary>
+      <div id="logList" class="log-list"></div>
+    </details>
+
+    <footer class="footline">
+      <span>Contact → Calendar → Alarm → Verify</span>
+      <span id="versionLabel">P24 · ACTIO v0.3</span>
+    </footer>
+  </main>
+  <script src="actio.js"></script>
+  <script src="watch.js"></script>
+</body>
+</html>
