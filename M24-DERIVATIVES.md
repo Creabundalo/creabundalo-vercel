@@ -24,7 +24,7 @@ M24 normalizes:
 
 The provider paginates long ranges and keeps the result as exchange-specific derivatives evidence.
 
-### Open interest
+### Recent open interest
 Binance's open-interest history endpoint is a recent-history source, not a complete 2021 historical source. M24 therefore does **not** convert an unavailable historical response into `openInterest = 0`.
 
 For an old case the provider emits/causes a `SOURCE_GAP` with:
@@ -33,86 +33,114 @@ For an old case the provider emits/causes a `SOURCE_GAP` with:
 - recommended archival source
 - an example Binance Vision metrics archive URL
 
-### Binance Vision archive
-Historical derivatives archive locator:
+### Binance Vision historical metrics
+Historical archive locator:
 
 `data/futures/um/daily/metrics/{SYMBOL}/{SYMBOL}-metrics-YYYY-MM-DD.zip`
 
-This archive can supply historical metrics such as open interest and ratios where files are present. Missing archive days must remain explicit source gaps.
+`m24-binance-vision.js` now implements deterministic archive ingestion:
+1. request the ZIP and its `.CHECKSUM` sidecar
+2. calculate SHA-256 over the downloaded ZIP
+3. fail closed if the checksum differs
+4. read the ZIP central directory
+5. extract CSV entries (`stored` or `deflate` ZIP methods)
+6. validate the expected metrics schema
+7. normalize rows to typed M24 observations
+8. preserve archive URL, checksum and retrieval provenance
 
-Funding archive locator:
+Expected metrics include:
+- `sum_open_interest`
+- `sum_open_interest_value`
+- `count_toptrader_long_short_ratio`
+- `sum_toptrader_long_short_ratio`
+- `count_long_short_ratio`
+- `sum_taker_long_short_vol_ratio`
+
+Missing archive days remain `SOURCE_GAP`; they are never converted to zero.
+
+Funding archive locator remains available for independent validation:
 
 `data/futures/um/monthly/fundingRate/{SYMBOL}/{SYMBOL}-fundingRate-YYYY-MM.zip`
-
-Archive ingestion/parsing is a separate adapter step so browser UI and regression CI do not silently depend on ZIP transport.
 
 ## Qubus records
 
 ### `DERIVATIVES_CONTEXT`
 Stores measured funding context around semantic case windows.
 
-For the BTC 2021 case the same case schema supplies:
-- first-top window
-- second-top window
-
-The funding analysis stores per window:
-- sample count
-- average funding rate
-- share of positive funding observations
-- min/max rate
-
-It then stores a comparison such as:
-- `MORE_POSITIVE_AT_SECOND_TOP`
-- `LESS_POSITIVE_AT_SECOND_TOP`
-- `UNCHANGED`
-- `INSUFFICIENT_DATA`
-
-These are positioning/crowding observations, not actor attribution.
+### `ARCHIVE_DERIVATIVES_CONTEXT`
+Stores checksum-verified historical metrics at resolved case checkpoints, including:
+- open interest
+- open-interest value
+- top-trader account long/short ratio
+- top-trader position long/short ratio
+- global long/short ratio
+- taker long/short volume ratio
+- first-top → second-top deltas
+- source provenance and archive SHA-256
 
 ### `SOURCE_GAP`
-A source gap is first-class data. Example:
-
-`OPEN_INTEREST / 2021 requested / recent-history API cannot cover / use Binance Vision metrics archive`
+A source gap is first-class data. Examples:
+- recent OI API cannot cover the 2021 case
+- a Binance Vision archive day is missing
+- a downloaded archive contains no valid metrics rows
 
 This prevents the learning layer from confusing missing data with a measured zero.
 
+## Evidence semantics
+Open interest by itself is **directionless**. A higher OI value means more open contracts, not automatically more longs or more shorts.
+
+Directional positioning context requires an actual ratio or directional measurement, for example:
+- global long/short ratio
+- top-trader account/position ratio
+- taker buy/sell volume ratio
+- funding rate
+
+This is enforced in the Historical Trickster tests.
+
 ## Trickster use
-The derivatives layer may strengthen or weaken a Trickster hypothesis.
+The derivatives layer may strengthen, weaken or confirm a Trickster hypothesis.
 
-Example:
+Examples:
+- positive narrative + more-positive funding → possible long crowding context
+- positive narrative + increasingly long-skewed archived global L/S ratio → crowding hypothesis
+- positive narrative + stronger taker-buy ratio → mechanism may actually confirm part of the visible narrative
+- higher OI alone → observation only, never a directional Trickster contrast
 
-`visible bullish narrative + higher price top + increasingly positive funding`
+None of these proves a trap, manipulation or actor identity.
 
-may indicate increasing long crowding, but it does not prove a trap or manipulation.
-
-The evidence progression remains:
+Evidence progression remains:
 
 `mechanism visible → plausible interpretation → intent unknown → manipulation proven only with separate hard evidence`
 
 ## UI
-Lab exposes a lazy-loaded `Laad derivatencontext` action. It:
-- fetches read-only historical funding
-- evaluates funding in the case checkpoint windows
-- records `DERIVATIVES_CONTEXT`
-- records historical OI limitations as `SOURCE_GAP`
-- never accesses an account or places an order
+Lab exposes lazy-loaded read-only actions:
+- `Laad derivatencontext` — funding + recent-OI capability/gap
+- `Laad 2021 OI/ratio archief` — checksum-verified Binance Vision checkpoint metrics
+
+Neither action accesses an account or places an order.
 
 ## Automated tests
-`m24-derivatives-test.js` checks:
-- BTC → BTCUSDT mapping
-- historical funding pagination
-- normalization/provenance
-- preservation of funding `rateType`
-- recent open-interest normalization
-- rejection of old OI history as a source-window error
-- Binance Vision archive URL construction
-- semantic funding comparison around first/second top
+`m24-derivatives-test.js` checks funding, recent OI and archive routing.
 
-`m24-derivatives-lab-test.js` checks:
-- derivatives context binding to the BTC case
-- source gap is a first-class Qubus payload
-- source gap is not interpreted as zero
-- funding provenance survives into the Lab payload
+`m24-derivatives-lab-test.js` checks Qubus binding and `SOURCE_GAP` semantics.
+
+`m24-binance-vision-test.js` checks:
+- deterministic ZIP parsing using a generated test archive
+- metrics CSV schema mapping
+- checksum sidecar verification
+- fail-closed checksum mismatch behavior
+- missing archive day → `SOURCE_GAP`
+
+`m24-binance-vision-lab-test.js` checks:
+- first/second checkpoint metrics comparison
+- archive provenance retention
+- archive gaps as separate Qubus payloads
+
+`m24-trickster-lab-test.js` additionally enforces that:
+- OI change is descriptive, not directional
+- actual long/short skew may become a positioning contrast
+- actual taker-buy skew may become a confirmation
+- actor attribution and intent are never invented
 
 ## Next step
-Implement a deterministic Binance Vision ZIP/CSV archive importer for historical BTCUSDT metrics, then attach actual 2021 open-interest/ratio observations to the same checkpoint windows. After that, add macro/cross-asset and timestamped meaning-world evidence.
+Run the archive path against the real 2021 BTCUSDT checkpoint dates, retain any missing days explicitly, and then use the source-complete historical state in the first calibrated multi-layer backtest. Broaden source coverage rather than silently interpolating archive gaps.
