@@ -25,6 +25,8 @@ on:
       - 'm24-case-btc-2021.json'
       - 'M24-REQUIREMENTS.md'
       - 'M24-TECHNICAL-DESIGN.md'
+      - 'M24-SOURCE-COMPARISON.md'
+      - 'M24-DERIVATIVES.md'
       - 'M24-RELEASE-CHECKLIST.md'
       - '.github/workflows/m24-release-gate.yml'
   workflow_dispatch:
@@ -59,6 +61,8 @@ jobs:
           test -f m24-case-btc-2021.json
           test -f M24-REQUIREMENTS.md
           test -f M24-TECHNICAL-DESIGN.md
+          test -f M24-SOURCE-COMPARISON.md
+          test -f M24-DERIVATIVES.md
           test -f M24-RELEASE-CHECKLIST.md
 
       - name: JavaScript syntax
