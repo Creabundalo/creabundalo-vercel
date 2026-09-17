@@ -20,6 +20,8 @@
 - [x] Historical OI source gaps are shown as missing-source state, never as zero
 - [x] LAB lazy-loads read-only macro/cross-asset context
 - [x] Macro series remain separate instead of being collapsed into a hidden direction score
+- [x] LAB exposes timestamped historical meaning-world sources
+- [x] LAB can run historical Trickster across the layers currently loaded in Qubus
 
 ## Transactions
 - [x] Compact transaction rows exist
@@ -48,6 +50,9 @@
 - [x] EFFR / 10Y / broad dollar / RRP / Fed assets / NFCI / WTI are separate series
 - [x] Macro observations resolve around semantic BTC checkpoints
 - [x] Missing/stale macro observations become SOURCE_GAP
+- [x] Timestamped meaning-world source fixture exists around first top / reaction / support / second top
+- [x] Historical Trickster combines price, meaning world, derivatives and macro when loaded
+- [x] Missing Trickster input layers remain explicit
 - [x] Resolution-independent case schema exists
 - [x] Checkpoints resolve through semantic windows/selectors rather than fixed source dates
 - [x] Primary-source Lab runner exists
@@ -60,11 +65,14 @@
 - [x] Source/resolution comparison design documented
 - [x] Derivatives evidence design documented
 - [x] Macro/cross-asset evidence design documented
+- [x] Meaning-world / historical Trickster design documented
 - [x] BTC 2021→2022 historical case definition exists
 - [x] LAB_RESULT is stored as a Qubus record
 - [x] Primary Lab and SOURCE_COMPARISON can be stored as separate Qubus records
 - [x] DERIVATIVES_CONTEXT and SOURCE_GAP can be stored as separate Qubus records
 - [x] MACRO_CROSS_ASSET_CONTEXT and SOURCE_GAP can be stored as separate Qubus records
+- [x] MEANING_WORLD_CONTEXT can be stored with timestamped provenance
+- [x] HISTORICAL_TRICKSTER_ASSESSMENT can be stored as a separate hypothesis record
 
 ## Evidence / semantics
 - [x] Narrative and measured mechanism are separate records
@@ -78,6 +86,9 @@
 - [x] Missing derivatives history is retained as SOURCE_GAP rather than numeric zero
 - [x] Funding crowding context is not treated as proof of manipulation or actor intent
 - [x] Macro/cross-asset changes are descriptive context, not automatic trade direction
+- [x] Meaning-world direction coding is explicitly not a truth score or prediction
+- [x] Historical Trickster cannot resurrect the rejected BTC weekly RSI divergence
+- [x] Historical Trickster remains PLAUSIBLE_INTERPRETATION / INTENT_UNKNOWN / actor NONE
 
 ## Learning
 - [x] Forecasts are first-class Qubus instances
@@ -86,6 +97,7 @@
 - [x] Learned changes cannot silently alter real-money execution
 - [x] Historical outcome measurement is separated from the earlier checkpoint hypothesis
 - [x] Missing-source records can be excluded from numeric calibration instead of treated as zero
+- [x] Source frames remain inspectable inputs rather than opaque sentiment labels
 
 ## Safety
 - [x] SIMULATED_ONLY permanently visible in v0.1
@@ -95,6 +107,8 @@
 - [x] Coinbase historical comparison is read-only
 - [x] Derivatives context is read-only market data
 - [x] Macro/cross-asset context is read-only historical data
+- [x] Meaning-world sources are read-only historical claims
+- [x] Historical Trickster does not infer manipulator identity
 - [x] COMMIT means paper-state mutation only
 
 ## Automated gates
@@ -108,12 +122,16 @@
 - [x] Derivatives Lab/Qubus contract test defined
 - [x] Macro provider deterministic contract test defined
 - [x] Macro Lab/Qubus contract test defined
+- [x] Meaning-world contract test defined
+- [x] Historical Trickster contract test defined
 - [x] Safety contract checks defined
 - [x] Interaction contract checks defined
 - [x] M24 Release Gate green after derivatives Lab/UI integration (run 53)
 - [x] ACTIO Release Gate remains green on derivatives checkpoint (run 60)
 - [x] M24 Release Gate green after macro/cross-asset integration (run 63)
 - [x] ACTIO Release Gate remains green on macro/cross-asset checkpoint (run 70)
+- [x] M24 Release Gate green after meaning-world / historical Trickster integration (run 73)
+- [x] ACTIO Release Gate remains green on meaning-world / Trickster checkpoint (run 80)
 - [ ] Visual browser/Vercel preview review completed
 
 ## Historical BTC case status
@@ -133,9 +151,11 @@
 - [x] Binance Vision metrics archive is designated for 2021 OI/ratio backfill
 - [x] Macro/cross-asset provider implemented for EFFR, DGS10, dollar, RRP, Fed assets, NFCI and WTI
 - [x] Macro/cross-asset context is compared around resolved first/second top dates
+- [x] Timestamped meaning-world fixture covers first top / reaction / support / second top
+- [x] Historical multi-layer Trickster assessment exists and preserves evidence discipline
 - [ ] Capture an actual Coinbase daily comparison result in a source-complete Lab run
 - [ ] Implement Binance Vision ZIP/CSV metrics archive importer
 - [ ] Attach 2021 open-interest / long-short / taker-ratio archive data
-- [ ] Add timestamped narrative/source history
+- [ ] Broaden timestamped narrative corpus beyond the first deterministic source fixture
 
 Release rule: M24 cannot progress from paper to real execution until historical validation, paper trading and an explicit live-execution approval gate exist.
