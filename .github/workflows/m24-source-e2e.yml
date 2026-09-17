@@ -4,6 +4,10 @@ on:
   pull_request:
     paths:
       - 'm24-source-e2e-test.js'
+      - 'm24-replay-e2e-test.js'
+      - 'm24-verified-btc-2021.json'
+      - 'm24-replay.js'
+      - 'm24-calibration.js'
       - 'm24-enrichment.js'
       - 'm24-evidence-gate.js'
       - 'm24-coinbase.js'
@@ -29,13 +33,19 @@ jobs:
         with:
           node-version: '22'
       - name: Syntax
-        run: node --check m24-source-e2e-test.js
+        run: |
+          node --check m24-source-e2e-test.js
+          node --check m24-replay-e2e-test.js
       - name: Run real-source enrichment
         run: node m24-source-e2e-test.js
-      - name: Upload source snapshot
+      - name: Replay verified horizons
+        run: node m24-replay-e2e-test.js
+      - name: Upload source snapshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: m24-btc-2021-source-snapshot
-          path: m24-btc-2021-source-snapshot.json
+          name: m24-btc-2021-source-snapshots
+          path: |
+            m24-btc-2021-source-snapshot.json
+            m24-btc-2021-replay-snapshot.json
           if-no-files-found: warn
