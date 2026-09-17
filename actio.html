@@ -2,8 +2,12 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#11130f" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ACTIO" />
   <title>ACTIO · Vandaag</title>
+  <link rel="manifest" href="actio.webmanifest" />
   <link rel="stylesheet" href="actio.css" />
 </head>
 <body>
@@ -13,14 +17,14 @@
         <p class="eyebrow">CREABUNDALO · ACTIO</p>
         <h1>Vandaag</h1>
       </div>
-      <div class="status-pill">PREVIEW-MODUS</div>
+      <div class="status-pill">LOCAL FIRST</div>
     </header>
 
     <section class="voice-panel">
       <button id="micButton" class="mic-button" aria-label="Spreek opdracht in">●</button>
       <div class="voice-copy">
         <strong>Zeg gewoon wat je wilt doen</strong>
-        <span>Bijv. “Woensdag 12 uur C24 met Eva, alarm 11:45.”</span>
+        <span>“Woensdag 12 uur C24 met Prometheus, alarm 11:45.”</span>
       </div>
     </section>
 
@@ -31,7 +35,10 @@
 
     <section id="previewPanel" class="panel hidden">
       <div class="panel-head">
-        <h2>Ter goedkeuring</h2>
+        <div>
+          <h2>Ter goedkeuring</h2>
+          <span id="txLabel" class="muted"></span>
+        </div>
         <span class="step">PREVIEW</span>
       </div>
       <div id="previewContent" class="preview-content"></div>
@@ -47,6 +54,16 @@
         <span id="todayCount" class="muted">0 open</span>
       </div>
       <div id="todayList" class="list"></div>
+    </section>
+
+    <section class="panel compact-panel">
+      <div class="panel-head">
+        <h2>Uitvoering</h2>
+        <span class="muted">provider-onafhankelijk</span>
+      </div>
+      <div class="provider-line"><span>Contact</span><b>LOCAL / Nextcloud-ready</b></div>
+      <div class="provider-line"><span>Kalender</span><b>CalendarProvider · LOCAL_MOCK</b></div>
+      <div class="provider-line"><span>Alarm</span><b>AlarmProvider · Android bridge pending</b></div>
     </section>
 
     <section class="panel">
