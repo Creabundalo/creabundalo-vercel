@@ -30,33 +30,43 @@ globalThis.M24EvidenceGate = (() => {
   function derivativesState(records,caseId){
     const funding=latest(forCase(records,caseId,'DERIVATIVES_CONTEXT'));
     const archive=latest(forCase(records,caseId,'ARCHIVE_DERIVATIVES_CONTEXT'));
-    const gaps=forCase(records,caseId,'SOURCE_GAP').filter(r=>['DERIVATIVES_ARCHIVE','DERIVATIVES'].includes(r?.data?.domain)||String(r?.data?.metric||'').includes('OPEN_INTEREST'));
-    if(!funding) return {state:'MISSING',recordIds:[],note:'No checkpoint-bounded funding context.'};
+    const relatedGaps=forCase(records,caseId,'SOURCE_GAP').filter(r=>['DERIVATIVES_ARCHIVE','DERIVATIVES'].includes(r?.data?.domain)||String(r?.data?.metric||'').includes('OPEN_INTEREST'));
+    if(!funding) return {state:'MISSING',extensionState:'MISSING',recordIds:[],note:'No checkpoint-bounded funding context.'};
+
     const firstFundingCount=Number(funding?.data?.firstTop?.count||0);
     const secondFundingCount=Number(funding?.data?.secondTop?.count||0);
-    if(firstFundingCount<1||secondFundingCount<1){
-      return {state:'INCOMPLETE',recordIds:[funding.id],note:`Funding observations incomplete at resolved checkpoints (${firstFundingCount}/${secondFundingCount}).`};
+    const fundingSourceGaps=funding?.data?.sourceGaps||[];
+    if(fundingSourceGaps.length){
+      return {state:'INCOMPLETE',extensionState:'UNKNOWN',recordIds:[funding.id],note:`Historical funding source has ${fundingSourceGaps.length} unresolved archive gap(s).`,sourceGaps:clone(fundingSourceGaps)};
     }
-    if(!archive) return {state:'INCOMPLETE',recordIds:[funding.id],note:'Funding exists, but archived OI/long-short/taker context is missing.'};
+    if(firstFundingCount<1||secondFundingCount<1){
+      return {state:'INCOMPLETE',extensionState:'UNKNOWN',recordIds:[funding.id],note:`Funding observations incomplete at resolved checkpoints (${firstFundingCount}/${secondFundingCount}).`};
+    }
+
+    const recentApiGaps=relatedGaps.filter(r=>r?.data?.reason==='HISTORY_WINDOW_EXCEEDED'&&r?.data?.recommendedSource==='BINANCE_VISION_METRICS');
+    if(!archive){
+      return {
+        state:'COMPLETE',extensionState:'MISSING',recordIds:[funding.id],
+        note:'Core derivatives evidence complete from checkpoint-bounded funding; OI/long-short archive extension not loaded.',
+        sourceGapIds:relatedGaps.map(x=>x.id),resolvedGapIds:[]
+      };
+    }
 
     const archiveGaps=archive?.data?.gaps||[];
     const archiveComplete=archiveGaps.length===0;
-    const resolvedRecentApiGaps=gaps.filter(r=>archiveComplete&&r?.data?.reason==='HISTORY_WINDOW_EXCEEDED'&&r?.data?.recommendedSource==='BINANCE_VISION_METRICS');
-    const unresolvedGaps=gaps.filter(r=>!resolvedRecentApiGaps.includes(r));
-
-    if(archiveGaps.length||unresolvedGaps.length){
+    const unexpectedNonRetentionGaps=relatedGaps.filter(r=>!recentApiGaps.includes(r));
+    if(archiveComplete&&unexpectedNonRetentionGaps.length===0){
       return {
-        state:'BLOCKED_BY_SOURCE_GAP',
-        recordIds:[funding.id,archive.id,...unresolvedGaps.map(x=>x.id)],
-        note:'Derivatives archive still contains an unresolved source gap; do not promote.',
-        resolvedGapIds:resolvedRecentApiGaps.map(x=>x.id)
+        state:'COMPLETE',extensionState:'COMPLETE',recordIds:[funding.id,archive.id],
+        note:recentApiGaps.length?'Core funding and extended archived positioning complete; recent-API retention gap is resolved by Binance Vision archive.':'Core funding and extended archived positioning complete.',
+        sourceGapIds:relatedGaps.map(x=>x.id),resolvedGapIds:recentApiGaps.map(x=>x.id)
       };
     }
+
     return {
-      state:'COMPLETE',
-      recordIds:[funding.id,archive.id],
-      note:resolvedRecentApiGaps.length?'Funding plus archived positioning complete; recent-API retention gap is resolved by Binance Vision archive.':'Funding and archived positioning context complete.',
-      resolvedGapIds:resolvedRecentApiGaps.map(x=>x.id)
+      state:'COMPLETE',extensionState:'SOURCE_LIMITED',recordIds:[funding.id,archive.id],
+      note:`Core checkpoint funding is complete. Extended OI/long-short/taker archive is source-limited (${archiveGaps.length+unexpectedNonRetentionGaps.length} unresolved extension gap(s)); keep the limitation visible and do not synthesize missing positioning values.`,
+      sourceGapIds:[...relatedGaps.map(x=>x.id)],resolvedGapIds:[],archiveGaps:clone(archiveGaps)
     };
   }
 
@@ -88,12 +98,13 @@ globalThis.M24EvidenceGate = (() => {
     };
     const missing=REQUIRED.filter(key=>layers[key].state!=='COMPLETE');
     const calibrationEligible=missing.length===0;
+    const coverageProfile=layers.DERIVATIVES.extensionState==='COMPLETE'?'EXTENDED_DERIVATIVES':'CORE_DERIVATIVES';
     return {
       type:'CASE_EVIDENCE_STATUS',caseId:caseSchema.id,asset:caseSchema.asset,
       requiredLayers:[...REQUIRED],layers:clone(layers),missingLayers:missing,
-      calibrationEligible,
+      calibrationEligible,coverageProfile,
       state:calibrationEligible?'SOURCE_COMPLETE':'INCOMPLETE',
-      rule:'A case may enter forecast calibration only when every required source layer is complete and the no-lookahead decision/outcome split exists.'
+      rule:'Source completeness requires the common cross-asset core. Optional positioning extensions remain explicit in coverageProfile and may not be silently mixed in calibration cohorts.'
     };
   }
 
