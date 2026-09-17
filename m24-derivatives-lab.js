@@ -18,6 +18,8 @@ globalThis.M24DerivativesLab = (() => {
     fundingContext.firstTop.asOf=`${labResult.firstTop.date}T23:59:59.999Z`;
     fundingContext.secondTop.asOf=`${labResult.secondTop.date}T23:59:59.999Z`;
     fundingContext.cutoffPolicy='RESOLVED_CHECKPOINT_DATE';
+    fundingContext.sourceMode=funding.sourceMode||'BINANCE_USDM_FUNDING_API';
+    fundingContext.sourceGaps=structuredClone(funding.gaps||[]);
 
     let openInterestGap=null;
     try{
@@ -27,6 +29,7 @@ globalThis.M24DerivativesLab = (() => {
       openInterestGap={
         type:'SOURCE_GAP',
         source:'BINANCE_USDM_OPEN_INTEREST_API',
+        domain:'DERIVATIVES',
         metric:'OPEN_INTEREST',
         caseId:caseSchema.id,
         asset:caseSchema.asset,
