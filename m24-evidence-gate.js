@@ -31,9 +31,26 @@ globalThis.M24EvidenceGate = (() => {
     const gaps=forCase(records,caseId,'SOURCE_GAP').filter(r=>['DERIVATIVES_ARCHIVE','DERIVATIVES'].includes(r?.data?.domain)||String(r?.data?.metric||'').includes('OPEN_INTEREST'));
     if(!funding) return {state:'MISSING',recordIds:[],note:'No checkpoint-bounded funding context.'};
     if(!archive) return {state:'INCOMPLETE',recordIds:[funding.id],note:'Funding exists, but archived OI/long-short/taker context is missing.'};
+
     const archiveGaps=archive?.data?.gaps||[];
-    if(archiveGaps.length||gaps.length) return {state:'BLOCKED_BY_SOURCE_GAP',recordIds:[funding.id,archive.id,...gaps.map(x=>x.id)],note:'Derivatives archive contains an explicit source gap; do not promote.'};
-    return {state:'COMPLETE',recordIds:[funding.id,archive.id],note:'Funding and archived positioning context complete.'};
+    const archiveComplete=archiveGaps.length===0;
+    const resolvedRecentApiGaps=gaps.filter(r=>archiveComplete&&r?.data?.reason==='HISTORY_WINDOW_EXCEEDED'&&r?.data?.recommendedSource==='BINANCE_VISION_METRICS');
+    const unresolvedGaps=gaps.filter(r=>!resolvedRecentApiGaps.includes(r));
+
+    if(archiveGaps.length||unresolvedGaps.length){
+      return {
+        state:'BLOCKED_BY_SOURCE_GAP',
+        recordIds:[funding.id,archive.id,...unresolvedGaps.map(x=>x.id)],
+        note:'Derivatives archive still contains an unresolved source gap; do not promote.',
+        resolvedGapIds:resolvedRecentApiGaps.map(x=>x.id)
+      };
+    }
+    return {
+      state:'COMPLETE',
+      recordIds:[funding.id,archive.id],
+      note:resolvedRecentApiGaps.length?'Funding plus archived positioning complete; recent-API retention gap is resolved by Binance Vision archive.':'Funding and archived positioning context complete.',
+      resolvedGapIds:resolvedRecentApiGaps.map(x=>x.id)
+    };
   }
 
   function macroState(records,caseId){
