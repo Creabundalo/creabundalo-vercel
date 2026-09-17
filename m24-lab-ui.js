@@ -36,7 +36,7 @@ globalThis.M24LabUI = (() => {
       if(!baseline) throw new Error('Open eerst BTC in Lab mode zodat de regressiebaseline bestaat.');
       const caseSchema=M24Cases.get(caseId);
       const provider=new M24Coinbase.CoinbaseHistoricalProvider();
-      const primary=await M24PrimaryLab.runBtcCase({provider,caseSchema,granularity:86400});
+      const primary=await M24PrimaryLab.runCase({provider,caseSchema,granularity:86400});
       const comparison=M24PrimaryLab.compare({baseline,primary:primary.result});
       const store=M24?.runtime?.store;
       if(store){
@@ -70,6 +70,7 @@ globalThis.M24LabUI = (() => {
     loadAuxUI('m24-trickster-ui.js','M24TricksterUI');
     loadAuxUI('m24-backtest-ui.js','M24BacktestUI');
     loadAuxUI('m24-calibration-ui.js','M24CalibrationUI');
+    loadAuxUI('m24-cohort-ui.js','M24CohortUI');
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
