@@ -46,8 +46,8 @@ globalThis.M24EvidenceGate = (() => {
     const recentApiGaps=relatedGaps.filter(r=>r?.data?.reason==='HISTORY_WINDOW_EXCEEDED'&&r?.data?.recommendedSource==='BINANCE_VISION_METRICS');
     if(!archive){
       return {
-        state:'COMPLETE',extensionState:'MISSING',recordIds:[funding.id],
-        note:'Core derivatives evidence complete from checkpoint-bounded funding; OI/long-short archive extension not loaded.',
+        state:'INCOMPLETE',extensionState:'NOT_ATTEMPTED',recordIds:[funding.id],
+        note:'Core funding is complete, but the historical positioning extension has not yet been attempted; run the archive adapter before promotion.',
         sourceGapIds:relatedGaps.map(x=>x.id),resolvedGapIds:[]
       };
     }
