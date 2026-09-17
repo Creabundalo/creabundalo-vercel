@@ -1,0 +1,46 @@
+name: M24 Release Gate
+
+on:
+  pull_request:
+    paths:
+      - 'm24.html'
+      - 'm24.css'
+      - 'm24.js'
+      - 'M24-REQUIREMENTS.md'
+      - 'M24-RELEASE-CHECKLIST.md'
+      - '.github/workflows/m24-release-gate.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Required files
+        run: |
+          test -f m24.html
+          test -f m24.css
+          test -f m24.js
+          test -f M24-REQUIREMENTS.md
+          test -f M24-RELEASE-CHECKLIST.md
+
+      - name: JavaScript syntax
+        run: node --check m24.js
+
+      - name: Safety contract
+        run: |
+          grep -q 'SIMULATED_ONLY' m24.html
+          grep -q 'no broker execution' m24.html
+          grep -q 'No broker order action exists' M24-REQUIREMENTS.md
+          ! grep -Eqi 'placeOrder|submitOrder|transmit[[:space:]]*=[[:space:]]*true|LIVE_ORDER' m24.js
+
+      - name: Interaction contract
+        run: |
+          grep -q 'data-level="life"' m24.html
+          grep -q 'data-mode="story"' m24.html
+          grep -q 'data-mode="analysis"' m24.html
+          grep -q 'data-mode="lab"' m24.html
+          grep -q 'transactionList' m24.html
+          grep -q 'Trickster-machine' m24.html
+          grep -q 'renderTransactions' m24.js
