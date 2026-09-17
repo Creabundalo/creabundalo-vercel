@@ -9,7 +9,7 @@ const test=`
   const complete=[
     rec('p','LAB_RESULT_PRIMARY',{caseId:caseSchema.id}),
     rec('m','MEANING_WORLD_CONTEXT',{caseId:caseSchema.id,sources:[{id:'s1',publishedAt:'2021-11-09T10:00:00Z'}]}),
-    rec('d','DERIVATIVES_CONTEXT',{caseId:caseSchema.id}),
+    rec('d','DERIVATIVES_CONTEXT',{caseId:caseSchema.id,firstTop:{count:3},secondTop:{count:3}}),
     rec('a','ARCHIVE_DERIVATIVES_CONTEXT',{caseId:caseSchema.id,gaps:[]}),
     rec('x','MACRO_CROSS_ASSET_CONTEXT',{caseId:caseSchema.id,series:[{key:'DOLLAR'}],gaps:[]}),
     rec('s','DECISION_SNAPSHOT',{caseId:caseSchema.id}),
@@ -24,8 +24,13 @@ const test=`
   check(incomplete.calibrationEligible===false,'funding-only derivatives must not promote');
   check(incomplete.layers.DERIVATIVES.state==='INCOMPLETE','missing archive should be explicit');
 
+  const noFundingAtSecond=complete.map(x=>x.id==='d'?rec('d','DERIVATIVES_CONTEXT',{caseId:caseSchema.id,firstTop:{count:3},secondTop:{count:0}}):x);
+  const missingFunding=M24EvidenceGate.assess(noFundingAtSecond,caseSchema);
+  check(missingFunding.calibrationEligible===false,'missing checkpoint funding must block promotion');
+  check(missingFunding.layers.DERIVATIVES.state==='INCOMPLETE','funding checkpoint gap should be explicit');
+
   const resolvedRetentionGap=complete.concat(rec('rg','SOURCE_GAP',{
-    caseId:caseSchema.id,metric:'OPEN_INTEREST',reason:'HISTORY_WINDOW_EXCEEDED',recommendedSource:'BINANCE_VISION_METRICS'
+    caseId:caseSchema.id,domain:'DERIVATIVES',metric:'OPEN_INTEREST',reason:'HISTORY_WINDOW_EXCEEDED',recommendedSource:'BINANCE_VISION_METRICS'
   }));
   const resolved=M24EvidenceGate.assess(resolvedRetentionGap,caseSchema);
   check(resolved.calibrationEligible===true,'recent API retention gap should be resolved by complete archive');
