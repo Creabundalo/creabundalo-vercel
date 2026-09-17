@@ -71,6 +71,8 @@ globalThis.M24LabUI = (() => {
     loadAuxUI('m24-backtest-ui.js','M24BacktestUI');
     loadAuxUI('m24-calibration-ui.js','M24CalibrationUI');
     loadAuxUI('m24-cohort-ui.js','M24CohortUI');
+    loadAuxUI('m24-evidence-ui.js','M24EvidenceUI');
+    loadAuxUI('m24-enrichment-ui.js','M24EnrichmentUI');
   }
 
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',wire); else wire();
