@@ -1,0 +1,89 @@
+{
+  "version": "0.1",
+  "mode": "SIMULATED_ONLY",
+  "assets": {
+    "BTC": {
+      "name": "Bitcoin",
+      "unit": "USD",
+      "window": "Current cycle",
+      "resolution": "day",
+      "price": 76200,
+      "trend": "neutral-weak",
+      "regime": "tight-liquidity / mixed cross-asset",
+      "prices": [44,46,50,56,61,58,64,70,76,72,80,84,79,87,92,89,83,86,81,77,74,76,72,70,73,69,67,71,68,66],
+      "flags": [
+        {"i":8,"type":"momentum","label":"Momentum versnelt","detail":"Prijs en momentum lopen samen omhoog."},
+        {"i":14,"type":"structure","label":"Eerste grote piek","detail":"Nieuwe top; nog geen afdoende neerwaartse bevestiging."},
+        {"i":17,"type":"trickster","label":"Tweede top?","detail":"Prijs herstelt, maar meerdere onderliggende lagen bevestigen minder sterk."},
+        {"i":20,"type":"flow","label":"Flow verzwakt","detail":"Mock: herstel krijgt minder deelname; controleer live bron later."},
+        {"i":25,"type":"structure","label":"Steun onder druk","detail":"Herhaalde test van dezelfde zone maakt een break relevanter."}
+      ],
+      "story": {
+        "what": "De prijs zit onder de recente top en het herstel oogt minder krachtig.",
+        "why": "Mock-combinatie van afnemend momentum, krapper krediet en gemengde cross-asset bevestiging.",
+        "meaning": "Nog geen short-signaal; dit is een downside-watch totdat structuur en flow bevestigen."
+      },
+      "meaningWorld": "Dominant verhaal: Bitcoin als schaarse waarde-asset blijft structureel aantrekkelijk, terwijl kortetermijnrisico door rente/liquiditeit hoger is.",
+      "mechanism": "Mock: liquiditeit is minder ruim, leverage blijft relevant en prijs houdt nog belangrijke steun.",
+      "trickster": {
+        "status": "INTERPRETATION_PLAUSIBLE",
+        "pattern": "possible failed continuation / second-peak trap",
+        "intent": "INTENT_UNKNOWN",
+        "note": "Narratief blijft relatief positief terwijl prijs/flow minder overtuigend ogen. Geen actor-attributie."
+      },
+      "crossAsset": [
+        {"name":"Gold","state":"up","note":"safe-haven / hard-asset bevestiging"},
+        {"name":"Oil","state":"volatile","note":"inflatie/geopolitieke sensor"},
+        {"name":"Nasdaq","state":"mixed","note":"risk-asset bevestiging onduidelijk"},
+        {"name":"Credit","state":"tightening","note":"financiële condities minder ondersteunend"},
+        {"name":"USD","state":"firm","note":"kan liquiditeit voor risk-assets drukken"}
+      ],
+      "forecast": [
+        {"horizon":"NOW","direction":"WAIT","confidence":78,"note":"state reading"},
+        {"horizon":"3D","direction":"DOWN / SIDE","confidence":62,"note":"structure can confirm quickly"},
+        {"horizon":"2W","direction":"SCENARIOS","confidence":46,"note":"macro + flow dominate"},
+        {"horizon":"1M","direction":"SCENARIOS","confidence":34,"note":"wider regime uncertainty"},
+        {"horizon":"2M","direction":"SCENARIOS","confidence":22,"note":"scenario fan only"}
+      ],
+      "historicalMatches": [
+        {"label":"BTC 2021 second peak","score":74,"status":"seed hypothesis"},
+        {"label":"Risk-off liquidity episodes","score":58,"status":"generic seed"},
+        {"label":"Failed-breakout set","score":51,"status":"to backtest"}
+      ]
+    },
+    "TSLA": {
+      "name":"Tesla",
+      "unit":"USD",
+      "window":"Current cycle",
+      "resolution":"day",
+      "price": 0,
+      "trend":"demo-only",
+      "regime":"mock placeholder",
+      "prices":[34,37,39,42,47,50,48,54,58,63,61,68,72,70,76,73,77,71,69,66,68,64,61,63,59,57,60,56,55,58],
+      "flags":[{"i":14,"type":"structure","label":"Peak candidate","detail":"Mock placeholder."},{"i":16,"type":"momentum","label":"Divergence candidate","detail":"Mock placeholder."}],
+      "story":{"what":"Demo asset shell.","why":"Real market feed not connected.","meaning":"Use only to validate asset switching."},
+      "meaningWorld":"Demo narrative.","mechanism":"No live mechanism data.",
+      "trickster":{"status":"UNSUPPORTED","pattern":"none","intent":"INTENT_UNKNOWN","note":"No evidence; demo only."},
+      "crossAsset":[],
+      "forecast":[{"horizon":"NOW","direction":"NO DATA","confidence":0,"note":"mock"}],
+      "historicalMatches":[]
+    },
+    "OIL": {
+      "name":"Oil / WTI concept",
+      "unit":"USD",
+      "window":"Current cycle",
+      "resolution":"day",
+      "price": 0,
+      "trend":"demo-only",
+      "regime":"mock placeholder",
+      "prices":[42,41,43,44,46,49,52,54,57,60,64,69,74,80,87,92,88,84,81,78,75,73,76,74,72,69,67,66,68,65],
+      "flags":[{"i":15,"type":"structure","label":"Blow-off candidate","detail":"Mock placeholder for lifecycle navigation."}],
+      "story":{"what":"Demo commodity shell.","why":"Real inventory/curve/geopolitical feeds not connected.","meaning":"Same M24 engine, different sensors."},
+      "meaningWorld":"Demo commodity narrative.","mechanism":"No live curve/inventory data.",
+      "trickster":{"status":"UNSUPPORTED","pattern":"none","intent":"INTENT_UNKNOWN","note":"No evidence; demo only."},
+      "crossAsset":[],
+      "forecast":[{"horizon":"NOW","direction":"NO DATA","confidence":0,"note":"mock"}],
+      "historicalMatches":[]
+    }
+  }
+}
