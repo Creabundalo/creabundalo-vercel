@@ -8,6 +8,12 @@ on:
       - 'm24-cohort.js'
       - 'm24-cohort-ui.js'
       - 'm24-cohort-test.js'
+      - 'm24-evidence-gate.js'
+      - 'm24-evidence-gate-test.js'
+      - 'm24-evidence-ui.js'
+      - 'm24-enrichment.js'
+      - 'm24-enrichment-test.js'
+      - 'm24-enrichment-ui.js'
       - 'm24-lab.js'
       - 'm24-lab-ui.js'
       - '.github/workflows/m24-cohort-gate.yml'
@@ -20,18 +26,28 @@ jobs:
       - uses: actions/checkout@v4
       - name: Required cohort files
         run: |
-          for f in m24-cases.js m24-primary-lab.js m24-cohort.js m24-cohort-ui.js m24-cohort-test.js; do test -f "$f"; done
+          for f in m24-cases.js m24-primary-lab.js m24-cohort.js m24-cohort-ui.js m24-cohort-test.js m24-evidence-gate.js m24-evidence-gate-test.js m24-evidence-ui.js m24-enrichment.js m24-enrichment-test.js m24-enrichment-ui.js; do test -f "$f"; done
       - name: JavaScript syntax
         run: |
-          for f in m24-cases.js m24-primary-lab.js m24-cohort.js m24-cohort-ui.js m24-cohort-test.js; do node --check "$f"; done
+          for f in m24-cases.js m24-primary-lab.js m24-cohort.js m24-cohort-ui.js m24-cohort-test.js m24-evidence-gate.js m24-evidence-gate-test.js m24-evidence-ui.js m24-enrichment.js m24-enrichment-test.js m24-enrichment-ui.js; do node --check "$f"; done
       - name: Cohort contract test
         run: node m24-cohort-test.js
+      - name: Evidence promotion contract test
+        run: node m24-evidence-gate-test.js
+      - name: Source-complete enrichment contract test
+        run: node m24-enrichment-test.js
       - name: Calibration safety contract
         run: |
           grep -q "calibrationEligible:false" m24-cases.js
           grep -q "Price measurement alone is not a calibration sample" m24-cohort.js
           grep -q "result.calibrationEligible===0" m24-cohort-test.js
+          grep -q "Promotion is computed from Qubus evidence records" m24-enrichment.js
+          grep -q "resolved by Binance Vision archive" m24-evidence-gate.js
       - name: Interaction contract
         run: |
           grep -q "Laad historische case-batch" m24-cohort-ui.js
+          grep -q "Controleer broncompleetheid" m24-evidence-ui.js
+          grep -q "Vul BTC 2021 bewijs aan" m24-enrichment-ui.js
           grep -q "m24-cohort-ui.js" m24-lab-ui.js
+          grep -q "m24-evidence-ui.js" m24-lab-ui.js
+          grep -q "m24-enrichment-ui.js" m24-lab-ui.js
