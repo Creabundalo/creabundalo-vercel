@@ -37,7 +37,7 @@ globalThis.M24DerivativesUI = (() => {
         <p>1e top: avg ${pct(f.firstTop.avgFundingRate)} · positief ${f.firstTop.positiveShare==null?'—':Math.round(f.firstTop.positiveShare*100)+'%'} · n=${f.firstTop.count}</p>
         <p>2e top: avg ${pct(f.secondTop.avgFundingRate)} · positief ${f.secondTop.positiveShare==null?'—':Math.round(f.secondTop.positiveShare*100)+'%'} · n=${f.secondTop.count}</p>
         <p>Verschuiving: <strong>${f.comparison.crowdingShift}</strong></p>
-        <small>Positionering/leverage-context; geen bewijs van actorintentie of manipulatie.</small>
+        <small>Cutoff op opgeloste topdatums · geen bewijs van actorintentie of manipulatie.</small>
       </div>
       ${gap?`<div class="history-item"><span>SOURCE GAP / OPEN INTEREST</span><strong>Historische OI niet beschikbaar via recent-history API</strong><p>Dit is een bronbeperking, niet “open interest = 0”. Aanbevolen bron: ${gap.recommendedSource}.</p><small>${gap.archiveExample||''}</small></div>`:''}`;
   }
@@ -50,8 +50,10 @@ globalThis.M24DerivativesUI = (() => {
     try{
       await ensureDependencies();
       const caseSchema=M24Cases.get(M24DerivativesLab.caseId);
+      const labResult=M24?.labResult;
+      if(!labResult) throw new Error('Open eerst BTC in Lab mode zodat de opgeloste checkpoints bestaan.');
       const provider=new M24Derivatives.BinanceDerivativesProvider();
-      const result=await M24DerivativesLab.runCase({provider,caseSchema});
+      const result=await M24DerivativesLab.runCase({provider,caseSchema,labResult});
       const store=M24?.runtime?.store;
       if(store){
         M24DerivativesLab.toRecordPayloads(result).forEach(item=>{
@@ -59,7 +61,7 @@ globalThis.M24DerivativesUI = (() => {
         });
       }
       render(result);
-      if(status) status.textContent='derivatencontext gereed';
+      if(status) status.textContent='derivatencontext gereed · checkpoint-cutoff toegepast';
       return result;
     }catch(err){
       console.error(err);
