@@ -35,9 +35,10 @@
 - [x] Trickster defaults intent to unknown without evidence
 
 ## Release gates
-- [ ] JavaScript syntax gate
-- [ ] Required file gate: m24.html / m24.css / m24.js / M24-REQUIREMENTS.md
-- [ ] Interaction smoke test
+- [x] JavaScript syntax gate — GitHub Actions
+- [x] Required file gate — GitHub Actions
+- [x] Interaction contract gate — GitHub Actions
+- [ ] Browser interaction smoke test
 - [ ] Vercel preview opens `/m24.html`
 - [ ] Visual review on desktop
 - [ ] Visual review on touch display
