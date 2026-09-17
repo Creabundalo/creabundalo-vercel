@@ -5,7 +5,7 @@ M24 is not a charting terminal with more indicators. It is an augmented market v
 
 Core chain:
 
-`CAUSE → REGIME → POSITIONING → FLOW → MEANING WORLD → TRICKSTER → PATTERN → CONFIRMATION → FORECAST → ACTION → LEARN`
+`CAUSE → REGIME → POSITIONING → FLOW → MEANING WORLD → TRICKSTER → PATTERN → CONFIRMATION → FORECAST → ACTION → TRANSACTION → OUTCOME → LEARN`
 
 v0.1 is **SIMULATED_ONLY**. No broker execution path may exist.
 
@@ -44,6 +44,7 @@ The price/lifecycle is the primary canvas. Optional overlays include:
 - Trickster assessment
 - historical matches
 - M24 forecast flags
+- own transaction markers
 
 ## Meaning world + Trickster
 Narrative and mechanism are first-class, separate records.
@@ -57,6 +58,39 @@ Evidence state must remain explicit:
 4. **MANIPULATION_PROVEN** — only with hard evidence / official findings / defensible attribution.
 
 Never infer an actor merely because it is a large holder.
+
+## Transactions
+Transactions follow the same progressive-disclosure design as the rest of M24: compact rows first, details only after drill-down.
+
+Default transaction row:
+
+`ASSET | LONG/SHORT/HEDGE | STRATEGY | OPENED | ENTRY | SIZE | STATUS | P/L`
+
+User-facing lifecycle:
+
+`KANDIDAAT → KLAAR → OPEN → DEELS → GESLOTEN`
+
+Alternate terminal states:
+
+`GEANNULEERD | AFGEWEZEN`
+
+Execution/audit lifecycle below the simple status:
+
+`PREPARE → PREVIEW → APPROVE → COMMIT → VERIFY`
+
+Every transaction must link back to the decision context at entry time:
+- forecast instance
+- regime
+- meaning-world state
+- Trickster assessment
+- pattern/signals used
+- risk plan / stop / targets
+- fills and status changes
+- realized outcome
+
+Clicking a transaction row opens a nested detail view showing **why we entered, what changed while open, how execution happened, and what was learned**.
+
+In v0.1 all transactions are paper/mock instances and are clearly labeled `PAPER`.
 
 ## Qubus core types
 - ASSET
@@ -74,6 +108,10 @@ Never infer an actor merely because it is a large holder.
 - HISTORICAL_CASE
 - FORECAST_INSTANCE
 - ACTION_CANDIDATE
+- TRANSACTION_INSTANCE
+- ORDER_INSTANCE
+- FILL_INSTANCE
+- TRANSACTION_STATE
 - OUTCOME_INSTANCE
 - SOURCE
 - USER_OBSERVATION
@@ -119,5 +157,7 @@ No learned change may silently alter real-money execution.
 - Trickster output defaults intent to unknown unless evidenced.
 - Cross-asset strip is visible.
 - Forecast strip widens uncertainty by horizon.
+- Transactions are shown as compact rows and drill into full context/status history.
+- Paper/live mode is explicit per transaction.
 - `SIMULATED_ONLY` is permanently visible in v0.1.
 - No broker order action exists.
