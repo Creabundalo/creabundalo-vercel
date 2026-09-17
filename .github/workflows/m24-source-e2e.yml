@@ -1,0 +1,40 @@
+name: M24 Source E2E
+
+on:
+  pull_request:
+    paths:
+      - 'm24-source-e2e-test.js'
+      - 'm24-enrichment.js'
+      - 'm24-evidence-gate.js'
+      - 'm24-coinbase.js'
+      - 'm24-derivatives.js'
+      - 'm24-derivatives-lab.js'
+      - 'm24-binance-vision.js'
+      - 'm24-binance-vision-lab.js'
+      - 'm24-macro.js'
+      - 'm24-macro-lab.js'
+      - 'm24-meaning.js'
+      - 'm24-backtest.js'
+      - '.github/workflows/m24-source-e2e.yml'
+  workflow_dispatch:
+
+jobs:
+  btc-2021-real-sources:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: node --check m24-source-e2e-test.js
+      - name: Run real-source enrichment
+        run: node m24-source-e2e-test.js
+      - name: Upload source snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m24-btc-2021-source-snapshot
+          path: m24-btc-2021-source-snapshot.json
+          if-no-files-found: warn
