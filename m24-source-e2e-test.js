@@ -7,7 +7,7 @@ globalThis.__m24fs=fs;
 const files=[
   'm24-core.js','m24-cases.js','m24-lab.js','m24-primary-lab.js','m24-coinbase.js',
   'm24-meaning.js','m24-derivatives.js','m24-derivatives-lab.js',
-  'm24-binance-vision.js','m24-binance-vision-lab.js',
+  'm24-binance-vision.js','m24-funding-archive.js','m24-binance-vision-lab.js',
   'm24-macro.js','m24-macro-lab.js','m24-backtest.js','m24-evidence-gate.js','m24-enrichment.js'
 ];
 const source=files.map(f=>fs.readFileSync(f,'utf8')).join('\n');
@@ -18,7 +18,7 @@ const test=`
   const store=new M24Core.QubusStore();
   const providers={
     price:new M24Coinbase.CoinbaseHistoricalProvider(),
-    derivatives:new M24Derivatives.BinanceDerivativesProvider(),
+    derivatives:new M24FundingArchive.BinanceHistoricalDerivativesProvider(),
     archive:new M24BinanceVision.BinanceVisionMetricsProvider(),
     macro:new M24Macro.FredCsvProvider()
   };
@@ -42,11 +42,12 @@ const test=`
     },
     evidenceLayers:Object.fromEntries(Object.entries(evidence.layers).map(([k,v])=>[k,{state:v.state,note:v.note,resolvedGapIds:v.resolvedGapIds||[]}])) ,
     missingLayers:evidence.missingLayers,
+    fundingSourceMode:result.derivatives.fundingContext.sourceMode,
     actionCandidate:{action:result.backtest.candidate.action,score:result.backtest.candidate.score,coverage:result.backtest.candidate.coverage,evidence:result.backtest.candidate.evidence,confirmations:result.backtest.candidate.confirmations},
     recordsByType:Object.fromEntries([...new Set(store.records.map(r=>r.type))].sort().map(type=>[type,store.list(type).length])),
     sourceNotes:{
       price:'Coinbase Exchange historical candles',
-      funding:'Binance USD-M funding API',
+      funding:'Binance Vision monthly fundingRate archives with SHA-256 verification',
       derivativesArchive:'Binance Vision daily metrics with SHA-256 verification',
       macro:'Official-source series via FRED',
       meaning:'Timestamped source fixture with provenance'
@@ -60,6 +61,7 @@ const test=`
   check(store.list('ARCHIVE_DERIVATIVES_CONTEXT').length===1,'archive derivatives context missing');
   check(store.list('MACRO_CROSS_ASSET_CONTEXT').length===1,'macro context missing');
   check(store.list('DECISION_SNAPSHOT').length===1&&store.list('BACKTEST_OUTCOME').length===1,'no-lookahead split missing');
+  check(result.derivatives.fundingContext.sourceMode==='BINANCE_VISION_MONTHLY_FUNDING','historical funding did not use archive fallback');
   check(result.calibrationEligible===true,'real-source BTC 2021 chain is not source-complete: '+evidence.missingLayers.join(','));
   console.log('M24 real-source BTC 2021 E2E OK');
   console.log(JSON.stringify(summary));
