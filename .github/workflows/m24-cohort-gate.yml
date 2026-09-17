@@ -1,0 +1,37 @@
+name: M24 Cohort Gate
+
+on:
+  pull_request:
+    paths:
+      - 'm24-cases.js'
+      - 'm24-primary-lab.js'
+      - 'm24-cohort.js'
+      - 'm24-cohort-ui.js'
+      - 'm24-cohort-test.js'
+      - 'm24-lab.js'
+      - 'm24-lab-ui.js'
+      - '.github/workflows/m24-cohort-gate.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-cohort:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Required cohort files
+        run: |
+          for f in m24-cases.js m24-primary-lab.js m24-cohort.js m24-cohort-ui.js m24-cohort-test.js; do test -f "$f"; done
+      - name: JavaScript syntax
+        run: |
+          for f in m24-cases.js m24-primary-lab.js m24-cohort.js m24-cohort-ui.js m24-cohort-test.js; do node --check "$f"; done
+      - name: Cohort contract test
+        run: node m24-cohort-test.js
+      - name: Calibration safety contract
+        run: |
+          grep -q "calibrationEligible:false" m24-cases.js
+          grep -q "Price measurement alone is not a calibration sample" m24-cohort.js
+          grep -q "result.calibrationEligible===0" m24-cohort-test.js
+      - name: Interaction contract
+        run: |
+          grep -q "Laad historische case-batch" m24-cohort-ui.js
+          grep -q "m24-cohort-ui.js" m24-lab-ui.js
