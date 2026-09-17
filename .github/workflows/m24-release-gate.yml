@@ -6,7 +6,10 @@ on:
       - 'm24.html'
       - 'm24.css'
       - 'm24.js'
+      - 'm24-core.js'
+      - 'm24-data.js'
       - 'M24-REQUIREMENTS.md'
+      - 'M24-TECHNICAL-DESIGN.md'
       - 'M24-RELEASE-CHECKLIST.md'
       - '.github/workflows/m24-release-gate.yml'
   workflow_dispatch:
@@ -22,18 +25,35 @@ jobs:
           test -f m24.html
           test -f m24.css
           test -f m24.js
+          test -f m24-core.js
+          test -f m24-data.js
           test -f M24-REQUIREMENTS.md
+          test -f M24-TECHNICAL-DESIGN.md
           test -f M24-RELEASE-CHECKLIST.md
 
       - name: JavaScript syntax
-        run: node --check m24.js
+        run: |
+          node --check m24-core.js
+          node --check m24-data.js
+          node --check m24.js
+
+      - name: Architecture contract
+        run: |
+          grep -q 'class QubusStore' m24-core.js
+          grep -q 'class TricksterEngine' m24-core.js
+          grep -q 'class ForecastEngine' m24-core.js
+          grep -q 'class TransactionEngine' m24-core.js
+          grep -q 'class MarketDataProvider' m24-data.js
+          grep -q 'class MockProvider' m24-data.js
+          grep -q 'new M24Core.Runtime' m24.js
 
       - name: Safety contract
         run: |
           grep -q 'SIMULATED_ONLY' m24.html
           grep -q 'no broker execution' m24.html
           grep -q 'No broker order action exists' M24-REQUIREMENTS.md
-          ! grep -Eqi 'placeOrder|submitOrder|transmit[[:space:]]*=[[:space:]]*true|LIVE_ORDER' m24.js
+          grep -q "mode='SIMULATED_ONLY'" m24-core.js
+          ! grep -Eqi 'placeOrder|submitOrder|transmit[[:space:]]*=[[:space:]]*true|LIVE_ORDER' m24.js m24-core.js m24-data.js
 
       - name: Interaction contract
         run: |
@@ -44,3 +64,4 @@ jobs:
           grep -q 'transactionList' m24.html
           grep -q 'Trickster-machine' m24.html
           grep -q 'renderTransactions' m24.js
+          grep -q 'getHistoricalCase' m24-data.js
