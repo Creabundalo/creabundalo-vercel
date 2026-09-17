@@ -1,8 +1,10 @@
-const CACHE='actio-shell-v0.2';
+const CACHE='actio-shell-v0.3';
 const ASSETS=[
   './actio.html',
   './actio.css',
   './actio.js',
+  './watch.css',
+  './watch.js',
   './actio.webmanifest',
   './actio-icon.svg'
 ];
