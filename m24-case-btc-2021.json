@@ -1,0 +1,90 @@
+{
+  "id": "BTC-2021-2022-TOP-MARKDOWN",
+  "type": "HISTORICAL_CASE",
+  "asset": "BTC",
+  "title": "Bitcoin 2021 double-peak to 2022 markdown",
+  "purpose": "Test the combined M24 state around a first top, correction, second top and subsequent markdown without assuming Elliott, Wyckoff, RSI or Fibonacci is causal on its own.",
+  "dataStatus": "SEED_NEEDS_AUTHORITATIVE_BARS_AND_PROVENANCE",
+  "window": {
+    "from": "2021-01-01",
+    "to": "2022-12-31"
+  },
+  "checkpoints": [
+    {
+      "id": "CP-01",
+      "phase": "FIRST_TOP",
+      "windowHint": "2021-Q2",
+      "questions": [
+        "How high were momentum and participation?",
+        "What did leverage and cross-asset context show?",
+        "What narrative dominated?"
+      ]
+    },
+    {
+      "id": "CP-02",
+      "phase": "AUTOMATIC_REACTION",
+      "windowHint": "2021-Q2-Q3",
+      "questions": [
+        "Was selling voluntary or forced/liquidation-driven?",
+        "Where did support and liquidity form?",
+        "Did the meaning-world narrative change as fast as flow?"
+      ]
+    },
+    {
+      "id": "CP-03",
+      "phase": "SECOND_TOP",
+      "windowHint": "2021-Q4",
+      "questions": [
+        "Did price retest or exceed the prior top?",
+        "Was RSI/momentum stronger or weaker than at the first top?",
+        "Did volume/flow confirm?",
+        "Did cross-asset context confirm?",
+        "Which Fibonacci extension/retracement zones overlapped?",
+        "What did Elliott and Wyckoff describe at this point?"
+      ]
+    },
+    {
+      "id": "CP-04",
+      "phase": "TRICKSTER_TEST",
+      "windowHint": "around second top",
+      "questions": [
+        "What did the visible bullish narrative imply?",
+        "What did underlying flow/positioning imply?",
+        "Was there a false breakout, liquidity sweep or narrative lag?",
+        "Is mechanism visible while intent remains unknown?"
+      ]
+    },
+    {
+      "id": "CP-05",
+      "phase": "SUPPORT_BREAK",
+      "windowHint": "late 2021 to 2022",
+      "questions": [
+        "Which structural support failed?",
+        "Was the break confirmed by volume, volatility, leverage or cross-asset stress?",
+        "Would M24 have changed from WAIT to DOWNSIDE candidate only after confirmation?"
+      ]
+    },
+    {
+      "id": "CP-06",
+      "phase": "MARKDOWN_OUTCOME",
+      "windowHint": "2022",
+      "questions": [
+        "What happened after 1d, 3d, 5d, 20d and 60d?",
+        "What was maximum adverse excursion and maximum favorable excursion?",
+        "Which signal combinations added predictive value?"
+      ]
+    }
+  ],
+  "requiredSources": [
+    "authoritative BTC OHLCV source",
+    "derivatives/open-interest/funding source where available",
+    "macro rates/liquidity/credit sources",
+    "cross-asset price sources",
+    "narrative/news source set with timestamps"
+  ],
+  "output": {
+    "forecastHorizons": ["NOW", "3D", "2W", "1M", "2M"],
+    "actions": ["LONG", "SHORT", "HEDGE", "WAIT"],
+    "evidenceStates": ["MECHANISM_VISIBLE", "PLAUSIBLE_INTERPRETATION", "INTENT_UNKNOWN", "MANIPULATION_PROVEN"]
+  }
+}
