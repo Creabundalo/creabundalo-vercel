@@ -18,9 +18,9 @@ const test=`
       forecasts:store.list('FORECAST_INSTANCE'),outcomes:store.list('OUTCOME_INSTANCE'),
       horizon,lens:'m24',direction:replay.direction,minSamples:30
     });
-    check(calibrations[horizon].sampleSize===1,`${horizon} should have exactly one verified replay sample`);
-    check(calibrations[horizon].state==='INSUFFICIENT_SAMPLE',`${horizon} must not be calibrated at n=1`);
-    check(calibrations[horizon].displayProbability===null,`${horizon} must not display a probability at n=1`);
+    check(calibrations[horizon].sampleSize===1,horizon+' should have exactly one verified replay sample');
+    check(calibrations[horizon].state==='INSUFFICIENT_SAMPLE',horizon+' must not be calibrated at n=1');
+    check(calibrations[horizon].displayProbability===null,horizon+' must not display a probability at n=1');
   }
   const summary={
     type:'M24_VERIFIED_REPLAY_SNAPSHOT',caseId:snapshot.caseId,asset:snapshot.asset,
