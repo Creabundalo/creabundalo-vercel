@@ -11,6 +11,7 @@ globalThis.M24EnrichmentUI = (() => {
     await loadScript('m24-derivatives.js','M24Derivatives');
     await loadScript('m24-derivatives-lab.js','M24DerivativesLab');
     await loadScript('m24-binance-vision.js','M24BinanceVision');
+    await loadScript('m24-funding-archive.js','M24FundingArchive');
     await loadScript('m24-binance-vision-lab.js','M24BinanceVisionLab');
     await loadScript('m24-macro.js','M24Macro');
     await loadScript('m24-macro-lab.js','M24MacroLab');
@@ -21,7 +22,7 @@ globalThis.M24EnrichmentUI = (() => {
   function ensureControls(){
     const lab=$('#labPanel');if(!lab||$('#runCaseEnrichment'))return;
     const wrap=document.createElement('div');
-    wrap.innerHTML=`<div class="observation-input"><button id="runCaseEnrichment" class="primary">Vul BTC 2021 bewijs aan</button><span id="enrichmentStatus" class="muted">prijs → betekenis → derivaten → macro → backtest → gate</span></div><div id="enrichmentContext" class="history-list"></div>`;
+    wrap.innerHTML=`<div class="observation-input"><button id="runCaseEnrichment" class="primary">Vul BTC 2021 bewijs aan</button><span id="enrichmentStatus" class="muted">prijs → betekenis → funding-archief → OI/ratio-archief → macro → backtest → gate</span></div><div id="enrichmentContext" class="history-list"></div>`;
     lab.append(...wrap.childNodes);
   }
   function render(result){
@@ -37,7 +38,7 @@ globalThis.M24EnrichmentUI = (() => {
       const caseSchema=M24Cases.get('BTC-2021-2022-TOP-MARKDOWN');
       const providers={
         price:new M24Coinbase.CoinbaseHistoricalProvider(),
-        derivatives:new M24Derivatives.BinanceDerivativesProvider(),
+        derivatives:new M24FundingArchive.BinanceHistoricalDerivativesProvider(),
         archive:new M24BinanceVision.BinanceVisionMetricsProvider(),
         macro:new M24Macro.FredCsvProvider()
       };
