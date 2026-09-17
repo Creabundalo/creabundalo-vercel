@@ -72,7 +72,8 @@
 - [x] Coinbase adapter deterministic contract test defined
 - [x] Safety contract checks defined
 - [x] Interaction contract checks defined
-- [ ] Latest GitHub Actions M24 Release Gate green after Coinbase adapter commit
+- [x] M24 Release Gate green with Coinbase adapter contract (run 25)
+- [x] ACTIO Release Gate remains green on same head (run 32)
 - [ ] Visual browser/Vercel preview review completed
 
 ## Historical BTC fixture status
