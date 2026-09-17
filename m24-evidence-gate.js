@@ -22,7 +22,9 @@ globalThis.M24EvidenceGate = (() => {
     const sources=rec?.data?.sources||[];
     if(!rec) return {state:'MISSING',recordIds:[],note:'No timestamped meaning-world context.'};
     if(!sources.length) return {state:'INCOMPLETE',recordIds:[rec.id],note:'Meaning-world record has no timestamped sources.'};
-    return {state:'COMPLETE',recordIds:[rec.id],note:`${sources.length} timestamped source item(s).`};
+    const firstCount=Number(rec?.data?.firstTop?.count||0),secondCount=Number(rec?.data?.secondTop?.count||0);
+    if(firstCount<1||secondCount<1) return {state:'INCOMPLETE',recordIds:[rec.id],note:`Meaning-world top coverage incomplete (${firstCount}/${secondCount}); require timestamped evidence around both resolved top windows.`};
+    return {state:'COMPLETE',recordIds:[rec.id],note:`${sources.length} scoped timestamped source item(s); top coverage ${firstCount}/${secondCount}.`};
   }
 
   function derivativesState(records,caseId){
