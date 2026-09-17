@@ -39,6 +39,10 @@ const test=`
     evidenceLayers:Object.fromEntries(Object.entries(evidence.layers).map(([k,v])=>[k,{state:v.state,note:v.note,resolvedGapIds:v.resolvedGapIds||[]}])) ,
     missingLayers:evidence.missingLayers,
     fundingSourceMode:result.derivatives.fundingContext.sourceMode,
+    fundingCheckpointCounts:{firstTop:result.derivatives.fundingContext.firstTop.count,secondTop:result.derivatives.fundingContext.secondTop.count},
+    fundingSourceGaps:result.derivatives.fundingContext.sourceGaps||[],
+    archiveGaps:result.archive.gaps||[],
+    archiveCheckpoints:{firstTop:result.archive.firstTop,secondTop:result.archive.secondTop},
     actionCandidate:{action:result.backtest.candidate.action,score:result.backtest.candidate.score,coverage:result.backtest.candidate.coverage,evidence:result.backtest.candidate.evidence,confirmations:result.backtest.candidate.confirmations},
     recordsByType:Object.fromEntries([...new Set(store.records.map(r=>r.type))].sort().map(type=>[type,store.list(type).length])),
     sourceNotes:{price:'Coinbase Exchange historical candles',funding:'Binance Vision monthly fundingRate archives with SHA-256 verification',derivativesArchive:'Binance Vision daily metrics with SHA-256 verification',macro:'Official-source series via FRED',meaning:'ETH-scoped timestamped Reuters-source fixtures'},
@@ -52,10 +56,13 @@ const test=`
   check(store.list('DERIVATIVES_CONTEXT').length===1,'funding context missing');
   check(store.list('ARCHIVE_DERIVATIVES_CONTEXT').length===1,'archive derivatives context missing');
   check(store.list('MACRO_CROSS_ASSET_CONTEXT').length===1,'macro context missing');
-  check(result.calibrationEligible===true,'real-source ETH 2021 chain is not source-complete: '+evidence.missingLayers.join(','));
+  if(result.calibrationEligible!==true){
+    throw new Error('real-source ETH 2021 chain incomplete: '+JSON.stringify({missing:evidence.missingLayers,derivatives:evidence.layers.DERIVATIVES,fundingCounts:summary.fundingCheckpointCounts,fundingGaps:summary.fundingSourceGaps,archiveGaps:summary.archiveGaps,checkpoints:summary.resolvedCheckpoints}));
+  }
   console.log('M24 real-source ETH 2021 E2E OK');console.log(JSON.stringify(summary));
 })().catch(err=>{
-  globalThis.__m24fs.writeFileSync('m24-eth-2021-source-snapshot.json',JSON.stringify({type:'M24_REAL_SOURCE_ETH_FAILURE',at:new Date().toISOString(),message:String(err?.message||err),stack:String(err?.stack||'')},null,2));
+  const current=globalThis.__m24fs.existsSync('m24-eth-2021-source-snapshot.json')?JSON.parse(globalThis.__m24fs.readFileSync('m24-eth-2021-source-snapshot.json','utf8')):{};
+  globalThis.__m24fs.writeFileSync('m24-eth-2021-source-snapshot.json',JSON.stringify({...current,failure:{at:new Date().toISOString(),message:String(err?.message||err),stack:String(err?.stack||'')}},null,2));
   console.error(err);process.exit(1);
 });
 `;
