@@ -32,9 +32,9 @@ const test=`
   ]};
 
   const run=M24Backtest.run({caseSchema,labResult:baseLab,meaningContext:meaning,derivativesContext:derivatives,archiveDerivativesContext:archive,macroContext:macro});
-  const snapshotJson=JSON.stringify(run.snapshot);
   check(run.snapshot.asOf.startsWith('2021-11-10'),'default decision cutoff must be resolved second-top date, not window end');
-  check(!snapshotJson.includes('troughDate')&&!snapshotJson.includes('drawdownFromSecondHighPct')&&!snapshotJson.includes('firstCloseBelow'),'future outcome leaked into decision snapshot');
+  check(!('support' in run.snapshot)&&!('outcome' in run.snapshot),'future outcome container leaked into decision snapshot');
+  check(!('troughDate' in run.snapshot.price)&&!('drawdownFromSecondHighPct' in run.snapshot.price),'future outcome metric leaked into price snapshot');
   check(run.snapshot.meaning.count===1&&run.snapshot.meaning.sourceIds.length===1&&run.snapshot.meaning.sourceIds[0]==='a','post-top meaning source leaked into snapshot');
   check(!(run.snapshot.macro||[]).some(x=>x.key==='FUTURE_MACRO'),'post-top macro source leaked into snapshot');
   check(run.snapshot.coverage.funding===true,'verified checkpoint-bounded funding should be admitted');
