@@ -8,13 +8,22 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="ACTIO" />
-  <title>ACTIO · Vandaag</title>
+  <title>P24 · ACTIO</title>
   <link rel="manifest" href="actio.webmanifest" />
   <link rel="icon" href="actio-icon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="actio.css" />
+  <link rel="stylesheet" href="watch.css" />
 </head>
 <body>
-  <main class="app-shell">
+  <section id="watchFace" class="watch-face" aria-label="P24 horlogescherm">
+    <div id="watchTime" class="watch-time">--:--</div>
+    <div id="watchDate" class="watch-date">---</div>
+    <div class="watch-state">P24 · gereed</div>
+    <div id="watchRecording" class="watch-recording"><span class="watch-dot"></span><span>ACTIO luistert</span></div>
+    <div class="watch-hint">Function = inspreken<br />Swipe omhoog = ACTIO</div>
+  </section>
+
+  <main class="app-shell watch-hidden">
     <header class="topbar">
       <div>
         <p class="eyebrow">CREABUNDALO · ACTIO</p>
@@ -22,6 +31,12 @@
       </div>
       <div id="connectionState" class="status-pill">LOCAL FIRST</div>
     </header>
+
+    <nav class="quick-nav" aria-label="Snelle functies">
+      <button id="watchBackButton">Horloge<span>terug naar tijd</span></button>
+      <button id="quickCameraButton">Camera<span>foto vastleggen</span></button>
+      <button id="otherAppsButton">Overig<span>Android-apps</span></button>
+    </nav>
 
     <section class="capture-panel">
       <button id="micButton" class="capture-button mic" aria-label="Spreek opdracht in">
@@ -79,9 +94,10 @@
 
     <footer class="footline">
       <span>Contact → Calendar → Alarm → Verify</span>
-      <span id="versionLabel">P24 · ACTIO v0.2</span>
+      <span id="versionLabel">P24 · ACTIO v0.3</span>
     </footer>
   </main>
   <script src="actio.js"></script>
+  <script src="watch.js"></script>
 </body>
 </html>
