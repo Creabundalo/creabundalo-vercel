@@ -11,9 +11,10 @@ globalThis.M24PrimaryLab = (() => {
     };
   }
 
-  async function runBtcCase({provider,caseSchema,granularity=86400}={}) {
+  async function runCase({provider,caseSchema,granularity=86400}={}) {
     if(!provider) throw new Error('Primary Lab requires a historical provider.');
     if(!caseSchema) throw new Error('Primary Lab requires a case schema.');
+    if(caseSchema.analysis!=='TOP_MARKDOWN') throw new Error(`Unsupported primary Lab analysis ${caseSchema.analysis}.`);
     const sourceResult=await provider.getBarsForAsset(caseSchema.asset,{
       start:`${caseSchema.window.from}T00:00:00Z`,
       end:`${caseSchema.window.to}T23:59:59Z`,
@@ -25,9 +26,11 @@ globalThis.M24PrimaryLab = (() => {
     return {sourceResult,caseDef,result};
   }
 
+  async function runBtcCase(args={}) { return runCase(args); }
+
   function compare({baseline,primary}) {
     return M24Lab.compareSourceResults(baseline,primary);
   }
 
-  return {buildCaseFromBars,runBtcCase,compare};
+  return {buildCaseFromBars,runCase,runBtcCase,compare};
 })();
