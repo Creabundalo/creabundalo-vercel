@@ -30,6 +30,11 @@ globalThis.M24EvidenceGate = (() => {
     const archive=latest(forCase(records,caseId,'ARCHIVE_DERIVATIVES_CONTEXT'));
     const gaps=forCase(records,caseId,'SOURCE_GAP').filter(r=>['DERIVATIVES_ARCHIVE','DERIVATIVES'].includes(r?.data?.domain)||String(r?.data?.metric||'').includes('OPEN_INTEREST'));
     if(!funding) return {state:'MISSING',recordIds:[],note:'No checkpoint-bounded funding context.'};
+    const firstFundingCount=Number(funding?.data?.firstTop?.count||0);
+    const secondFundingCount=Number(funding?.data?.secondTop?.count||0);
+    if(firstFundingCount<1||secondFundingCount<1){
+      return {state:'INCOMPLETE',recordIds:[funding.id],note:`Funding observations incomplete at resolved checkpoints (${firstFundingCount}/${secondFundingCount}).`};
+    }
     if(!archive) return {state:'INCOMPLETE',recordIds:[funding.id],note:'Funding exists, but archived OI/long-short/taker context is missing.'};
 
     const archiveGaps=archive?.data?.gaps||[];
