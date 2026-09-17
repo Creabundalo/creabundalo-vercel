@@ -8,6 +8,9 @@ on:
       - 'm24.js'
       - 'm24-core.js'
       - 'm24-data.js'
+      - 'm24-historical.js'
+      - 'm24-lab.js'
+      - 'm24-smoke-test.js'
       - 'M24-REQUIREMENTS.md'
       - 'M24-TECHNICAL-DESIGN.md'
       - 'M24-RELEASE-CHECKLIST.md'
@@ -27,6 +30,9 @@ jobs:
           test -f m24.js
           test -f m24-core.js
           test -f m24-data.js
+          test -f m24-historical.js
+          test -f m24-lab.js
+          test -f m24-smoke-test.js
           test -f M24-REQUIREMENTS.md
           test -f M24-TECHNICAL-DESIGN.md
           test -f M24-RELEASE-CHECKLIST.md
@@ -35,6 +41,9 @@ jobs:
         run: |
           node --check m24-core.js
           node --check m24-data.js
+          node --check m24-historical.js
+          node --check m24-lab.js
+          node --check m24-smoke-test.js
           node --check m24.js
 
       - name: Architecture contract
@@ -45,7 +54,13 @@ jobs:
           grep -q 'class TransactionEngine' m24-core.js
           grep -q 'class MarketDataProvider' m24-data.js
           grep -q 'class MockProvider' m24-data.js
+          grep -q 'class HistoricalProvider' m24-historical.js
+          grep -q 'analyzeTopMarkdown' m24-lab.js
           grep -q 'new M24Core.Runtime' m24.js
+          grep -q 'PUBLIC_REPRODUCIBLE_FIXTURE' m24-historical.js
+
+      - name: Historical runtime smoke test
+        run: node m24-smoke-test.js
 
       - name: Safety contract
         run: |
@@ -53,7 +68,7 @@ jobs:
           grep -q 'no broker execution' m24.html
           grep -q 'No broker order action exists' M24-REQUIREMENTS.md
           grep -q "mode='SIMULATED_ONLY'" m24-core.js
-          ! grep -Eqi 'placeOrder|submitOrder|transmit[[:space:]]*=[[:space:]]*true|LIVE_ORDER' m24.js m24-core.js m24-data.js
+          ! grep -Eqi 'placeOrder|submitOrder|transmit[[:space:]]*=[[:space:]]*true|LIVE_ORDER' m24.js m24-core.js m24-data.js m24-historical.js m24-lab.js
 
       - name: Interaction contract
         run: |
@@ -65,3 +80,5 @@ jobs:
           grep -q 'Trickster-machine' m24.html
           grep -q 'renderTransactions' m24.js
           grep -q 'getHistoricalCase' m24-data.js
+          grep -q "mode:state.mode" m24.js
+          grep -q "LAB_RESULT" m24.js
