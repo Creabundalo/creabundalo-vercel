@@ -18,6 +18,8 @@
 - [x] Source/resolution comparison is projected separately from baseline result
 - [x] LAB lazy-loads a read-only derivatives-context action
 - [x] Historical OI source gaps are shown as missing-source state, never as zero
+- [x] LAB lazy-loads read-only macro/cross-asset context
+- [x] Macro series remain separate instead of being collapsed into a hidden direction score
 
 ## Transactions
 - [x] Compact transaction rows exist
@@ -37,24 +39,32 @@
 - [x] HistoricalProvider adapter exists
 - [x] CoinbaseHistoricalProvider primary-exchange adapter exists
 - [x] BinanceDerivativesProvider exists
+- [x] FredCsvProvider source-first macro adapter exists
 - [x] Historical funding pagination/normalization exists
 - [x] Recent open-interest normalization exists
 - [x] Historical OI source-window limitation is explicit
 - [x] Binance Vision metrics/funding archive locators exist
+- [x] Macro source registry retains original upstream source provenance
+- [x] EFFR / 10Y / broad dollar / RRP / Fed assets / NFCI / WTI are separate series
+- [x] Macro observations resolve around semantic BTC checkpoints
+- [x] Missing/stale macro observations become SOURCE_GAP
 - [x] Resolution-independent case schema exists
 - [x] Checkpoints resolve through semantic windows/selectors rather than fixed source dates
 - [x] Primary-source Lab runner exists
 - [x] Derivatives Lab binder exists
+- [x] Macro Lab binder exists
 - [x] Source/resolution comparison engine exists
 - [x] M24Lab RSI/top/volume/support/outcome analysis exists
 - [x] Provider-independent Runtime exists
 - [x] Technical design documented
 - [x] Source/resolution comparison design documented
 - [x] Derivatives evidence design documented
+- [x] Macro/cross-asset evidence design documented
 - [x] BTC 2021→2022 historical case definition exists
 - [x] LAB_RESULT is stored as a Qubus record
 - [x] Primary Lab and SOURCE_COMPARISON can be stored as separate Qubus records
 - [x] DERIVATIVES_CONTEXT and SOURCE_GAP can be stored as separate Qubus records
+- [x] MACRO_CROSS_ASSET_CONTEXT and SOURCE_GAP can be stored as separate Qubus records
 
 ## Evidence / semantics
 - [x] Narrative and measured mechanism are separate records
@@ -67,6 +77,7 @@
 - [x] Cross-source/resolution disagreement is retained as data rather than averaged away
 - [x] Missing derivatives history is retained as SOURCE_GAP rather than numeric zero
 - [x] Funding crowding context is not treated as proof of manipulation or actor intent
+- [x] Macro/cross-asset changes are descriptive context, not automatic trade direction
 
 ## Learning
 - [x] Forecasts are first-class Qubus instances
@@ -83,6 +94,7 @@
 - [x] No order-submit action
 - [x] Coinbase historical comparison is read-only
 - [x] Derivatives context is read-only market data
+- [x] Macro/cross-asset context is read-only historical data
 - [x] COMMIT means paper-state mutation only
 
 ## Automated gates
@@ -94,10 +106,13 @@
 - [x] Coinbase adapter deterministic contract test defined
 - [x] Derivatives adapter deterministic contract test defined
 - [x] Derivatives Lab/Qubus contract test defined
+- [x] Macro provider deterministic contract test defined
+- [x] Macro Lab/Qubus contract test defined
 - [x] Safety contract checks defined
 - [x] Interaction contract checks defined
-- [x] M24 Release Gate green with derivatives provider contract (run 44)
-- [ ] M24 Release Gate green after derivatives Lab/UI integration
+- [x] M24 Release Gate green after derivatives Lab/UI integration (run 53)
+- [x] ACTIO Release Gate remains green on derivatives checkpoint (run 60)
+- [ ] M24 Release Gate green after macro/cross-asset integration
 - [ ] Visual browser/Vercel preview review completed
 
 ## Historical BTC case status
@@ -115,10 +130,11 @@
 - [x] Funding is compared across semantic first-top / second-top windows
 - [x] Historical OI recent-API limitation becomes SOURCE_GAP
 - [x] Binance Vision metrics archive is designated for 2021 OI/ratio backfill
+- [x] Macro/cross-asset provider implemented for EFFR, DGS10, dollar, RRP, Fed assets, NFCI and WTI
+- [x] Macro/cross-asset context is compared around resolved first/second top dates
 - [ ] Capture an actual Coinbase daily comparison result in a source-complete Lab run
 - [ ] Implement Binance Vision ZIP/CSV metrics archive importer
 - [ ] Attach 2021 open-interest / long-short / taker-ratio archive data
-- [ ] Add macro/cross-asset history
 - [ ] Add timestamped narrative/source history
 
 Release rule: M24 cannot progress from paper to real execution until historical validation, paper trading and an explicit live-execution approval gate exist.
