@@ -16,6 +16,8 @@
 - [x] Measured historical test result is projected in LAB
 - [x] LAB exposes explicit read-only Coinbase daily comparison action
 - [x] Source/resolution comparison is projected separately from baseline result
+- [x] LAB lazy-loads a read-only derivatives-context action
+- [x] Historical OI source gaps are shown as missing-source state, never as zero
 
 ## Transactions
 - [x] Compact transaction rows exist
@@ -34,20 +36,25 @@
 - [x] MockProvider adapter exists
 - [x] HistoricalProvider adapter exists
 - [x] CoinbaseHistoricalProvider primary-exchange adapter exists
-- [x] Coinbase long ranges are chunked below documented 300-candle request maximum
-- [x] Historical fixture carries explicit provenance and source quality
-- [x] Coinbase adapter carries explicit primary-exchange provenance
+- [x] BinanceDerivativesProvider exists
+- [x] Historical funding pagination/normalization exists
+- [x] Recent open-interest normalization exists
+- [x] Historical OI source-window limitation is explicit
+- [x] Binance Vision metrics/funding archive locators exist
 - [x] Resolution-independent case schema exists
 - [x] Checkpoints resolve through semantic windows/selectors rather than fixed source dates
 - [x] Primary-source Lab runner exists
+- [x] Derivatives Lab binder exists
 - [x] Source/resolution comparison engine exists
 - [x] M24Lab RSI/top/volume/support/outcome analysis exists
 - [x] Provider-independent Runtime exists
 - [x] Technical design documented
 - [x] Source/resolution comparison design documented
+- [x] Derivatives evidence design documented
 - [x] BTC 2021→2022 historical case definition exists
 - [x] LAB_RESULT is stored as a Qubus record
 - [x] Primary Lab and SOURCE_COMPARISON can be stored as separate Qubus records
+- [x] DERIVATIVES_CONTEXT and SOURCE_GAP can be stored as separate Qubus records
 
 ## Evidence / semantics
 - [x] Narrative and measured mechanism are separate records
@@ -58,6 +65,8 @@
 - [x] Weekly RSI is not mislabeled as daily RSI
 - [x] Primary exchange bars and secondary regression fixture remain distinct provenance classes
 - [x] Cross-source/resolution disagreement is retained as data rather than averaged away
+- [x] Missing derivatives history is retained as SOURCE_GAP rather than numeric zero
+- [x] Funding crowding context is not treated as proof of manipulation or actor intent
 
 ## Learning
 - [x] Forecasts are first-class Qubus instances
@@ -65,6 +74,7 @@
 - [x] Calibration pipeline documented
 - [x] Learned changes cannot silently alter real-money execution
 - [x] Historical outcome measurement is separated from the earlier checkpoint hypothesis
+- [x] Missing-source records can be excluded from numeric calibration instead of treated as zero
 
 ## Safety
 - [x] SIMULATED_ONLY permanently visible in v0.1
@@ -72,6 +82,7 @@
 - [x] No live BrokerProvider implementation
 - [x] No order-submit action
 - [x] Coinbase historical comparison is read-only
+- [x] Derivatives context is read-only market data
 - [x] COMMIT means paper-state mutation only
 
 ## Automated gates
@@ -81,13 +92,15 @@
 - [x] Historical runtime smoke test defined
 - [x] Cross-resolution Lab contract test defined
 - [x] Coinbase adapter deterministic contract test defined
+- [x] Derivatives adapter deterministic contract test defined
+- [x] Derivatives Lab/Qubus contract test defined
 - [x] Safety contract checks defined
 - [x] Interaction contract checks defined
-- [x] M24 Release Gate green with cross-resolution/source-comparison slice (run 37)
-- [x] ACTIO Release Gate remains green on same code checkpoint (run 44)
+- [x] M24 Release Gate green with derivatives provider contract (run 44)
+- [ ] M24 Release Gate green after derivatives Lab/UI integration
 - [ ] Visual browser/Vercel preview review completed
 
-## Historical BTC fixture status
+## Historical BTC case status
 - [x] Deterministic weekly OHLCV fixture attached for 2021-01 through 2022-06
 - [x] Second high measured above first high
 - [x] Lower weekly volume at second top measured
@@ -98,8 +111,13 @@
 - [x] Case checkpoint definitions are resolution-independent
 - [x] Source-comparison engine implemented for weekly baseline versus daily primary result
 - [x] Interactive primary-source comparison path implemented
+- [x] Historical funding adapter implemented (Binance USD-M)
+- [x] Funding is compared across semantic first-top / second-top windows
+- [x] Historical OI recent-API limitation becomes SOURCE_GAP
+- [x] Binance Vision metrics archive is designated for 2021 OI/ratio backfill
 - [ ] Capture an actual Coinbase daily comparison result in a source-complete Lab run
-- [ ] Add derivatives/open-interest/funding history
+- [ ] Implement Binance Vision ZIP/CSV metrics archive importer
+- [ ] Attach 2021 open-interest / long-short / taker-ratio archive data
 - [ ] Add macro/cross-asset history
 - [ ] Add timestamped narrative/source history
 
