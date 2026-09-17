@@ -59,6 +59,38 @@ Evidence state must remain explicit:
 
 Never infer an actor merely because it is a large holder.
 
+## Historical case semantics
+A historical case describes market structure independently from one source or timeframe.
+
+For each case, M24 must separate:
+
+`CASE WINDOW → CHECKPOINT WINDOW → SELECTION RULE → SOURCE/RESOLUTION → MEASURED INSTANCE`
+
+A checkpoint may therefore be defined as, for example:
+- maximum high inside a first-top window
+- minimum low inside a support window
+- maximum high inside a second-top window
+- first close below the resolved support after the resolved second top
+
+The analysis must not require a fixed weekly date when the same market event is tested on daily or intraday bars.
+
+## Source / resolution comparison
+M24 must be able to run the same historical case against multiple sources/resolutions and retain differences explicitly.
+
+At minimum a comparison stores:
+- resolved checkpoint dates per source/resolution
+- metric deltas
+- agreement/disagreement for structural and indicator verdicts
+- both provenance chains
+
+A disagreement is information. M24 must not silently average or rewrite conflicting weekly/daily outcomes into artificial certainty.
+
+The initial comparison path is:
+
+`weekly deterministic regression fixture → daily Coinbase Exchange historical bars`
+
+Primary-source comparison is read-only historical analysis. It must not require broker credentials and may not expose any order action.
+
 ## Transactions
 Transactions follow the same progressive-disclosure design as the rest of M24: compact rows first, details only after drill-down.
 
@@ -106,6 +138,9 @@ In v0.1 all transactions are paper/mock instances and are clearly labeled `PAPER
 - SIGNAL_INSTANCE
 - FIBONACCI_INSTANCE
 - HISTORICAL_CASE
+- LAB_RESULT
+- LAB_RESULT_PRIMARY
+- SOURCE_COMPARISON
 - FORECAST_INSTANCE
 - ACTION_CANDIDATE
 - TRANSACTION_INSTANCE
@@ -157,6 +192,10 @@ No learned change may silently alter real-money execution.
 - Trickster output defaults intent to unknown unless evidenced.
 - Cross-asset strip is visible.
 - Forecast strip widens uncertainty by horizon.
+- Historical case checkpoints can resolve from semantic windows rather than source-specific fixed dates.
+- The same case can be tested on weekly and daily representations.
+- Source/resolution disagreements are preserved as explicit comparison data.
+- Primary historical-source comparison is read-only.
 - Transactions are shown as compact rows and drill into full context/status history.
 - Paper/live mode is explicit per transaction.
 - `SIMULATED_ONLY` is permanently visible in v0.1.
