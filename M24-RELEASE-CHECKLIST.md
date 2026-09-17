@@ -12,6 +12,8 @@
 - [x] Fibonacci / momentum / pattern overlays exist
 - [x] Forecast horizons NOW / 3D / 2W / 1M / 2M exist
 - [x] User observations can be stored locally
+- [x] LAB switches BTC to deterministic historical weekly fixture
+- [x] Measured historical test result is projected in LAB
 
 ## Transactions
 - [x] Compact transaction rows exist
@@ -28,21 +30,28 @@
 - [x] TransactionEngine exists
 - [x] MarketDataProvider contract exists
 - [x] MockProvider adapter exists
+- [x] HistoricalProvider adapter exists
+- [x] Historical fixture carries explicit provenance and source quality
+- [x] M24Lab RSI/top/volume/support/outcome analysis exists
 - [x] Provider-independent Runtime exists
 - [x] Technical design documented
 - [x] BTC 2021→2022 historical case definition exists
+- [x] LAB_RESULT is stored as a Qubus record
 
 ## Evidence / semantics
 - [x] Narrative and measured mechanism are separate records
 - [x] MECHANISM_VISIBLE / PLAUSIBLE_INTERPRETATION / INTENT_UNKNOWN / MANIPULATION_PROVEN vocabulary exists
 - [x] Intent defaults to unknown for suspected trap/manipulation patterns
 - [x] Ownership never implies actor attribution
+- [x] A rejected historical indicator hypothesis is retained instead of rewritten
+- [x] Weekly RSI is not mislabeled as daily RSI
 
 ## Learning
 - [x] Forecasts are first-class Qubus instances
 - [x] Outcome record contract exists
 - [x] Calibration pipeline documented
 - [x] Learned changes cannot silently alter real-money execution
+- [x] Historical outcome measurement is separated from the earlier checkpoint hypothesis
 
 ## Safety
 - [x] SIMULATED_ONLY permanently visible in v0.1
@@ -53,11 +62,25 @@
 
 ## Automated gates
 - [x] Required-file gate defined
-- [x] JavaScript syntax checks cover renderer/core/provider
+- [x] JavaScript syntax checks cover renderer/core/providers/lab
 - [x] Architecture contract checks defined
+- [x] Historical runtime smoke test defined
 - [x] Safety contract checks defined
 - [x] Interaction contract checks defined
-- [x] GitHub Actions M24 Release Gate green after modular-runtime commit (run 11)
+- [x] GitHub Actions M24 Release Gate green on historical Lab slice (run 19)
+- [x] ACTIO Release Gate remains green on same head (run 26)
 - [ ] Visual browser/Vercel preview review completed
+
+## Historical BTC fixture status
+- [x] Deterministic weekly OHLCV fixture attached for 2021-01 through 2022-06
+- [x] Second high measured above first high
+- [x] Lower weekly volume at second top measured
+- [x] RSI(14) bearish-divergence hypothesis rejected for this weekly fixture
+- [x] First weekly support break after second top measured
+- [x] Subsequent markdown outcome measured
+- [ ] Replace/augment secondary fixture with authoritative historical market-data adapter before calibration decisions
+- [ ] Add derivatives/open-interest/funding history
+- [ ] Add macro/cross-asset history
+- [ ] Add timestamped narrative/source history
 
 Release rule: M24 cannot progress from paper to real execution until historical validation, paper trading and an explicit live-execution approval gate exist.
