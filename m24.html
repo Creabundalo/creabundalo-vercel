@@ -105,6 +105,11 @@
     <section id="labPanel" class="panel lab-panel hidden">
       <div class="panel-head"><div><p class="eyebrow">LAB MODE</p><h2>Historische matches</h2></div></div>
       <div id="historyList" class="history-list"></div>
+      <div class="observation-input">
+        <button id="runPrimaryCompare" class="primary">Vergelijk Coinbase dagdata</button>
+        <span id="primaryCompareStatus" class="muted">read-only historische bron · geen brokeractie</span>
+      </div>
+      <div id="sourceComparison" class="history-list"></div>
     </section>
 
     <section class="panel observation-panel">
@@ -115,6 +120,10 @@
 
     <footer class="footerline"><span>M24 v0.1 · local mock state · no broker execution</span><a href="M24-REQUIREMENTS.md">Requirements</a></footer>
   </main>
+  <script src="m24-cases.js"></script>
+  <script src="m24-coinbase.js"></script>
+  <script src="m24-primary-lab.js"></script>
   <script src="m24.js"></script>
+  <script src="m24-lab-ui.js"></script>
 </body>
 </html>
