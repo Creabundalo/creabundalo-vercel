@@ -1,11 +1,23 @@
 globalThis.M24DerivativesLab = (() => {
   const caseId='BTC-2021-2022-TOP-MARKDOWN';
 
-  async function runCase({provider,caseSchema}={}){
+  function checkpointBoundCase(caseSchema,labResult){
+    if(!labResult?.firstTop?.date||!labResult?.secondTop?.date) throw new Error('Derivatives Lab requires resolved firstTop and secondTop dates to prevent lookahead.');
+    const bounded=structuredClone(caseSchema);
+    bounded.checkpointWindows.firstTop.to=labResult.firstTop.date;
+    bounded.checkpointWindows.secondTop.to=labResult.secondTop.date;
+    return bounded;
+  }
+
+  async function runCase({provider,caseSchema,labResult}={}){
     if(!provider) throw new Error('Derivatives Lab requires a provider.');
     if(!caseSchema) throw new Error('Derivatives Lab requires a case schema.');
+    const boundedCase=checkpointBoundCase(caseSchema,labResult);
     const funding=await provider.fetchFundingHistory({asset:caseSchema.asset,start:`${caseSchema.window.from}T00:00:00Z`,end:`${caseSchema.window.to}T23:59:59Z`});
-    const fundingContext=M24Derivatives.analyzeFundingAroundCase(funding.records,caseSchema);
+    const fundingContext=M24Derivatives.analyzeFundingAroundCase(funding.records,boundedCase);
+    fundingContext.firstTop.asOf=`${labResult.firstTop.date}T23:59:59.999Z`;
+    fundingContext.secondTop.asOf=`${labResult.secondTop.date}T23:59:59.999Z`;
+    fundingContext.cutoffPolicy='RESOLVED_CHECKPOINT_DATE';
 
     let openInterestGap=null;
     try{
@@ -34,7 +46,7 @@ globalThis.M24DerivativesLab = (() => {
       openInterestGap,
       evidenceStatus:'MECHANISM_VISIBLE',
       intentStatus:'INTENT_UNKNOWN',
-      note:'Derivatives context can support or contradict a market-structure hypothesis; it does not identify a manipulating actor.'
+      note:'Derivatives context is bounded by resolved checkpoint dates. It can support or contradict a market-structure hypothesis; it does not identify a manipulating actor.'
     };
   }
 
@@ -50,5 +62,5 @@ globalThis.M24DerivativesLab = (() => {
     return payloads;
   }
 
-  return {caseId,runCase,toRecordPayloads};
+  return {caseId,checkpointBoundCase,runCase,toRecordPayloads};
 })();
