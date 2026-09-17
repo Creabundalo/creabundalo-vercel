@@ -57,7 +57,7 @@
 - [x] Architecture contract checks defined
 - [x] Safety contract checks defined
 - [x] Interaction contract checks defined
-- [ ] Latest GitHub Actions M24 Release Gate green after modular-runtime commit
+- [x] GitHub Actions M24 Release Gate green after modular-runtime commit (run 11)
 - [ ] Visual browser/Vercel preview review completed
 
 Release rule: M24 cannot progress from paper to real execution until historical validation, paper trading and an explicit live-execution approval gate exist.
