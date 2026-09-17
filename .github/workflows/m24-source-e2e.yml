@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'm24-source-e2e-test.js'
+      - 'm24-eth-2021-source-e2e-test.js'
       - 'm24-replay-e2e-test.js'
       - 'm24-verified-btc-2021.json'
       - 'm24-replay.js'
@@ -24,9 +25,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  btc-2021-real-sources:
+  historical-real-sources:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -35,17 +36,21 @@ jobs:
       - name: Syntax
         run: |
           node --check m24-source-e2e-test.js
+          node --check m24-eth-2021-source-e2e-test.js
           node --check m24-replay-e2e-test.js
-      - name: Run real-source enrichment
+      - name: BTC 2021 real-source enrichment
         run: node m24-source-e2e-test.js
-      - name: Replay verified horizons
+      - name: BTC verified horizon replay
         run: node m24-replay-e2e-test.js
+      - name: ETH 2021 real-source enrichment
+        run: node m24-eth-2021-source-e2e-test.js
       - name: Upload source snapshots
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: m24-btc-2021-source-snapshots
+          name: m24-2021-source-snapshots
           path: |
             m24-btc-2021-source-snapshot.json
             m24-btc-2021-replay-snapshot.json
+            m24-eth-2021-source-snapshot.json
           if-no-files-found: warn
