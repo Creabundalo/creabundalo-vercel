@@ -20,7 +20,7 @@ const test=`
       DCOILWTICO:['2021-04-14,63.15','2021-11-09,84.15']
     }[id];
     if(!rows) return {ok:false,status:404,text:async()=>''};
-    return {ok:true,status:200,text:async()=>`DATE,${id}\n${rows.join('\\n')}\n2021-11-10,.`};
+    return {ok:true,status:200,text:async()=>('DATE,'+id+'\\n'+rows.join('\\n')+'\\n2021-11-10,.')};
   };
   const provider=new M24Macro.FredCsvProvider({fetchImpl:fakeFetch,nowFn:()=>Date.parse('2026-09-17T20:00:00Z')});
   const keys=['FED_FUNDS','TEN_YEAR','DOLLAR','RRP','FED_ASSETS','FIN_CONDITIONS','WTI'];
