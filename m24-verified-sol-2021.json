@@ -1,0 +1,56 @@
+{
+  "type": "VERIFIED_SOURCE_SNAPSHOT",
+  "caseId": "SOL-2021-2022-TOP-MARKDOWN",
+  "asset": "SOL",
+  "coverageProfile": "CORE_DERIVATIVES",
+  "verification": {
+    "workflow": "M24 Source E2E",
+    "workflowRunId": 35301181203,
+    "artifactId": 10530231472,
+    "artifactDigest": "sha256:aa22e025d8d60298441c497f4830442f6271b5ec793242027025667ac9680c98",
+    "headSha": "d30472c94e989cf310bbd9a093a1c331b9b053f2",
+    "verifiedAt": "2026-09-18T02:54:57.218Z",
+    "sourceComplete": true
+  },
+  "state": "SOURCE_COMPLETE",
+  "calibrationEligible": true,
+  "resolvedCheckpoints": {
+    "firstTop": "2021-09-09",
+    "secondTop": "2021-11-06",
+    "decisionAsOf": "2021-11-06T23:59:59.999Z",
+    "supportBreakDate": "2022-01-21",
+    "troughDate": "2022-06-14"
+  },
+  "evidenceLayers": {
+    "PRICE": {"state":"COMPLETE","note":"Measured price structure exists."},
+    "MEANING_WORLD": {"state":"COMPLETE","note":"6 SOL-scoped timestamped source item(s); top coverage 3/2."},
+    "DERIVATIVES": {"state":"COMPLETE","extensionState":"SOURCE_LIMITED","note":"Core checkpoint funding complete. Historical Binance Vision OI/long-short/taker metrics are unavailable at the resolved SOL checkpoints and remain explicit source gaps."},
+    "MACRO": {"state":"COMPLETE","note":"7 source-backed series."},
+    "DECISION_SNAPSHOT": {"state":"COMPLETE","note":"No-lookahead decision snapshot exists."},
+    "BACKTEST_OUTCOME": {"state":"COMPLETE","note":"Later outcome exists separately from decision input."}
+  },
+  "sourceGaps": [
+    {"domain":"DERIVATIVES_ARCHIVE","metric":"BINANCE_VISION_METRICS","date":"2021-09-09","reason":"ARCHIVE_DAY_MISSING"},
+    {"domain":"DERIVATIVES_ARCHIVE","metric":"BINANCE_VISION_METRICS","date":"2021-11-06","reason":"ARCHIVE_DAY_MISSING"}
+  ],
+  "actionCandidate": {
+    "action": "DOWNSIDE_WATCH",
+    "score": 3,
+    "coverage": 0.8,
+    "evidence": [
+      {"id":"WEAK_PARTICIPATION","weight":1},
+      {"id":"WEAK_RSI","weight":1},
+      {"id":"STRONGER_DOLLAR","weight":0.5},
+      {"id":"TIGHTER_FINANCIAL_CONDITIONS","weight":0.5}
+    ],
+    "confirmations": []
+  },
+  "sourceNotes": {
+    "price": "Coinbase Exchange historical candles",
+    "funding": "Binance Vision monthly fundingRate archives with SHA-256 verification",
+    "derivativesArchive": "Binance Vision daily metrics attempted; checkpoint files absent and retained as source gaps",
+    "macro": "Official-source series via FRED",
+    "meaning": "SOL-scoped timestamped CoinDesk / The Block / Yahoo sources"
+  },
+  "note": "Pinned output of a successful real-source E2E run. Coverage profile is CORE_DERIVATIVES because optional archived positioning data is source-limited. Missing extension data is not synthesized."
+}
