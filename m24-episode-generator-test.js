@@ -12,7 +12,7 @@ const test=`
  }
  bars[100]={...bars[100],high:200,close:195,volume:2200};
  bars[180]={...bars[180],high:202,close:190,volume:900};
- bars[181]={...bars[181],high:201,close:188,volume:850};
+ bars[181]={...bars[181],high:203,close:188,volume:850};
  bars[250]={...bars[250],high:201,close:189,volume:800};
 
  const rule={minRetestRatio:0.95,maxRetestRatio:1.05,cooldownDays:75,minRsiWeakeningPoints:999};
