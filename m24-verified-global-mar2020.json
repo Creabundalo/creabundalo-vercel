@@ -1,0 +1,39 @@
+{
+  "type":"VERIFIED_SOURCE_SNAPSHOT",
+  "caseId":"GLOBAL-MAR2020",
+  "asset":"SPX",
+  "coverageProfile":"CROSS_ASSET_LIQUIDITY",
+  "verification":{
+    "workflow":"M24 Source E2E",
+    "workflowRunId":35349395178,
+    "artifactId":10548791572,
+    "artifactDigest":"sha256:31c79cd8eeb3808a5ed80d2b3d2672b7e84ad74a18016c7e99452fbc284521f2",
+    "headSha":"84a2458ac9c17b97fb76e1af87f5654ebcf4abb2",
+    "verifiedAt":"2026-09-18T13:18:04Z",
+    "sourceComplete":true
+  },
+  "state":"SOURCE_COMPLETE",
+  "calibrationEligible":true,
+  "resolvedCheckpoints":{
+    "firstTop":"2020-02-19",
+    "secondTop":"2020-03-16",
+    "decisionAsOf":"2020-03-16T23:59:59.999Z",
+    "supportBreakDate":"2020-03-20",
+    "troughDate":"2020-03-23"
+  },
+  "actionCandidate":{
+    "action":"DOWNSIDE_WATCH",
+    "score":4,
+    "coverage":1,
+    "evidence":["CROSS_ASSET_PRICE_SHOCK","VOLATILITY_SPIKE","FINANCIAL_CONDITIONS_STRESS","DOLLAR_STRESS","OIL_DEMAND_STRESS"]
+  },
+  "macroAtStress":{
+    "VIX":{"delta":68.31,"pctDelta":475.03},
+    "DOLLAR":{"delta":4.1523,"pctDelta":3.56},
+    "TEN_YEAR":{"delta":-0.83,"pctDelta":-53.21},
+    "FIN_CONDITIONS":{"delta":0.564},
+    "WTI":{"delta":-24.35,"pctDelta":-45.68},
+    "FED_FUNDS_LEGACY":{"delta":-1.34,"pctDelta":-84.28}
+  },
+  "note":"Pinned cross-asset liquidity-shock evidence. Historical calibration evidence only; no live trading authorization."
+}
