@@ -9,6 +9,7 @@ on:
       - 'm24-replay-e2e-test.js'
       - 'm24-verified-btc-2021.json'
       - 'm24-verified-eth-2021.json'
+      - 'm24-verified-sol-2021.json'
       - 'm24-replay.js'
       - 'm24-calibration.js'
       - 'm24-enrichment.js'
@@ -47,7 +48,7 @@ jobs:
         run: node m24-eth-2021-source-e2e-test.js
       - name: SOL 2021 real-source enrichment
         run: node m24-sol-2021-source-e2e-test.js
-      - name: BTC + ETH verified horizon replay
+      - name: BTC + ETH + SOL verified horizon replay
         run: node m24-replay-e2e-test.js
       - name: Upload source snapshots
         if: always()
@@ -60,5 +61,6 @@ jobs:
             m24-eth-2021-source-snapshot.json
             m24-eth-2021-replay-snapshot.json
             m24-sol-2021-source-snapshot.json
+            m24-sol-2021-replay-snapshot.json
             m24-replay-failure.json
           if-no-files-found: ignore
