@@ -20,18 +20,19 @@ globalThis.M24Calibration = (() => {
     return {low:round(Math.max(0,center-margin)),high:round(Math.min(1,center+margin))};
   }
 
-  function sampleMatches(pair,{horizon=null,lens=null,direction=null,regime=null,coverageProfile=null}={}){
+  function sampleMatches(pair,{horizon=null,lens=null,direction=null,regime=null,coverageProfile=null,horizonProfile=null}={}){
     const f=pair.forecast;
     if(horizon&&f?.data?.horizon!==horizon) return false;
     if(lens&&f?.data?.lens!==lens) return false;
     if(direction&&f?.data?.direction!==direction) return false;
     if(regime&&f?.data?.conditions?.regime!==regime) return false;
     if(coverageProfile&&f?.data?.conditions?.coverageProfile!==coverageProfile) return false;
+    if(horizonProfile&&f?.data?.conditions?.horizonProfile!==horizonProfile) return false;
     return typeof pair.outcome?.data?.directionCorrect==='boolean';
   }
 
-  function calibrate({forecasts=[],outcomes=[],horizon=null,lens=null,direction=null,regime=null,coverageProfile=null,minSamples=DEFAULT_MIN_SAMPLES}={}){
-    const pairs=joinForecastOutcomes(forecasts,outcomes).filter(pair=>sampleMatches(pair,{horizon,lens,direction,regime,coverageProfile}));
+  function calibrate({forecasts=[],outcomes=[],horizon=null,lens=null,direction=null,regime=null,coverageProfile=null,horizonProfile=null,minSamples=DEFAULT_MIN_SAMPLES}={}){
+    const pairs=joinForecastOutcomes(forecasts,outcomes).filter(pair=>sampleMatches(pair,{horizon,lens,direction,regime,coverageProfile,horizonProfile}));
     const n=pairs.length;
     const successes=pairs.filter(x=>x.outcome.data.directionCorrect===true).length;
     const meanRawConfidence=n?pairs.reduce((sum,x)=>sum+(Number.isFinite(x.forecast.confidence)?x.forecast.confidence:0),0)/n:null;
@@ -40,7 +41,7 @@ globalThis.M24Calibration = (() => {
     const interval=enough?wilson95(successes,n):{low:null,high:null};
     return {
       type:'CALIBRATION_RESULT',
-      filter:{horizon,lens,direction,regime,coverageProfile},
+      filter:{horizon,lens,direction,regime,coverageProfile,horizonProfile},
       sampleSize:n,
       successes,
       minSamples,
@@ -54,8 +55,8 @@ globalThis.M24Calibration = (() => {
     };
   }
 
-  function horizonTable({forecasts=[],outcomes=[],lens='m24',coverageProfile=null,minSamples=DEFAULT_MIN_SAMPLES,horizons=['NOW','3D','2W','1M','2M']}={}){
-    return horizons.map(horizon=>calibrate({forecasts,outcomes,horizon,lens,coverageProfile,minSamples}));
+  function horizonTable({forecasts=[],outcomes=[],lens='m24',coverageProfile=null,horizonProfile=null,minSamples=DEFAULT_MIN_SAMPLES,horizons=['NOW','3D','2W','1M','2M']}={}){
+    return horizons.map(horizon=>calibrate({forecasts,outcomes,horizon,lens,coverageProfile,horizonProfile,minSamples}));
   }
 
   function toRecordPayload(result){
