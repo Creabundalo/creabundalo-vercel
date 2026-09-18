@@ -22,7 +22,7 @@ jobs:
         run: |
           for f in \
             m24.html m24.css m24.js m24-core.js m24-data.js m24-cases.js m24-historical.js m24-lab.js m24-primary-lab.js m24-lab-ui.js \
-            m24-smoke-test.js m24-resolution-test.js m24-coinbase.js m24-coinbase-test.js \
+            m24-smoke-test.js m24-resolution-test.js m24-coinbase.js m24-coinbase-test.js m24-fred-market.js m24-fred-market-test.js m24-index-lab.js m24-index-lab-test.js \
             m24-derivatives.js m24-derivatives-lab.js m24-derivatives-ui.js m24-derivatives-test.js m24-derivatives-lab-test.js m24-cftc.js m24-cftc-lab.js m24-cftc-test.js \
             m24-binance-vision.js m24-binance-vision-lab.js m24-binance-vision-ui.js m24-binance-vision-test.js m24-binance-vision-lab-test.js \
             m24-funding-archive.js m24-funding-archive-test.js \
@@ -47,6 +47,10 @@ jobs:
           grep -q 'class TricksterEngine' m24-core.js
           grep -q 'resolutionIndependent:true' m24-cases.js
           grep -q 'class CoinbaseHistoricalProvider' m24-coinbase.js
+          grep -q 'class FredMarketProvider' m24-fred-market.js
+          grep -q 'TOP_MARKDOWN_CLOSE_ONLY' m24-cases.js
+          grep -q 'INDEX_CLOSE_MACRO_MEANING' m24-cases.js
+          grep -q 'requiredForCase' m24-evidence-gate.js
           grep -q 'class BinanceDerivativesProvider' m24-derivatives.js
           grep -q 'class BinanceVisionFundingProvider' m24-funding-archive.js
           grep -q 'class BinanceHistoricalDerivativesProvider' m24-funding-archive.js
@@ -83,6 +87,10 @@ jobs:
         run: node m24-resolution-test.js
       - name: Coinbase adapter contract test
         run: node m24-coinbase-test.js
+      - name: Fred close-only market contract test
+        run: node m24-fred-market-test.js
+      - name: Close-only index Lab contract test
+        run: node m24-index-lab-test.js
       - name: Derivatives adapter contract test
         run: node m24-derivatives-test.js
       - name: Derivatives Lab contract test
