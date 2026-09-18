@@ -15,13 +15,13 @@ const test=`
  const w=M24Patterns.structuralDistribution(lab);
  check(w.status==='OBSERVED','structure');
  const fib=M24Patterns.fibGeometry({firstTop:{high:100},reaction:{close:70},secondTop:{high:103},trough:{troughLow:40}});
- check(fib.status==='OBSERVED','fib');
+ check(fib.status==='MEASURED_GEOMETRY','fib');
  const pts=[100,110,102,118,108,125,112].map((v,i)=>({date:'2021-01-'+String(i+1).padStart(2,'0'),value:v}));
  const closeOnly={firstTop:{high:null,close:5000,rsi14:75},secondTop:{high:null,close:4900,rsi14:60},support:{referenceLow:null,referenceClose:4500,firstCloseBelow:'2000-04-01'}};
  const co=M24Patterns.structuralDistribution(closeOnly);
  check(co.firstTop===5000&&co.secondTop===4900,'close-only null high must fall through to close');
  const e=M24Patterns.elliottCandidate(pts,{thresholdPct:5});
- check(['OBSERVED','INSUFFICIENT'].includes(e.status),'elliott candidate contract');
+ check(['CANDIDATE_ONLY','INSUFFICIENT'].includes(e.status),'elliott candidate contract');
  console.log('M24 pattern hypothesis contract OK');
 })();
 `;
