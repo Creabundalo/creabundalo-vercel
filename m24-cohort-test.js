@@ -1,7 +1,7 @@
 const fs=require('fs');
 const vm=require('vm');
 
-const source=['m24-cases.js','m24-lab.js','m24-primary-lab.js','m24-index-lab.js','m24-housing-lab.js','m24-cohort.js'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
+const source=['m24-cases.js','m24-lab.js','m24-primary-lab.js','m24-index-lab.js','m24-housing-lab.js','m24-cross-asset-lab.js','m24-cohort.js'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
 const test=`
 (async()=>{
   const check=(condition,message)=>{if(!condition) throw new Error(message)};
@@ -56,7 +56,7 @@ const test=`
   const result=await M24Cohort.run({
     provider:fakeProvider,
     providers:{CBS_KADASTER_HOUSING:fakeHousingProvider},
-    labs:{TOP_MARKDOWN_CLOSE_ONLY:M24IndexLab,HOUSING_CYCLE:M24HousingLab},
+    labs:{TOP_MARKDOWN_CLOSE_ONLY:M24IndexLab,HOUSING_CYCLE:M24HousingLab,CROSS_ASSET_SHOCK:M24CrossAssetLab},
     caseSchemas:M24Cases.list(),
     granularity:86400
   });
@@ -67,7 +67,7 @@ const test=`
   check(result.cases.every(x=>x.status==='MEASURED_PRICE_LAYER'),'wrong case status');
   check(result.cases.every(x=>x.missingLayers.includes('MEANING_WORLD')),'missing evidence layers should stay explicit');
   const assets=[...new Set(result.cases.map(x=>x.asset))].sort();
-  check(['BTC','ETH','SOL','NASDAQ','NL_HOUSING'].every(x=>assets.includes(x)),'expected BTC/ETH/SOL/NASDAQ/NL_HOUSING case registry');
+  check(['BTC','ETH','SOL','NASDAQ','NL_HOUSING','SPX'].every(x=>assets.includes(x)),'expected BTC/ETH/SOL/NASDAQ/NL_HOUSING/SPX case registry');
   console.log('M24 cohort test OK',JSON.stringify({total:result.total,measured:result.measured,eligible:result.calibrationEligible,assets}));
 })()
 `;
