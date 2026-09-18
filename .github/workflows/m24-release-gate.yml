@@ -103,6 +103,8 @@ jobs:
         run: node m24-relations-test.js
       - name: Relation stability contract test
         run: node m24-relation-stability-test.js
+      - name: Horizon profile contract test
+        run: node m24-horizon-profile-test.js
       - name: Pattern hypothesis contract test
         run: node m24-patterns-test.js
       - name: Pattern discrimination contract test
