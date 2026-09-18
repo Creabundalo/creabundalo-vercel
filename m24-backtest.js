@@ -102,8 +102,8 @@ globalThis.M24Backtest = (() => {
       if(Number(snapshot.price.comparisons.transactionYoYAtSecond)<-10) add('HOUSING_TRANSACTION_WEAKNESS',1,'Housing transactions were more than 10% below the year-earlier level while the price index remained elevated.');
     }
     const macro=Object.fromEntries((snapshot.macro||[]).map(x=>[x.key,x]));
-    if(Number(macro.DOLLAR?.delta)>0) add('STRONGER_DOLLAR',0.5,'Broad U.S. dollar is stronger versus first-top checkpoint.');
-    if(Number(macro.FIN_CONDITIONS?.delta)>0) add('TIGHTER_FINANCIAL_CONDITIONS',0.5,'NFCI is higher/tighter versus first-top checkpoint.');
+    if(snapshot.scoreProfile!=='CROSS_ASSET_LIQUIDITY'&&Number(macro.DOLLAR?.delta)>0) add('STRONGER_DOLLAR',0.5,'Broad U.S. dollar is stronger versus first-top checkpoint.');
+    if(snapshot.scoreProfile!=='CROSS_ASSET_LIQUIDITY'&&Number(macro.FIN_CONDITIONS?.delta)>0) add('TIGHTER_FINANCIAL_CONDITIONS',0.5,'NFCI is higher/tighter versus first-top checkpoint.');
     if(snapshot.scoreProfile==='HOUSING_SLOW_MARKET'&&Number(macro.ECB_DEPOSIT_RATE?.delta)>0) add('ECB_RATE_TIGHTENING',0.5,'ECB deposit rate is higher at the second housing checkpoint.');
 
     const loaded=Object.values(snapshot.coverage).filter(Boolean).length;
