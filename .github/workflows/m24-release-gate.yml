@@ -99,6 +99,8 @@ jobs:
         run: node m24-cftc-test.js
       - name: CBS housing provider contract test
         run: node m24-cbs-housing-test.js
+      - name: Cross-asset relation contract test
+        run: node m24-relations-test.js
       - name: Cross-asset lab contract test
         run: node m24-cross-asset-test.js
       - name: Binance Vision archive contract test
