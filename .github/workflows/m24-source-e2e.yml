@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'm24-source-e2e-test.js'
+      - 'm24-btc-2019-source-e2e-test.js'
       - 'm24-eth-2021-source-e2e-test.js'
       - 'm24-sol-2021-source-e2e-test.js'
       - 'm24-replay-e2e-test.js'
@@ -17,6 +18,8 @@ on:
       - 'm24-coinbase.js'
       - 'm24-derivatives.js'
       - 'm24-derivatives-lab.js'
+      - 'm24-cftc.js'
+      - 'm24-cftc-lab.js'
       - 'm24-binance-vision.js'
       - 'm24-funding-archive.js'
       - 'm24-binance-vision-lab.js'
@@ -39,9 +42,14 @@ jobs:
       - name: Syntax
         run: |
           node --check m24-source-e2e-test.js
+          node --check m24-btc-2019-source-e2e-test.js
+          node --check m24-cftc.js
+          node --check m24-cftc-lab.js
           node --check m24-eth-2021-source-e2e-test.js
           node --check m24-sol-2021-source-e2e-test.js
           node --check m24-replay-e2e-test.js
+      - name: BTC 2019 real-source enrichment
+        run: node m24-btc-2019-source-e2e-test.js
       - name: BTC 2021 real-source enrichment
         run: node m24-source-e2e-test.js
       - name: ETH 2021 real-source enrichment
@@ -56,6 +64,7 @@ jobs:
         with:
           name: m24-2021-source-snapshots
           path: |
+            m24-btc-2019-source-snapshot.json
             m24-btc-2021-source-snapshot.json
             m24-btc-2021-replay-snapshot.json
             m24-eth-2021-source-snapshot.json
