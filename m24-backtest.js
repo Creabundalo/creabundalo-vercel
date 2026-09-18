@@ -35,10 +35,11 @@ globalThis.M24Backtest = (() => {
 
   function buildDecisionSnapshot({caseSchema,labResult,meaningContext=null,derivativesContext=null,archiveDerivativesContext=null,macroContext=null,asOf=null}={}){
     if(!caseSchema||!labResult) throw new Error('Backtest requires case schema and measured price Lab result.');
-    const cutoff=asOf||endOfDay(labResult.secondTop.date);
+    const cutoff=asOf||labResult.secondTop?.asOf||endOfDay(labResult.secondTop.date);
     const cutoffMs=asTime(cutoff);
     if(!Number.isFinite(cutoffMs)) throw new Error('Invalid backtest asOf.');
-    if(asTime(endOfDay(labResult.secondTop.date))>cutoffMs) throw new Error('Backtest asOf precedes resolved second top.');
+    const secondAvailability=labResult.secondTop?.asOf||endOfDay(labResult.secondTop.date);
+    if(asTime(secondAvailability)>cutoffMs) throw new Error('Backtest asOf precedes resolved second-top availability.');
 
     const meaning=meaningContext?aggregateMeaningSources(meaningContext.sources,cutoff):null;
     const derivatives=verifiedDerivativesContext(derivativesContext,cutoffMs);
@@ -52,7 +53,7 @@ globalThis.M24Backtest = (() => {
     const decisionCoverage=profileInputs?.length?profileInputs.filter(k=>rawCoverage[k]).length/profileInputs.length:null;
 
     const snapshot={
-      type:'DECISION_SNAPSHOT',caseId:caseSchema.id,asset:caseSchema.asset,asOf:cutoff,
+      type:'DECISION_SNAPSHOT',caseId:caseSchema.id,asset:caseSchema.asset,asOf:cutoff,scoreProfile:caseSchema.scoreProfile||null,
       price:{
         firstTop:clone(labResult.firstTop),secondTop:clone(labResult.secondTop),
         comparisons:{
@@ -60,7 +61,9 @@ globalThis.M24Backtest = (() => {
           volumeChangePct:labResult.comparisons.volumeChangePct,
           rsiChange:labResult.comparisons.rsiChange,
           rsiBearishDivergence:Boolean(labResult.comparisons.rsiBearishDivergence),
-          volumeBearishDivergence:Boolean(labResult.comparisons.volumeBearishDivergence)
+          volumeBearishDivergence:Boolean(labResult.comparisons.volumeBearishDivergence),
+          priceReferenceChangePct:labResult.comparisons.priceReferenceChangePct??null,
+          yoyGrowthChange:labResult.comparisons.yoyGrowthChange??null
         }
       },
       meaning,
@@ -85,9 +88,14 @@ globalThis.M24Backtest = (() => {
     const archive=snapshot.archiveDerivatives;
     if(snapshot.meaning?.direction>0.25&&archive?.secondTop?.summary?.globalLongShort>1&&Number(archive?.deltas?.globalLongShort)>0) add('ARCHIVE_LONG_SKEW',1,'Positive framing coexists with increasingly long-skewed archived positioning.');
     if(archive?.secondTop?.summary?.takerLongShortVolume>1&&Number(archive?.deltas?.takerLongShortVolume)>0) confirmations.push({id:'TAKER_BUY_CONFIRMATION',reason:'Taker buy/sell ratio confirms buy-side aggression at the archived checkpoint.'});
+    if(snapshot.scoreProfile==='HOUSING_SLOW_MARKET'){
+      if(Number(snapshot.price.comparisons.yoyGrowthChange)<-3) add('HOUSING_GROWTH_DECELERATION',1,'Annual house-price growth slowed materially between the momentum peak and the price-level peak.');
+      if(Number(snapshot.price.comparisons.volumeChangePct)<-10) add('HOUSING_TRANSACTION_WEAKNESS',1,'Housing transaction activity weakened materially while the price index remained elevated.');
+    }
     const macro=Object.fromEntries((snapshot.macro||[]).map(x=>[x.key,x]));
     if(Number(macro.DOLLAR?.delta)>0) add('STRONGER_DOLLAR',0.5,'Broad U.S. dollar is stronger versus first-top checkpoint.');
     if(Number(macro.FIN_CONDITIONS?.delta)>0) add('TIGHTER_FINANCIAL_CONDITIONS',0.5,'NFCI is higher/tighter versus first-top checkpoint.');
+    if(snapshot.scoreProfile==='HOUSING_SLOW_MARKET'&&Number(macro.ECB_DEPOSIT_RATE?.delta)>0) add('ECB_RATE_TIGHTENING',0.5,'ECB deposit rate is higher at the second housing checkpoint.');
 
     const loaded=Object.values(snapshot.coverage).filter(Boolean).length;
     const total=Object.keys(snapshot.coverage).length;
