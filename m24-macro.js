@@ -3,6 +3,7 @@ globalThis.M24Macro = (() => {
   const DAY_MS=86400000;
   const SERIES=Object.freeze({
     FED_FUNDS:Object.freeze({id:'EFFR',label:'Effective Fed Funds Rate',family:'RATES',units:'percent',frequency:'daily',source:'Federal Reserve Bank of New York',higherMeaning:'TIGHTER_SHORT_RATE'}),
+    FED_FUNDS_LEGACY:Object.freeze({id:'DFF',label:'Federal Funds Effective Rate',family:'RATES',units:'percent',frequency:'daily',source:'Board of Governors of the Federal Reserve System',higherMeaning:'TIGHTER_SHORT_RATE'}),
     TEN_YEAR:Object.freeze({id:'DGS10',label:'10Y Treasury Yield',family:'RATES',units:'percent',frequency:'daily',source:'Board of Governors of the Federal Reserve System',higherMeaning:'HIGHER_LONG_RATE'}),
     DOLLAR:Object.freeze({id:'DTWEXBGS',label:'Broad U.S. Dollar Index',family:'FX',units:'index',frequency:'daily',source:'Board of Governors of the Federal Reserve System',higherMeaning:'STRONGER_DOLLAR'}),
     RRP:Object.freeze({id:'RRPONTSYD',label:'Overnight Reverse Repo',family:'LIQUIDITY',units:'billions_usd',frequency:'daily',source:'Federal Reserve Bank of New York',higherMeaning:'MORE_RRP_USAGE'}),
