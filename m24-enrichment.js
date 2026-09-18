@@ -41,10 +41,15 @@ globalThis.M24Enrichment = (() => {
       confidence:0.75,provenance:meaning.sources.map(M24Meaning.toProvenance)
     }));
 
-    if(!providers.derivatives) throw new Error('Derivatives provider is required.');
-    const derivativesLab=providers.derivativesLab||M24DerivativesLab;
-    const derivatives=await derivativesLab.runCase({provider:providers.derivatives,caseSchema,labResult});
-    addPayloads(store,derivativesLab.toRecordPayloads(derivatives),{subjectId:caseSchema.asset,resolution:'CHECKPOINT_BOUNDED'});
+    let derivatives=null;
+    const derivativesRequired=(caseSchema.requiredLayers||[]).includes('DERIVATIVES');
+    if(providers.derivatives){
+      const derivativesLab=providers.derivativesLab||M24DerivativesLab;
+      derivatives=await derivativesLab.runCase({provider:providers.derivatives,caseSchema,labResult});
+      addPayloads(store,derivativesLab.toRecordPayloads(derivatives),{subjectId:caseSchema.asset,resolution:'CHECKPOINT_BOUNDED'});
+    }else if(derivativesRequired){
+      throw new Error('Derivatives provider is required for this case evidence profile.');
+    }
 
     let archive=null;
     if(providers.archive){
@@ -58,7 +63,7 @@ globalThis.M24Enrichment = (() => {
 
     const backtest=M24Backtest.run({
       caseSchema,labResult,meaningContext:meaning,
-      derivativesContext:derivatives.context||derivatives.fundingContext,
+      derivativesContext:derivatives?(derivatives.context||derivatives.fundingContext):null,
       archiveDerivativesContext:archive,
       macroContext:macro.context
     });
