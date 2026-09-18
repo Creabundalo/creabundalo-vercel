@@ -26,10 +26,10 @@ Turn the existing BTC/ETH/SOL seed work into a systematic crypto fill layer with
 | B002-T01 | P0 | Inventory existing BTC/ETH/SOL work | DONE | Seed work mapped |
 | B002-T02 | P0 | Crypto provider capability matrix | DONE | Spot/funding/OI/macro/meaning + future options/on-chain paths explicit |
 | B002-T03 | P0 | Source-complete SOL 2021 case | DONE | Verified `CORE_DERIVATIVES` snapshot exists |
-| B002-T04 | P0 | Source-complete BTC 2019 case | BLOCKED | June/July 2019 predates Binance Futures; older derivatives source/adapter required |
+| B002-T04 | P0 | Source-complete BTC 2019 case | DONE | CFTC/CME FUTURES_POSITIONING profile verified by real-source E2E |
 | B002-T05 | P0 | Add lifecycle cases beyond top/markdown | DONE | Crypto lifecycle/event registry seeded |
 | B002-T06 | P0 | Crypto gap & quality sweep | DONE | Gaps classified and handed off |
-| B002-T07 | P1 | Add crypto options layer | BLOCKED | Explicit handoff to M99-B004 derivatives/options |
+| B002-T07 | P1 | Add crypto options layer | ACCEPTED_LIMITATION | Source paths defined in B004; deep historical options data may be licensed |
 | B002-T08 | P1 | Add on-chain sensor profile | DONE | Sensor family added; provider selection remains later source work |
 
 ## Verified source chronology behind the BTC 2019 blocker
@@ -39,9 +39,9 @@ Turn the existing BTC/ETH/SOL seed work into a systematic crypto fill layer with
 ## Batch checkpoint
 **Independent B002 work is complete.**
 
-Batch status: **BLOCKED / DEPENDENCY_HANDOFF** because B002-T04 requires the older derivatives source path that belongs in B004.
+Batch status: **DONE**. The older BTC derivatives dependency was resolved in B004 using CFTC/CME futures positioning; options-history licensing remains a documented non-blocking limitation.
 
-This blocker does **not** stop the project. M99-B003 and other B001-dependent batches remain READY.
+B002 no longer blocks the project. Crypto fill now has verified BTC 2019, BTC 2021, ETH 2021 and SOL 2021 representative cases with explicit coverage profiles.
 
 ## Acceptance achieved
 - BTC/ETH/SOL representative crypto structure mapped;
