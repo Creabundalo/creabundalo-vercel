@@ -48,7 +48,7 @@ globalThis.M24Replay = (() => {
       const directionCorrect=direction==='DOWN'?realizedReturn<0:realizedReturn>0;
       const forecast=M24Core.record('FORECAST_INSTANCE',{
         horizon,lens,direction,
-        conditions:{historicalCaseId:caseSchema.id,replay:'VERIFIED_SOURCE_SNAPSHOT'},
+        conditions:{historicalCaseId:caseSchema.id,replay:'VERIFIED_SOURCE_SNAPSHOT',coverageProfile:snapshot.coverageProfile||'UNSPECIFIED'},
         calibrationState:'HISTORICAL_REPLAY',
         decisionAsOf:snapshot.resolvedCheckpoints.decisionAsOf,
         sourceSnapshotDigest:snapshot.verification.artifactDigest
