@@ -16,7 +16,7 @@ const test=`
    macro:new M24Macro.FredCsvProvider(),
    macroKeys:caseSchema.macroKeys
  };
- const raw=await providers.price.getBarsForAsset(caseSchema.asset,{start:`${caseSchema.window.from}T00:00:00Z`,end:`${caseSchema.window.to}T23:59:59Z`});
+ const raw=await providers.price.getBarsForAsset(caseSchema.asset,{start:caseSchema.window.from+'T00:00:00Z',end:caseSchema.window.to+'T23:59:59Z'});
  const result=await M24Enrichment.runCase({store,caseSchema,providers});
  const minBar=raw.bars.reduce((a,b)=>!a||b.close<a.close?b:a,null);
  const snapshot={
