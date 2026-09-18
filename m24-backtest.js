@@ -85,6 +85,13 @@ globalThis.M24Backtest = (() => {
     const add=(id,weight,reason)=>{score+=weight;evidence.push({id,weight,reason})};
     if(snapshot.price.comparisons.volumeBearishDivergence) add('WEAK_PARTICIPATION',1,'Second top has lower measured volume than first top.');
     if(snapshot.price.comparisons.rsiBearishDivergence) add('WEAK_RSI',1,'Measured RSI bearish divergence is present.');
+    if(snapshot.scoreProfile==='MECHANICS_CORE'){
+      const priceChange=Number(snapshot.price.comparisons.priceHighChangePct);
+      const failedRetest=Number.isFinite(priceChange)&&priceChange<0&&priceChange>=-8;
+      if(failedRetest) add('FAILED_RETEST',1,'Second checkpoint retests the prior high zone but remains below the first high.');
+      if(failedRetest&&Number(snapshot.price.comparisons.volumeChangePct)<-15) add('FAILED_RETEST_WEAK_PARTICIPATION',1,'Failed retest occurs with materially lower measured volume.');
+      if(failedRetest&&Number(snapshot.price.comparisons.rsiChange)<-5) add('FAILED_RETEST_WEAK_MOMENTUM',1,'Failed retest occurs with materially weaker RSI.');
+    }
     if(snapshot.meaning?.direction>0.25&&snapshot.derivatives?.evidenceFamily==='PERPETUAL_FUNDING'&&snapshot.derivatives?.comparison?.crowdingShift==='MORE_POSITIVE_AT_SECOND_TOP') add('BULLISH_NARRATIVE_LONG_CROWDING',1,'Positive framing coexists with more-positive funding available by the decision cutoff.');
     const archive=snapshot.archiveDerivatives;
     if(snapshot.meaning?.direction>0.25&&archive?.secondTop?.summary?.globalLongShort>1&&Number(archive?.deltas?.globalLongShort)>0) add('ARCHIVE_LONG_SKEW',1,'Positive framing coexists with increasingly long-skewed archived positioning.');
