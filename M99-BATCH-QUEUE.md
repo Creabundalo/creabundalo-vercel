@@ -8,7 +8,7 @@
 |---|---|---|---|---|---|
 | M99-B000 | P0 | P00 | Project method / PBS / WBS / queue | — | DONE |
 | M99-B001 | P0 | P01/P02 | Fundament + full fill matrix | B000 | DONE |
-| M99-B002 | P0 | P01/P03/P05 | Crypto lifecycle & mechanics | B001 | RUNNING |
+| M99-B002 | P0 | P01/P03/P05 | Crypto lifecycle & mechanics | B001 | BLOCKED |
 | M99-B003 | P0 | P01/P03 | Equities / indices | B001 | READY |
 | M99-B004 | P0 | P05 | Futures / options / derivatives | B001 | READY |
 | M99-B005 | P0 | P01/P03 | Bonds / credit | B001 | READY |
@@ -62,3 +62,25 @@ The previous BTC/ETH/SOL M24 work is **not discarded**. It becomes seed material
 - P10 calibration.
 
 No previous case is treated as universal evidence for another asset class.
+
+
+## M99-B002 — Crypto lifecycle & mechanics
+### Checkpoint
+Independent crypto fill work is complete. One P0 dependency remains blocked on the older derivatives path.
+
+| Task | Priority | Output | Status |
+|---|---|---|---|
+| B002-T01 | P0 | BTC/ETH/SOL seed inventory | DONE |
+| B002-T02 | P0 | Crypto source/provider matrix | DONE |
+| B002-T03 | P0 | SOL 2021 source-complete case | DONE |
+| B002-T04 | P0 | BTC 2019 source-complete case | BLOCKED → B004 |
+| B002-T05 | P0 | Expanded lifecycle/event case registry | DONE |
+| B002-T06 | P0 | Crypto gap/quality sweep | DONE |
+| B002-T07 | P1 | Crypto options layer | BLOCKED → B004 |
+| B002-T08 | P1 | On-chain/network sensor profile | DONE |
+
+### Blocker
+BTC's June/July 2019 case predates Binance Futures. M99 needs an older historical derivatives path (candidate: CME Bitcoin futures, available since 2017) before that case can be promoted without inventing evidence.
+
+### Project continuation
+This blocker does not block other B001-dependent batches. **M99-B003 — Equities / indices remains the next READY batch.**
