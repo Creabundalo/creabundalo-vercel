@@ -21,14 +21,17 @@ globalThis.M24Cohort = (() => {
     };
   }
 
-  async function run({provider,caseSchemas=null,granularity=86400,onProgress=null}={}){
-    if(!provider) throw new Error('Cohort runner requires a historical provider.');
+  async function run({provider=null,providers={},labs={},caseSchemas=null,granularity=86400,onProgress=null}={}){
+    if(!provider&&!Object.keys(providers||{}).length) throw new Error('Cohort runner requires a historical provider or provider map.');
     const schemas=caseSchemas||M24Cases.list({status:'EXECUTABLE_PRIMARY'});
     const cases=[];
     for(let i=0;i<schemas.length;i++){
       const caseSchema=schemas[i];
       try{
-        const measured=await M24PrimaryLab.runCase({provider,caseSchema,granularity});
+        const selectedProvider=providers?.[caseSchema.providerFamily]||providers?.[caseSchema.asset]||provider;
+        if(!selectedProvider) throw new Error('No provider for '+caseSchema.providerFamily+' / '+caseSchema.asset);
+        const selectedLab=labs?.[caseSchema.analysis]||M24PrimaryLab;
+        const measured=await selectedLab.runCase({provider:selectedProvider,caseSchema,granularity});
         cases.push({...summarizeCase(caseSchema,measured,null),labResult:clone(measured.result)});
       }catch(error){
         cases.push(summarizeCase(caseSchema,null,error));
