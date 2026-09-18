@@ -6,7 +6,7 @@ on:
       - 'm24-source-e2e-test.js'
       - 'm24-eth-2021-source-e2e-test.js'
       - 'm24-replay-e2e-test.js'
-      - 'm24-verified-btc-2021.json'
+      - 'm24-verified-btc-2021.json'\n      - 'm24-verified-eth-2021.json'
       - 'm24-replay.js'
       - 'm24-calibration.js'
       - 'm24-enrichment.js'
