@@ -6,6 +6,7 @@ globalThis.M24GeneratedPromotion = (() => {
   function promote({caseSchema,enrichment,verification}={}){
     if(!caseSchema?.generated) throw new Error('Generated promotion requires generated case schema.');
     if(caseSchema.coverageProfile!=='MECHANICS_CORE_DERIVATIVES') throw new Error('Generated promotion requires mechanics-core coverage profile.');
+    if(caseSchema.selectionEligible!==true||!caseSchema.selectionUniverseId) throw new Error('Generated promotion requires canonical selection eligibility.');
     if(enrichment?.calibrationEligible!==true||enrichment?.state!=='SOURCE_COMPLETE') throw new Error('Generated case is not source-complete.');
     const action=enrichment?.backtest?.candidate?.action;
     if(!isDirectional(action)) throw new Error('Generated source-complete WAIT/non-directional case cannot create a directional calibration snapshot.');
@@ -20,6 +21,9 @@ globalThis.M24GeneratedPromotion = (() => {
       generated:true,
       generatorRule:caseSchema.generatorRule,
       episodeGroup:caseSchema.episodeGroup,
+      selectionEligible:true,
+      selectionUniverseId:caseSchema.selectionUniverseId,
+      selectionWindow:clone(caseSchema.selectionWindow),
       coverageProfile:caseSchema.coverageProfile,
       horizonProfile:caseSchema.horizonProfile,
       regimeFamily:caseSchema.regimeFamily,
