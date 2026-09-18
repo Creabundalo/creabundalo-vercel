@@ -19,8 +19,8 @@
 | M99-B010 | P0 | P02/P09 | Positioning / flows / cross-asset | B001 | DONE |
 | M99-B011 | P0 | P02/P09 | Macro / real economy | B001 | DONE |
 | M99-B012 | P0 | P06 | Meaning world | B001 | DONE |
-| M99-B013 | P0 | P03/P08 | Historical bubbles / crashes / regimes | B002-B012 | RUNNING |
-| M99-B014 | P1 | P09 | Cross-asset relation discovery | B002-B013 | LATER |
+| M99-B013 | P0 | P03/P08 | Historical bubbles / crashes / regimes | B002-B012 | DONE |
+| M99-B014 | P1 | P09 | Cross-asset relation discovery | B002-B013 | RUNNING |
 | M99-B015 | P0 | P02/P14 | Source-gap / quality sweep | B002-B013 | LATER |
 
 ## M99-B001 — Fundament + full fill matrix
@@ -73,17 +73,14 @@ Independent crypto fill work is complete. One P0 dependency remains blocked on t
 | B002-T01 | P0 | BTC/ETH/SOL seed inventory | DONE |
 | B002-T02 | P0 | Crypto source/provider matrix | DONE |
 | B002-T03 | P0 | SOL 2021 source-complete case | DONE |
-| B002-T04 | P0 | BTC 2019 source-complete case | BLOCKED → B004 |
+| B002-T04 | P0 | BTC 2019 source-complete case | DONE |
 | B002-T05 | P0 | Expanded lifecycle/event case registry | DONE |
 | B002-T06 | P0 | Crypto gap/quality sweep | DONE |
-| B002-T07 | P1 | Crypto options layer | BLOCKED → B004 |
+| B002-T07 | P1 | Crypto options layer | ACCEPTED_LIMITATION |
 | B002-T08 | P1 | On-chain/network sensor profile | DONE |
 
-### Blocker
-BTC's June/July 2019 case predates Binance Futures. M99 needs an older historical derivatives path (candidate: CME Bitcoin futures, available since 2017) before that case can be promoted without inventing evidence.
-
-### Project continuation
-This blocker does not block other B001-dependent batches. **M99-B003 — Equities / indices remains the next READY batch.**
+### Resolution
+BTC 2019 was resolved through CFTC/CME futures positioning and is source-complete. Long-history crypto/listed-options data remains an explicit source-access limitation, not a blocker.
 
 
 ## Multi-batch checkpoint B003-B012
@@ -144,3 +141,10 @@ This blocker does not block other B001-dependent batches. **M99-B003 — Equitie
 
 ### Principle
 Broad research windows are registered first; source data resolves actual checkpoints. Source-complete cases may remain non-directional and therefore contribute zero forecast samples.
+
+
+## M99-B014 checkpoint
+### RUNNING
+Cross-asset relation discovery.
+
+First rule: a relation is always scoped by subjects, time window, resolution, regime and evidence status. M99 does not store timeless claims such as “asset A always follows asset B”.
