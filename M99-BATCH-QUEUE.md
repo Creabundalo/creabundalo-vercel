@@ -8,9 +8,9 @@
 |---|---|---|---|---|---|
 | M99-B000 | P0 | P00 | Project method / PBS / WBS / queue | — | DONE |
 | M99-B001 | P0 | P01/P02 | Fundament + full fill matrix | B000 | DONE |
-| M99-B002 | P0 | P01/P03/P05 | Crypto lifecycle & mechanics | B001 | BLOCKED |
+| M99-B002 | P0 | P01/P03/P05 | Crypto lifecycle & mechanics | B001 | DONE |
 | M99-B003 | P0 | P01/P03 | Equities / indices | B001 | DONE |
-| M99-B004 | P0 | P05 | Futures / options / derivatives | B001 | BLOCKED |
+| M99-B004 | P0 | P05 | Futures / options / derivatives | B001 | DONE |
 | M99-B005 | P0 | P01/P03 | Bonds / credit | B001 | DONE |
 | M99-B006 | P0 | P01/P03 | Gold / silver / commodities | B001 | DONE |
 | M99-B007 | P0 | P01/P03 | FX | B001 | DONE |
@@ -19,7 +19,7 @@
 | M99-B010 | P0 | P02/P09 | Positioning / flows / cross-asset | B001 | DONE |
 | M99-B011 | P0 | P02/P09 | Macro / real economy | B001 | DONE |
 | M99-B012 | P0 | P06 | Meaning world | B001 | DONE |
-| M99-B013 | P0 | P03/P08 | Historical bubbles / crashes / regimes | B002-B012 | READY_WITH_DEPENDENCIES |
+| M99-B013 | P0 | P03/P08 | Historical bubbles / crashes / regimes | B002-B012 | READY |
 | M99-B014 | P1 | P09 | Cross-asset relation discovery | B002-B013 | LATER |
 | M99-B015 | P0 | P02/P14 | Source-gap / quality sweep | B002-B013 | LATER |
 
@@ -100,8 +100,7 @@ This blocker does not block other B001-dependent batches. **M99-B003 — Equitie
 - B012 Meaning world
 
 ### BLOCKED
-- B002 Crypto — remaining BTC 2019 historical-derivatives dependency + crypto options handoff.
-- B004 Futures / options / derivatives — domain/taxonomy/source map is filled, but detailed historical listed-options access and the older BTC/CME adapter remain unresolved.
+- none in the P0 fill chain. Detailed long-history listed-options access remains an accepted source limitation, not a phase blocker.
 
 ### Architecture discoveries folded into the base
 - ON_CHAIN_NETWORK
@@ -116,4 +115,19 @@ This blocker does not block other B001-dependent batches. **M99-B003 — Equitie
 - REPORTING_LAG / RELEASE_VINTAGE
 
 ### Next project-critical run
-**M99-B004-RESOLVE** — generalize derivatives evidence profiles and implement/use a historical pre-Binance BTC derivatives path (CME/CFTC) without requiring perpetual-funding data that did not yet exist.
+**M99-B013 — Historical bubbles / crashes / regimes** — now READY. Use the completed market/source worlds to populate representative regime cases and compare which mechanisms survive across asset classes.
+
+
+## M99-B004-RESOLVE checkpoint
+### DONE
+- generalized derivatives evidence profiles;
+- added CFTC TFF provider for CME Bitcoin market code 133741;
+- enforced Friday publication availability for Tuesday COT positions;
+- verified BTC 2019 real-source enrichment;
+- pinned `m24-verified-btc-2019.json`;
+- preserved `WAIT` as non-directional: source-complete case does not become a forecast sample.
+
+### Project effect
+- M99-B002 → DONE
+- M99-B004 → DONE
+- M99-B013 → READY
