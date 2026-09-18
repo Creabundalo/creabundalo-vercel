@@ -1,5 +1,7 @@
 globalThis.M24FredMarket = (() => {
   const FRED_CSV='https://fred.stlouisfed.org/graph/fredgraph.csv';
+  const DAY_MS=86400000;
+  const CHUNK_DAYS=365;
   const SERIES=Object.freeze({
     NASDAQ:Object.freeze({id:'NASDAQCOM',label:'NASDAQ Composite',source:'Nasdaq via FRED',priceBasis:'CLOSE_ONLY'})
   });
@@ -38,17 +40,29 @@ globalThis.M24FredMarket = (() => {
       const meta=this.meta(asset);
       const startMs=ms(start),endMs=ms(end);
       if(!Number.isFinite(startMs)||!Number.isFinite(endMs)||endMs<=startMs) throw new FredMarketError('INVALID_RANGE','Invalid market time range.',{start,end});
-      const params=new URLSearchParams({id:meta.id,cosd:new Date(startMs).toISOString().slice(0,10),coed:new Date(endMs).toISOString().slice(0,10)});
-      const url=`${this.baseUrl}?${params.toString()}`;
-      const response=await this.fetchImpl(url,{method:'GET',headers:{Accept:'text/csv'}});
-      if(!response?.ok) throw new FredMarketError('SOURCE_REQUEST_FAILED',`FRED market CSV failed: ${response?.status??'NETWORK'}.`,{url,status:response?.status??null});
-      const bars=parseCsv(await response.text(),meta.id).filter(x=>x.time*1000>=startMs&&x.time*1000<=endMs);
+      const barsByDate=new Map();
+      const urls=[];
+      let cursor=startMs;
+      while(cursor<=endMs){
+        const chunkEnd=Math.min(endMs,cursor+(CHUNK_DAYS*DAY_MS));
+        const params=new URLSearchParams({id:meta.id,cosd:new Date(cursor).toISOString().slice(0,10),coed:new Date(chunkEnd).toISOString().slice(0,10)});
+        const url=`${this.baseUrl}?${params.toString()}`;
+        urls.push(url);
+        const response=await this.fetchImpl(url,{method:'GET',headers:{Accept:'text/csv'}});
+        if(!response?.ok) throw new FredMarketError('SOURCE_REQUEST_FAILED',`FRED market CSV failed: ${response?.status??'NETWORK'}.`,{url,status:response?.status??null});
+        parseCsv(await response.text(),meta.id).forEach(bar=>{
+          if(bar.time*1000>=startMs&&bar.time*1000<=endMs) barsByDate.set(bar.date,bar);
+        });
+        if(chunkEnd>=endMs) break;
+        cursor=chunkEnd+DAY_MS;
+      }
+      const bars=[...barsByDate.values()].sort((a,b)=>a.time-b.time);
       if(!bars.length) throw new FredMarketError('NO_ROWS','FRED market series returned no observations.',{asset,start,end});
       return {
         asset,seriesId:meta.id,priceBasis:meta.priceBasis,bars,
-        provenance:[{sourceId:`FRED-${meta.id}`,sourceType:'OFFICIAL_SERIES_VIA_FRED',quality:'PRIMARY_OR_OFFICIAL_UPSTREAM',seriesId:meta.id,upstreamSource:meta.source,retrievedAt:new Date(this.nowFn()).toISOString(),note:'Close-only index series. M99 does not synthesize OHLC or volume.'}]
+        provenance:[{sourceId:`FRED-${meta.id}`,sourceType:'OFFICIAL_SERIES_VIA_FRED',quality:'PRIMARY_OR_OFFICIAL_UPSTREAM',seriesId:meta.id,upstreamSource:meta.source,retrievedAt:new Date(this.nowFn()).toISOString(),chunkCount:urls.length,note:'Close-only index series fetched in bounded date chunks. M99 does not synthesize OHLC or volume.'}]
       };
     }
   }
-  return {FRED_CSV,SERIES,FredMarketError,FredMarketProvider,parseCsv};
+  return {FRED_CSV,DAY_MS,CHUNK_DAYS,SERIES,FredMarketError,FredMarketProvider,parseCsv};
 })();
