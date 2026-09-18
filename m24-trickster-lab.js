@@ -67,6 +67,84 @@ globalThis.M24TricksterLab = (() => {
     };
   }
 
+  const finite=value=>value!==null&&value!==undefined&&String(value).trim()!==''&&Number.isFinite(Number(value));
+  const round=(n,d=3)=>Number(Number(n).toFixed(d));
+
+  function normalizedEvidence(snapshot){
+    return (snapshot?.actionCandidate?.evidence||[]).map(item=>typeof item==='string'?{id:item,weight:null}:{id:item?.id||'UNKNOWN',weight:finite(item?.weight)?Number(item.weight):null}).filter(x=>x.id);
+  }
+
+  function assessVerifiedSnapshot({caseSchema,snapshot,meaningContext}={}){
+    if(!caseSchema?.id||!snapshot||!meaningContext) throw new Error('Verified Trickster assessment requires case schema, verified snapshot and meaning context.');
+    if(snapshot.verification?.sourceComplete!==true) throw new Error('Trickster cross-case validation requires a source-complete snapshot.');
+
+    const firstNarrative=finite(meaningContext.firstTop?.direction)?Number(meaningContext.firstTop.direction):null;
+    const secondNarrative=finite(meaningContext.secondTop?.direction)?Number(meaningContext.secondTop.direction):null;
+    const narrativeShift=finite(firstNarrative)&&finite(secondNarrative)?round(secondNarrative-firstNarrative):null;
+    const actionScore=finite(snapshot.actionCandidate?.score)?Number(snapshot.actionCandidate.score):0;
+    const mechanismStressScore=round(Math.max(0,Math.min(1,actionScore/4)));
+    const mechanismDirection=round(-mechanismStressScore);
+    const discrepancyMagnitude=finite(secondNarrative)?round(Math.abs(secondNarrative-mechanismDirection)/2):null;
+    const evidenceItems=normalizedEvidence(snapshot);
+    const contrasts=[],confirmations=[],observations=[];
+
+    let state='MIXED_OR_LOW_SIGNAL';
+    if(finite(secondNarrative)&&mechanismStressScore>=0.4&&secondNarrative>0.25){
+      state='DIVERGENCE_VISIBLE';
+      contrasts.push({
+        id:'POSITIVE_MEANING_MECHANISM_STRESS',layerA:'MEANING_WORLD',layerB:'MECHANISM_STATE',
+        evidence:'PLAUSIBLE_INTERPRETATION',
+        statement:'Positive source framing coexists with a materially stressed/downside mechanism state in the verified decision evidence.'
+      });
+    }else if(finite(secondNarrative)&&mechanismStressScore>=0.4&&secondNarrative<-0.25){
+      state='ALIGNMENT_VISIBLE';
+      confirmations.push({
+        id:'NEGATIVE_MEANING_STRESS_ALIGNMENT',layerA:'MEANING_WORLD',layerB:'MECHANISM_STATE',
+        evidence:'MECHANISM_VISIBLE',
+        statement:'Negative/risk source framing and the verified mechanism state point in the same broad stress direction.'
+      });
+    }else if(finite(secondNarrative)&&mechanismStressScore<0.25&&Math.abs(secondNarrative)>=0.5){
+      state='MEANING_AHEAD_OF_MECHANISM';
+      contrasts.push({
+        id:'STRONG_MEANING_LOW_MEASURED_STRESS',layerA:'MEANING_WORLD',layerB:'MECHANISM_STATE',
+        evidence:'PLAUSIBLE_INTERPRETATION',
+        statement:'Strong source framing is present while the verified decision engine shows little measured stress. This is a discrepancy to inspect, not a directional signal.'
+      });
+    }
+
+    if(finite(firstNarrative)&&finite(secondNarrative)&&Math.sign(firstNarrative)!==Math.sign(secondNarrative)&&Math.abs(narrativeShift)>=0.5){
+      observations.push({
+        id:'NARRATIVE_REGIME_SHIFT',layer:'MEANING_WORLD',evidence:'MECHANISM_VISIBLE',
+        direction:narrativeShift,
+        statement:'The coded meaning-world direction changed materially between the two case checkpoints.'
+      });
+    }
+
+    if(caseSchema.scoreProfile==='HOUSING_SLOW_MARKET'){
+      observations.push({id:'SLOW_MARKET_PUBLICATION_LAG',layer:'TIME',evidence:'MECHANISM_VISIBLE',statement:'Housing meaning/mechanism comparison uses publication availability rather than pretending monthly observations were known at period start.'});
+    }
+    if(caseSchema.scoreProfile==='CROSS_ASSET_LIQUIDITY'){
+      observations.push({id:'CROSS_ASSET_STRESS_PROFILE',layer:'CROSS_ASSET',evidence:'MECHANISM_VISIBLE',statement:'Stress evidence is aggregated across volatility, dollar, financial conditions, rates and commodities rather than forced into a double-top template.'});
+    }
+
+    return {
+      type:'HISTORICAL_TRICKSTER_CROSS_CASE',
+      caseId:caseSchema.id,asset:caseSchema.asset,
+      action:snapshot.actionCandidate?.action||null,
+      coverageProfile:snapshot.coverageProfile||caseSchema.coverageProfile||null,
+      meaning:{firstDirection:firstNarrative,secondDirection:secondNarrative,directionShift:narrativeShift,sourceCount:meaningContext.sourceScope?.totalScopedSources??null},
+      mechanism:{stressScore:mechanismStressScore,direction:mechanismDirection,evidenceItems},
+      state,discrepancyMagnitude,
+      contrasts,confirmations,observations,
+      evidenceStatus:'PLAUSIBLE_INTERPRETATION',
+      intentStatus:'INTENT_UNKNOWN',
+      actorAttribution:'NONE',
+      manipulationStatus:'NOT_ESTABLISHED',
+      predictiveStatus:'NOT_CALIBRATED',
+      rule:'Trickster compares meaning with verified mechanism state. Divergence or alignment is descriptive evidence; neither proves manipulation, actor intent, causality or predictive edge.'
+    };
+  }
+
   function assessFromStore({store,labResult}={}){
     const meaning=latest(store,'MEANING_WORLD_CONTEXT')?.data||null;
     const derivatives=latest(store,'DERIVATIVES_CONTEXT')?.data||null;
@@ -75,5 +153,5 @@ globalThis.M24TricksterLab = (() => {
     return assess({labResult,meaningContext:meaning,derivativesContext:derivatives,archiveDerivativesContext:archiveDerivatives,macroContext:macro});
   }
 
-  return {assess,assessFromStore};
+  return {assess,assessVerifiedSnapshot,normalizedEvidence,assessFromStore};
 })();
