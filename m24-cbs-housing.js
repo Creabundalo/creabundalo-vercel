@@ -41,18 +41,19 @@ globalThis.M24CbsHousing = (() => {
       const price=pickProperty(meta.rows,['prijsindex','bestaande koopwoningen']);
       const yoy=pickProperty(meta.rows,['ontwikkeling','jaar eerder']);
       const sales=pickProperty(meta.rows,['aantal','verkochte woningen']);
-      if(!price||!yoy||!sales) throw new CbsHousingError('METADATA_MAPPING_FAILED','Could not map CBS housing fields',{price,yoy,sales,keys:meta.rows.map(x=>({k:x.Key,t:x.Title}))});
+      const salesYoy=pickProperty(meta.rows,['verkochte woningen','ontwikkeling','jaar eerder']);
+      if(!price||!yoy||!sales||!salesYoy) throw new CbsHousingError('METADATA_MAPPING_FAILED','Could not map CBS housing fields',{price,yoy,sales,keys:meta.rows.map(x=>({k:x.Key,t:x.Title}))});
       const rows=data.rows.map(r=>{
         const date=periodCodeToDate(r.Perioden);
         if(!date) return null;
         return {
           date,periodCode:r.Perioden,publishedAt:publicationDate(r.Perioden),
-          priceIndex:Number(r[price.Key]),yoyPct:Number(r[yoy.Key]),transactions:Number(r[sales.Key])
+          priceIndex:Number(r[price.Key]),yoyPct:Number(r[yoy.Key]),transactions:Number(r[sales.Key]),transactionYoYPct:Number(r[salesYoy.Key])
         };
       }).filter(x=>x&&x.date>=from&&x.date<=to&&Number.isFinite(x.priceIndex)).sort((a,b)=>a.date.localeCompare(b.date));
       if(!rows.length) throw new CbsHousingError('NO_ROWS','No monthly CBS housing records in requested window',{from,to});
       return {
-        rows,fields:{priceIndex:price.Key,yoyPct:yoy.Key,transactions:sales.Key},
+        rows,fields:{priceIndex:price.Key,yoyPct:yoy.Key,transactions:sales.Key,transactionYoYPct:salesYoy.Key},
         provenance:[{sourceId:'CBS-85773NED',sourceType:'PRIMARY_OFFICIAL_ODATA',quality:'PRIMARY_OFFICIAL',url:data.url,retrievedAt:new Date(this.nowFn()).toISOString(),license:'CC-BY 4.0',note:'CBS/Kadaster existing-home price index. Publication lag modeled conservatively as month-end + 28 days.'}]
       };
     }
