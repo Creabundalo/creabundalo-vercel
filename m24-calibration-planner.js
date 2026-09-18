@@ -15,6 +15,10 @@ globalThis.M24CalibrationPlanner = (() => {
     if(typeof caseResolver!=='function'||typeof profileResolver!=='function') throw new Error('Calibration planner requires case/profile resolvers.');
     const groups=new Map(),skipped=[];
     for(const snapshot of snapshots){
+      if(snapshot.generated&&snapshot.selectionEligible!==true){
+        skipped.push({caseId:snapshot.caseId,reason:'NON_CANONICAL_SELECTION'});
+        continue;
+      }
       const schema=caseResolver(snapshot.caseId)||(snapshot.generated?{
         id:snapshot.caseId,asset:snapshot.asset,
         horizonProfile:snapshot.horizonProfile,
