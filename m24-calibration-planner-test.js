@@ -20,13 +20,12 @@ const test=`
  const ext=byKey['EXTENDED_DERIVATIVES|FAST_MARKET|DISTRIBUTION_MARKDOWN|DOWN'];
  const housing=byKey['HOUSING_PRICE_RATE_MEANING|SLOW_MARKET|HOUSING_CYCLE_ROLLOVER|DOWN'];
  const shock=byKey['CROSS_ASSET_LIQUIDITY|SHOCK|LIQUIDITY_SHOCK|DOWN'];
- const mechanics=byKey['MECHANICS_CORE_DERIVATIVES|FAST_MARKET|DISTRIBUTION_MARKDOWN|DOWN'];
  check(core?.currentCases===2&&core.episodeDeficit===28,'CORE crypto deficit');
  check(ext?.currentCases===1&&ext.episodeDeficit===29,'EXTENDED crypto deficit');
  check(housing?.currentCases===1&&housing.episodeDeficit===29,'housing deficit');
  check(shock?.currentCases===1&&shock.episodeDeficit===29,'shock deficit');
- check(mechanics?.currentCases===1&&mechanics.episodeDeficit===29,'mechanics-core generated deficit');
  check(plan.skipped.filter(x=>x.reason==='NON_DIRECTIONAL').length===2,'WAIT controls should be skipped');
+ check(plan.skipped.some(x=>x.caseId==='GEN-ETH-FAST_DISTRIBUTION_V1-2023-02-16'&&x.reason==='NON_CANONICAL_SELECTION'),'noncanonical generated integration case must be skipped');
  check(plan.cohortGroups.every(g=>g.probabilityAllowed===false),'no current cohort should allow probability');
  const queue=M24CalibrationPlanner.expansionQueue(plan);
  check(queue[0].coverageProfile==='CORE_DERIVATIVES','largest existing compatible cohort should be first P0');
