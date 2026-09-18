@@ -1,0 +1,21 @@
+{
+  "type":"VERIFIED_RELATION_SNAPSHOT",
+  "caseId":"GLOBAL-MAR2020",
+  "window":{"from":"2020-01-02","to":"2020-04-30"},
+  "verification":{
+    "workflow":"M24 Source E2E",
+    "workflowRunId":35359722177,
+    "artifactId":10554292176,
+    "artifactDigest":"sha256:14636c70791503ffdd007194f91dce588dd322ea038c22306e8b467082e6c952",
+    "headSha":"23948ceb39be03fbb7d34a9dfffe44ecd9152606",
+    "verifiedAt":"2026-09-18T15:00:44Z"
+  },
+  "relations":{
+    "SPX_VIX":{"sampleSize":82,"correlation":-0.7222,"strength":"STRONG","bestLagMatchedObservations":0},
+    "SPX_DOLLAR":{"sampleSize":82,"correlation":-0.4098,"strength":"MODERATE","bestLagMatchedObservations":2,"bestLagCorrelation":-0.4252},
+    "SPX_WTI":{"sampleSize":82,"correlation":0.1242,"strength":"WEAK","bestLagMatchedObservations":0},
+    "SPX_TEN_YEAR":{"sampleSize":82,"correlation":0.5171,"strength":"MODERATE","bestLagMatchedObservations":0}
+  },
+  "causalityStatus":"NOT_ESTABLISHED",
+  "rule":"Measured, window-specific association only. Correlation and lag do not establish causality."
+}
