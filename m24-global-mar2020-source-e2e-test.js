@@ -32,7 +32,7 @@ const test=`
    evidenceLayers:Object.fromEntries(Object.entries(result.evidence.layers).map(([k,v])=>[k,{state:v.state,note:v.note}])),
    rule:'March 2020 is modeled as a cross-asset liquidity shock. No double-top, actor-intent or single-indicator causality is inferred.'
  };
- fs.writeFileSync('m24-global-mar2020-source-snapshot.json',JSON.stringify(snapshot,null,2));
+ globalThis.__m24fs.writeFileSync('m24-global-mar2020-source-snapshot.json',JSON.stringify(snapshot,null,2));
  check(result.backtest.snapshot.price.firstTop.date==='2020-02-19','SPX baseline checkpoint mismatch');
  check(result.backtest.snapshot.price.secondTop.date==='2020-03-16','SPX stress checkpoint mismatch');
  check(result.backtest.outcome.troughDate==='2020-03-23','SPX stress trough mismatch');
@@ -47,6 +47,6 @@ const test=`
  check(result.calibrationEligible===true,'March 2020 source chain incomplete: '+JSON.stringify(result.evidence));
  console.log('M24 real-source GLOBAL March 2020 E2E OK');
  console.log(JSON.stringify(snapshot));
-})().catch(err=>{fs.writeFileSync('m24-global-mar2020-source-snapshot.json',JSON.stringify({failure:{message:String(err?.message||err),stack:String(err?.stack||'')}},null,2));console.error(err);process.exit(1)});
+})().catch(err=>{globalThis.__m24fs.writeFileSync('m24-global-mar2020-source-snapshot.json',JSON.stringify({failure:{message:String(err?.message||err),stack:String(err?.stack||'')}},null,2));console.error(err);process.exit(1)});
 `;
 vm.runInThisContext(`${source}\n${test}`,{filename:'m24-global-mar2020-e2e-bundle.js'});
