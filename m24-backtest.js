@@ -1,0 +1,146 @@
+globalThis.M24Backtest = (() => {
+  const asTime=value=>new Date(value).getTime();
+  const endOfDay=date=>/^\d{4}-\d{2}-\d{2}$/.test(String(date))?`${date}T23:59:59.999Z`:String(date);
+  const clone=value=>structuredClone(value);
+
+  function aggregateMeaningSources(sources,asOf){
+    const cutoff=asTime(asOf);
+    const available=(sources||[]).filter(x=>asTime(x.publishedAt)<=cutoff);
+    const frames={};
+    available.forEach(x=>(x.frames||[]).forEach(frame=>frames[frame]=(frames[frame]||0)+1));
+    const direction=available.length?available.reduce((sum,x)=>sum+Number(x.direction||0),0)/available.length:null;
+    return {count:available.length,direction,frames:Object.entries(frames).sort((a,b)=>b[1]-a[1]).map(([frame,count])=>({frame,count})),sourceIds:available.map(x=>x.id)};
+  }
+
+  function macroSecondTop(macroContext,cutoffMs){
+    return (macroContext?.series||[])
+      .filter(x=>x.status==='COMPARABLE'&&x.secondTop?.date&&asTime(endOfDay(x.secondTop.date))<=cutoffMs)
+      .map(x=>({key:x.key,seriesId:x.seriesId,secondTop:{date:x.secondTop.date,value:x.secondTop.value,lagDays:x.secondTop.lagDays},delta:x.delta,pctDelta:x.pctDelta,higherMeaning:x.higherMeaning}));
+  }
+
+  function verifiedDerivativesContext(derivativesContext,cutoffMs){
+    if(!derivativesContext?.secondTop?.asOf||!derivativesContext?.firstTop?.asOf) return null;
+    if(asTime(derivativesContext.secondTop.asOf)>cutoffMs||asTime(derivativesContext.firstTop.asOf)>cutoffMs) return null;
+    if(Number(derivativesContext.firstTop.count||0)<1||Number(derivativesContext.secondTop.count||0)<1) return null;
+    return clone({evidenceFamily:derivativesContext.evidenceFamily||'PERPETUAL_FUNDING',sourceMode:derivativesContext.sourceMode||null,coverageProfile:derivativesContext.coverageProfile||null,firstTop:derivativesContext.firstTop,secondTop:derivativesContext.secondTop,comparison:derivativesContext.comparison,cutoffPolicy:derivativesContext.cutoffPolicy||null});
+  }
+
+  function verifiedArchiveContext(archiveContext,cutoffMs){
+    if(!archiveContext?.firstTop||!archiveContext?.secondTop) return null;
+    if(archiveContext.firstTop.status!=='OK'||archiveContext.secondTop.status!=='OK') return null;
+    if((archiveContext.gaps||[]).length) return null;
+    if(!archiveContext.secondTop.date||asTime(endOfDay(archiveContext.secondTop.date))>cutoffMs) return null;
+    return {firstTop:clone(archiveContext.firstTop),secondTop:clone(archiveContext.secondTop),deltas:clone(archiveContext.deltas||{})};
+  }
+
+  function buildDecisionSnapshot({caseSchema,labResult,meaningContext=null,derivativesContext=null,archiveDerivativesContext=null,macroContext=null,asOf=null}={}){
+    if(!caseSchema||!labResult) throw new Error('Backtest requires case schema and measured price Lab result.');
+    const cutoff=asOf||labResult.secondTop?.asOf||endOfDay(labResult.secondTop.date);
+    const cutoffMs=asTime(cutoff);
+    if(!Number.isFinite(cutoffMs)) throw new Error('Invalid backtest asOf.');
+    const secondAvailability=labResult.secondTop?.asOf||endOfDay(labResult.secondTop.date);
+    if(asTime(secondAvailability)>cutoffMs) throw new Error('Backtest asOf precedes resolved second-top availability.');
+
+    const meaning=meaningContext?aggregateMeaningSources(meaningContext.sources,cutoff):null;
+    const derivatives=verifiedDerivativesContext(derivativesContext,cutoffMs);
+    const funding=derivatives?.evidenceFamily==='PERPETUAL_FUNDING'?derivatives:null;
+    const archive=verifiedArchiveContext(archiveDerivativesContext,cutoffMs);
+    const macro=macroContext?macroSecondTop(macroContext,cutoffMs):null;
+
+    const rawCoverage={price:true,meaning:Boolean(meaning),derivatives:Boolean(derivatives),archiveDerivatives:Boolean(archive),macro:Boolean(macro?.length)};
+    const profileMap={PRICE:'price',MEANING_WORLD:'meaning',DERIVATIVES:'derivatives',MACRO:'macro'};
+    const profileInputs=caseSchema.coverageProfile?(caseSchema.requiredLayers||[]).map(x=>profileMap[x]).filter(Boolean):null;
+    const decisionCoverage=profileInputs?.length?profileInputs.filter(k=>rawCoverage[k]).length/profileInputs.length:null;
+
+    const snapshot={
+      type:'DECISION_SNAPSHOT',caseId:caseSchema.id,asset:caseSchema.asset,asOf:cutoff,scoreProfile:caseSchema.scoreProfile||null,
+      price:{
+        firstTop:clone(labResult.firstTop),secondTop:clone(labResult.secondTop),
+        comparisons:{
+          priceHighChangePct:labResult.comparisons.priceHighChangePct,
+          volumeChangePct:labResult.comparisons.volumeChangePct,
+          rsiChange:labResult.comparisons.rsiChange,
+          rsiBearishDivergence:Boolean(labResult.comparisons.rsiBearishDivergence),
+          volumeBearishDivergence:Boolean(labResult.comparisons.volumeBearishDivergence),
+          priceReferenceChangePct:labResult.comparisons.priceReferenceChangePct??null,
+          yoyGrowthChange:labResult.comparisons.yoyGrowthChange??null,
+          transactionYoYAtSecond:labResult.comparisons.transactionYoYAtSecond??null
+        }
+      },
+      meaning,
+      derivatives,funding,
+      archiveDerivatives:archive,
+      macro,
+      coverage:rawCoverage,
+      decisionCoverage,
+      excludedFutureFields:['support.firstCloseBelow','support.firstWeeklyCloseBelow','outcome.troughDate','outcome.troughLow','outcome.drawdownFromSecondHighPct'],
+      rejectedUnverifiableAggregates:{funding:Boolean(derivativesContext)&&!funding,archiveDerivatives:Boolean(archiveDerivativesContext)&&!archive,macro:Boolean(macroContext)&&!macro?.length},
+      rule:'Only information provably available by asOf may enter this record. Outcome is evaluated later in a separate record; source-gap archive objects do not count as loaded evidence.'
+    };
+    return snapshot;
+  }
+
+  function scoreCandidate(snapshot){
+    let score=0;const evidence=[];const confirmations=[];
+    const add=(id,weight,reason)=>{score+=weight;evidence.push({id,weight,reason})};
+    if(snapshot.price.comparisons.volumeBearishDivergence) add('WEAK_PARTICIPATION',1,'Second top has lower measured volume than first top.');
+    if(snapshot.price.comparisons.rsiBearishDivergence) add('WEAK_RSI',1,'Measured RSI bearish divergence is present.');
+    if(snapshot.scoreProfile==='MECHANICS_CORE'){
+      const priceChange=Number(snapshot.price.comparisons.priceHighChangePct);
+      const failedRetest=Number.isFinite(priceChange)&&priceChange<0&&priceChange>=-8;
+      if(failedRetest) add('FAILED_RETEST',1,'Second checkpoint retests the prior high zone but remains below the first high.');
+      if(failedRetest&&Number(snapshot.price.comparisons.volumeChangePct)<-15) add('FAILED_RETEST_WEAK_PARTICIPATION',1,'Failed retest occurs with materially lower measured volume.');
+      if(failedRetest&&Number(snapshot.price.comparisons.rsiChange)<-5) add('FAILED_RETEST_WEAK_MOMENTUM',1,'Failed retest occurs with materially weaker RSI.');
+    }
+    if(snapshot.meaning?.direction>0.25&&snapshot.derivatives?.evidenceFamily==='PERPETUAL_FUNDING'&&snapshot.derivatives?.comparison?.crowdingShift==='MORE_POSITIVE_AT_SECOND_TOP') add('BULLISH_NARRATIVE_LONG_CROWDING',1,'Positive framing coexists with more-positive funding available by the decision cutoff.');
+    const archive=snapshot.archiveDerivatives;
+    if(snapshot.meaning?.direction>0.25&&archive?.secondTop?.summary?.globalLongShort>1&&Number(archive?.deltas?.globalLongShort)>0) add('ARCHIVE_LONG_SKEW',1,'Positive framing coexists with increasingly long-skewed archived positioning.');
+    if(archive?.secondTop?.summary?.takerLongShortVolume>1&&Number(archive?.deltas?.takerLongShortVolume)>0) confirmations.push({id:'TAKER_BUY_CONFIRMATION',reason:'Taker buy/sell ratio confirms buy-side aggression at the archived checkpoint.'});
+    if(snapshot.scoreProfile==='CROSS_ASSET_LIQUIDITY'){
+      if(Number(snapshot.price.comparisons.priceReferenceChangePct)<-15) add('CROSS_ASSET_PRICE_SHOCK',1,'Primary equity index is more than 15% below the pre-shock baseline.');
+      const cm=Object.fromEntries((snapshot.macro||[]).map(x=>[x.key,x]));
+      if(Number(cm.VIX?.delta)>20) add('VOLATILITY_SPIKE',1,'VIX is more than 20 points above the pre-shock baseline.');
+      if(Number(cm.FIN_CONDITIONS?.delta)>0.4) add('FINANCIAL_CONDITIONS_STRESS',1,'Financial conditions tightened materially.');
+      if(Number(cm.DOLLAR?.delta)>1) add('DOLLAR_STRESS',0.5,'Broad U.S. dollar strengthened during the stress window.');
+      if(Number(cm.WTI?.pctDelta)<-20) add('OIL_DEMAND_STRESS',0.5,'WTI fell more than 20% versus the pre-shock checkpoint.');
+    }
+    if(snapshot.scoreProfile==='HOUSING_SLOW_MARKET'){
+      if(Number(snapshot.price.comparisons.yoyGrowthChange)<-3) add('HOUSING_GROWTH_DECELERATION',1,'Annual house-price growth slowed materially between the momentum peak and the price-level peak.');
+      if(Number(snapshot.price.comparisons.transactionYoYAtSecond)<-10) add('HOUSING_TRANSACTION_WEAKNESS',1,'Housing transactions were more than 10% below the year-earlier level while the price index remained elevated.');
+    }
+    const macro=Object.fromEntries((snapshot.macro||[]).map(x=>[x.key,x]));
+    if(snapshot.scoreProfile!=='CROSS_ASSET_LIQUIDITY'&&Number(macro.DOLLAR?.delta)>0) add('STRONGER_DOLLAR',0.5,'Broad U.S. dollar is stronger versus first-top checkpoint.');
+    if(snapshot.scoreProfile!=='CROSS_ASSET_LIQUIDITY'&&Number(macro.FIN_CONDITIONS?.delta)>0) add('TIGHTER_FINANCIAL_CONDITIONS',0.5,'NFCI is higher/tighter versus first-top checkpoint.');
+    if(snapshot.scoreProfile==='HOUSING_SLOW_MARKET'&&Number(macro.ECB_DEPOSIT_RATE?.delta)>0) add('ECB_RATE_TIGHTENING',0.5,'ECB deposit rate is higher at the second housing checkpoint.');
+
+    const loaded=Object.values(snapshot.coverage).filter(Boolean).length;
+    const total=Object.keys(snapshot.coverage).length;
+    const coverage=Number.isFinite(snapshot.decisionCoverage)?snapshot.decisionCoverage:(loaded/total);
+    const action=coverage<0.6?'INSUFFICIENT_CONTEXT':score>=2?'DOWNSIDE_WATCH':'WAIT';
+    return {type:'ACTION_CANDIDATE',asOf:snapshot.asOf,score,coverage,action,evidence,confirmations,rule:'Historical candidate only; not calibrated performance and not a live order signal.'};
+  }
+
+  function evaluateOutcome({snapshot,labResult}={}){
+    if(!snapshot||!labResult) throw new Error('Outcome evaluation requires snapshot and Lab result.');
+    const breakDate=labResult.support?.firstCloseBelow||labResult.support?.firstWeeklyCloseBelow||null;
+    return {
+      type:'BACKTEST_OUTCOME',caseId:snapshot.caseId,decisionAsOf:snapshot.asOf,
+      supportBreakAfterDecision:Boolean(breakDate&&asTime(endOfDay(breakDate))>asTime(snapshot.asOf)),
+      supportBreakDate:breakDate,
+      troughDate:labResult.outcome?.troughDate||null,
+      drawdownFromSecondHighPct:labResult.outcome?.drawdownFromSecondHighPct??null,
+      drawdownFromSecondReferencePct:labResult.outcome?.drawdownFromSecondReferencePct??labResult.outcome?.drawdownFromSecondHighPct??null,
+      rule:'Outcome is scoring data only and was not available to the decision snapshot.'
+    };
+  }
+
+  function run(args){
+    const snapshot=buildDecisionSnapshot(args);
+    const candidate=scoreCandidate(snapshot);
+    const outcome=evaluateOutcome({snapshot,labResult:args.labResult});
+    return {caseId:snapshot.caseId,snapshot,candidate,outcome};
+  }
+
+  const verifiedFundingContext=verifiedDerivativesContext;
+  return {aggregateMeaningSources,macroSecondTop,verifiedDerivativesContext,verifiedFundingContext,verifiedArchiveContext,buildDecisionSnapshot,scoreCandidate,evaluateOutcome,run};
+})();

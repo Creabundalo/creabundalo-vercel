@@ -1,0 +1,50 @@
+{
+  "type": "VERIFIED_SOURCE_SNAPSHOT",
+  "caseId": "BTC-2019-TOP-MARKDOWN",
+  "asset": "BTC",
+  "coverageProfile": "FUTURES_POSITIONING",
+  "verification": {
+    "workflow": "M24 Source E2E",
+    "workflowRunId": 35330437876,
+    "artifactId": 10540572946,
+    "artifactDigest": "sha256:6276fed98a866e95691651fb2fc98a7cc47a1cf947bcb7c567a7026b2e24188e",
+    "headSha": "1f8cf7168aab6f1425815e4d0df85069d04911f5",
+    "verifiedAt": "2026-09-18T09:37:15Z",
+    "sourceComplete": true
+  },
+  "state": "SOURCE_COMPLETE",
+  "calibrationEligible": true,
+  "resolvedCheckpoints": {
+    "firstTop": "2019-06-26",
+    "secondTop": "2019-07-10",
+    "decisionAsOf": "2019-07-10T23:59:59.999Z",
+    "supportBreakDate": "2019-07-16",
+    "troughDate": "2019-12-18"
+  },
+  "evidenceLayers": {
+    "PRICE": {"state":"COMPLETE","note":"Measured price structure exists."},
+    "MEANING_WORLD": {"state":"COMPLETE","note":"2 BTC-2019 scoped timestamped Reuters source items; top coverage 1/1."},
+    "DERIVATIVES": {"state":"COMPLETE","extensionState":"PROFILE_COMPLETE","note":"Checkpoint-bounded CFTC/CME futures positioning complete; perpetual funding is not required for this pre-perpetual profile."},
+    "MACRO": {"state":"COMPLETE","note":"7 source-backed series."},
+    "DECISION_SNAPSHOT": {"state":"COMPLETE","note":"No-lookahead decision snapshot exists."},
+    "BACKTEST_OUTCOME": {"state":"COMPLETE","note":"Later outcome exists separately from decision input."}
+  },
+  "derivativesCheckpoints": {
+    "firstTop": {"reportDate":"2019-06-18","publishedAt":"2019-06-21T23:59:59.999Z","openInterest":5391,"leveragedMoneyNet":-347,"assetManagerNet":354},
+    "secondTop": {"reportDate":"2019-07-02","publishedAt":"2019-07-05T23:59:59.999Z","openInterest":5839,"leveragedMoneyNet":-73,"assetManagerNet":42},
+    "comparison": {"openInterestChangePct":8.31,"leveragedMoneyNetChange":274,"assetManagerNetChange":-312,"dealerNetChange":36}
+  },
+  "actionCandidate": {
+    "action": "WAIT",
+    "score": 0.5,
+    "coverage": 0.8,
+    "evidence": [{"id":"STRONGER_DOLLAR","weight":0.5}]
+  },
+  "sourceNotes": {
+    "price": "Coinbase Exchange historical candles",
+    "derivatives": "CFTC Traders in Financial Futures Futures Only; CME Bitcoin market code 133741",
+    "macro": "Official-source series via FRED",
+    "meaning": "BTC-2019-scoped timestamped Reuters-source fixtures"
+  },
+  "note": "Pinned real-source E2E output. This case demonstrates a non-perpetual derivatives evidence profile. It is historical calibration evidence, not a live trading signal."
+}

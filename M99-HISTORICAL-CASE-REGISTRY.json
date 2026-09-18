@@ -1,0 +1,35 @@
+{
+  "schema": "M99_HISTORICAL_CASE_REGISTRY_V1",
+  "rule": "Windows are research scopes, not hand-picked resolved checkpoints. Data resolves checkpoints and outcomes.",
+  "cases": [
+    {"id":"BTC-2017-2018-CYCLE","domain":"CRYPTO","subject":"BTC","window":{"from":"2017-01-01","to":"2019-03-31"},"themes":["EXPANSION","EUPHORIA","BREAKDOWN","CAPITULATION"],"priority":"P0","status":"REGISTERED","sourceFamilies":["SPOT","CFTC_CME_FUTURES","MEANING","MACRO"]},
+    {"id":"BTC-2019-TOP-MARKDOWN","domain":"CRYPTO","subject":"BTC","window":{"from":"2019-05-01","to":"2019-12-31"},"themes":["DISTRIBUTION","BREAKDOWN"],"priority":"P0","status":"SOURCE_COMPLETE_NON_DIRECTIONAL","sourceFamilies":["COINBASE","CFTC_TFF","FRED","MEANING"]},
+    {"id":"BTC-2021-2022-TOP-MARKDOWN","domain":"CRYPTO","subject":"BTC","window":{"from":"2021-01-01","to":"2022-06-30"},"themes":["EUPHORIA","DISTRIBUTION","BREAKDOWN"],"priority":"P0","status":"SOURCE_COMPLETE_REPLAYED","sourceFamilies":["COINBASE","BINANCE_VISION","FRED","MEANING"]},
+    {"id":"ETH-2021-2022-TOP-MARKDOWN","domain":"CRYPTO","subject":"ETH","window":{"from":"2021-03-01","to":"2022-06-30"},"themes":["EXPANSION","DISTRIBUTION","BREAKDOWN"],"priority":"P0","status":"SOURCE_COMPLETE_REPLAYED","sourceFamilies":["COINBASE","BINANCE_VISION","FRED","MEANING"]},
+    {"id":"SOL-2021-2022-TOP-MARKDOWN","domain":"CRYPTO","subject":"SOL","window":{"from":"2021-07-01","to":"2022-06-30"},"themes":["EXPANSION","EUPHORIA","BREAKDOWN"],"priority":"P0","status":"SOURCE_COMPLETE_REPLAYED","sourceFamilies":["COINBASE","BINANCE_VISION","FRED","MEANING"]},
+    {"id":"UST-LUNA-2022","domain":"CRYPTO","subject":"UST/LUNA","window":{"from":"2021-10-01","to":"2022-06-30"},"themes":["PEG_STRESS","LEVERAGE_CASCADE","CAPITULATION"],"priority":"P0","status":"REGISTERED","sourceFamilies":["SPOT","ON_CHAIN","STABLECOIN","MEANING","CROSS_ASSET"]},
+
+    {"id":"NASDAQ-1999-2002","domain":"EQUITY_INDEX","subject":"NASDAQ","window":{"from":"1998-01-01","to":"2003-01-01"},"themes":["EXPANSION","EUPHORIA","BUBBLE_CANDIDATE","BREAKDOWN","CAPITULATION"],"priority":"P0","status":"SOURCE_COMPLETE_NON_DIRECTIONAL","sourceFamilies":["PRICE_BREADTH","FUNDAMENTALS","RATES","MEANING"]},
+    {"id":"SPX-2007-2009","domain":"EQUITY_INDEX","subject":"SPX","window":{"from":"2006-01-01","to":"2009-12-31"},"themes":["CREDIT_STRESS","DISTRIBUTION","BREAKDOWN","CAPITULATION"],"priority":"P0","status":"REGISTERED","sourceFamilies":["PRICE_BREADTH","CREDIT","FUNDING","VOLATILITY","MEANING"]},
+    {"id":"EQUITY-MAR2020","domain":"EQUITY_INDEX","subject":"SPX/NASDAQ","window":{"from":"2019-10-01","to":"2020-08-31"},"themes":["VOLATILITY_SHOCK","LIQUIDITY_STRESS","CAPITULATION","RECOVERY"],"priority":"P0","status":"REGISTERED","sourceFamilies":["PRICE_BREADTH","VOLATILITY","FUNDING","RATES","MEANING"]},
+    {"id":"GME-2021","domain":"EQUITY","subject":"GME","window":{"from":"2020-07-01","to":"2021-06-30"},"themes":["SHORT_SQUEEZE","VOLATILITY_SHOCK","OPTIONS_CROWDING"],"priority":"P1","status":"REGISTERED","sourceFamilies":["PRICE","SHORT_INTEREST","OPTIONS","FLOW","MEANING"]},
+
+    {"id":"CREDIT-2007-2009","domain":"BONDS_CREDIT","subject":"US_CREDIT","window":{"from":"2006-01-01","to":"2009-12-31"},"themes":["CREDIT_STRESS","LIQUIDITY_STRESS","LEVERAGE_CASCADE"],"priority":"P0","status":"REGISTERED","sourceFamilies":["YIELD_CURVE","CREDIT_SPREAD","FUNDING","DEFAULTS","MEANING"]},
+    {"id":"UST-MAR2020","domain":"BONDS_CREDIT","subject":"UST","window":{"from":"2019-10-01","to":"2020-06-30"},"themes":["LIQUIDITY_STRESS","VOLATILITY_SHOCK","POLICY_SHOCK"],"priority":"P0","status":"REGISTERED","sourceFamilies":["TREASURY","REPO","FED_BALANCE_SHEET","CFTC","MEANING"]},
+    {"id":"UK-GILTS-2022","domain":"BONDS_CREDIT","subject":"UK_GILTS","window":{"from":"2022-06-01","to":"2023-01-31"},"themes":["POLICY_SHOCK","MARGIN_COLLATERAL","LEVERAGE_CASCADE"],"priority":"P0","status":"REGISTERED","sourceFamilies":["GILT_YIELDS","DERIVATIVES","COLLATERAL","POLICY","MEANING"]},
+
+    {"id":"OIL-2008","domain":"COMMODITY","subject":"WTI","window":{"from":"2007-01-01","to":"2009-06-30"},"themes":["EXPANSION","EUPHORIA","DEMAND_SHOCK","BREAKDOWN"],"priority":"P0","status":"REGISTERED","sourceFamilies":["FUTURES","EIA_PHYSICAL","CFTC","USD","MEANING"]},
+    {"id":"OIL-APR2020","domain":"COMMODITY","subject":"WTI","window":{"from":"2020-01-01","to":"2020-09-30"},"themes":["SUPPLY_SHOCK","STORAGE_STRESS","CONTRACT_LIFECYCLE","VOLATILITY_SHOCK"],"priority":"P0","status":"REGISTERED","sourceFamilies":["FUTURES_CURVE","EIA_PHYSICAL","CFTC","STORAGE","MEANING"]},
+    {"id":"GOLD-2011","domain":"COMMODITY","subject":"XAU","window":{"from":"2009-01-01","to":"2013-06-30"},"themes":["EXPANSION","EUPHORIA","DISTRIBUTION","BREAKDOWN"],"priority":"P0","status":"REGISTERED","sourceFamilies":["GOLD_PRICE","CFTC","REAL_RATES","USD","ETF_FLOW","MEANING"]},
+
+    {"id":"CHF-2015-SNB-FLOOR-EXIT","domain":"FX","subject":"EURCHF","window":{"from":"2014-01-01","to":"2015-06-30"},"themes":["FX_REGIME","POLICY_SHOCK","VOLATILITY_SHOCK"],"priority":"P0","status":"REGISTERED","sourceFamilies":["FX","SNB_POLICY","RATES","OPTIONS","MEANING"]},
+    {"id":"USD-2021-2022","domain":"FX","subject":"USD_BROAD","window":{"from":"2021-01-01","to":"2023-01-31"},"themes":["RATE_DIFFERENTIAL","CARRY","LIQUIDITY_TIGHTENING"],"priority":"P0","status":"REGISTERED","sourceFamilies":["FX","RATES","CFTC","BIS","MEANING"]},
+
+    {"id":"US-HOUSING-2003-2009","domain":"HOUSING","subject":"US_HOUSING","window":{"from":"2002-01-01","to":"2010-12-31"},"themes":["EXPANSION","BUBBLE_CANDIDATE","CREDIT_STRESS","BREAKDOWN"],"priority":"P0","status":"REGISTERED","sourceFamilies":["HOUSE_PRICES","MORTGAGE_CREDIT","MBS","LENDING_STANDARDS","MEANING"]},
+    {"id":"NL-HOUSING-1995-2013","domain":"HOUSING","subject":"NL_HOUSING","window":{"from":"1995-01-01","to":"2013-12-31"},"themes":["EXPANSION","BUBBLE_CANDIDATE","CORRECTION","DELEVERAGING"],"priority":"P0","status":"REGISTERED","sourceFamilies":["CBS_KADASTER","MORTGAGE_RATES","CREDIT","SUPPLY","MEANING"]},
+    {"id":"NL-HOUSING-2015-2023","domain":"HOUSING","subject":"NL_HOUSING","window":{"from":"2015-01-01","to":"2023-12-31"},"themes":["LOW_RATE_EXPANSION","AFFORDABILITY_STRESS","RATE_SHOCK","CORRECTION"],"priority":"P0","status":"REGISTERED","sourceFamilies":["CBS_KADASTER","ECB_DNB_RATES","CREDIT","SUPPLY","MEANING"]},
+
+    {"id":"FUNDING-SEP2019","domain":"MONEY_FUNDING","subject":"USD_REPO","window":{"from":"2019-07-01","to":"2019-12-31"},"themes":["LIQUIDITY_STRESS","FUNDING_SHOCK","POLICY_RESPONSE"],"priority":"P0","status":"REGISTERED","sourceFamilies":["NYFED_REPO","RESERVES","TREASURY","POLICY","MEANING"]},
+    {"id":"GLOBAL-MAR2020","domain":"CROSS_ASSET","subject":"GLOBAL","window":{"from":"2019-10-01","to":"2020-09-30"},"themes":["LIQUIDITY_STRESS","VOLATILITY_SHOCK","CROSS_ASSET_CORRELATION","POLICY_RESPONSE"],"priority":"P0","status":"REGISTERED","sourceFamilies":["EQUITY","TREASURY","USD","GOLD","OIL","FUNDING","VOLATILITY","MEANING"]}
+  ]
+}

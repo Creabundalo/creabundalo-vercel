@@ -1,0 +1,44 @@
+name: M24 Generated Calibration Batch
+
+on:
+  pull_request:
+    paths:
+      - 'm24-generated-batch-e2e-test.js'
+      - 'm24-generated-batch.js'
+      - 'm24-generated-case.js'
+      - 'm24-episode-generator.js'
+      - 'm24-episode-universe.js'
+      - 'm24-enrichment.js'
+      - 'm24-backtest.js'
+      - 'm24-evidence-gate.js'
+      - 'm24-funding-archive.js'
+      - 'm24-binance-vision.js'
+      - 'm24-binance-vision-lab.js'
+      - 'm24-macro.js'
+      - '.github/workflows/m24-generated-calibration-batch.yml'
+  workflow_dispatch:
+
+jobs:
+  enrich-next-generated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check m24-generated-batch-e2e-test.js
+          node --check m24-generated-batch.js
+          node --check m24-generated-case.js
+          node --check m24-episode-universe.js
+      - name: Enrich next three canonical ETH episodes
+        run: node m24-generated-batch-e2e-test.js
+      - name: Upload batch checkpoint
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m24-generated-calibration-batch-002
+          path: m24-generated-batch-002-snapshot.json
+          if-no-files-found: error

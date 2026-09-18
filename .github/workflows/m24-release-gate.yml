@@ -1,0 +1,201 @@
+name: M24 Release Gate
+
+on:
+  pull_request:
+    paths:
+      - 'm24.html'
+      - 'm24.css'
+      - 'm24.js'
+      - 'm24-*.js'
+      - 'm24-*.json'
+      - 'M24-*.md'
+      - '.github/workflows/m24-release-gate.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Required files
+        run: |
+          for f in \
+            m24.html m24.css m24.js m24-core.js m24-data.js m24-cases.js m24-historical.js m24-lab.js m24-primary-lab.js m24-lab-ui.js \
+            m24-smoke-test.js m24-resolution-test.js m24-coinbase.js m24-coinbase-test.js m24-fred-market.js m24-fred-market-test.js m24-index-lab.js m24-index-lab-test.js \
+            m24-derivatives.js m24-derivatives-lab.js m24-derivatives-ui.js m24-derivatives-test.js m24-derivatives-lab-test.js m24-cftc.js m24-cftc-lab.js m24-cftc-test.js \
+            m24-binance-vision.js m24-binance-vision-lab.js m24-binance-vision-ui.js m24-binance-vision-test.js m24-binance-vision-lab-test.js \
+            m24-funding-archive.js m24-funding-archive-test.js \
+            m24-macro.js m24-macro-lab.js m24-macro-ui.js m24-macro-test.js m24-macro-lab-test.js \
+            m24-meaning.js m24-meaning-ui.js m24-meaning-test.js \
+            m24-trickster-lab.js m24-trickster-ui.js m24-trickster-lab-test.js m24-trickster-crosscase-test.js \
+            m24-backtest.js m24-backtest-ui.js m24-backtest-test.js \
+            m24-calibration.js m24-calibration-ui.js m24-calibration-test.js \
+            m24-evidence-gate.js m24-evidence-gate-test.js m24-evidence-ui.js \
+            m24-enrichment.js m24-enrichment-test.js m24-enrichment-ui.js \
+            m24-replay.js m24-replay-test.js m24-replay-e2e-test.js m24-verified-btc-2019.json m24-verified-btc-2021.json \
+            m24-cohort.js m24-cohort-test.js m24-cohort-ui.js \
+            m24-case-btc-2021.json M24-REQUIREMENTS.md M24-TECHNICAL-DESIGN.md M24-SOURCE-COMPARISON.md M24-DERIVATIVES.md M24-MACRO-CROSS-ASSET.md M24-MEANING-WORLD.md M24-BACKTEST.md M24-RELEASE-CHECKLIST.md; do test -f "$f"; done
+
+      - name: JavaScript syntax
+        run: |
+          for f in m24*.js; do node --check "$f"; done
+
+      - name: Architecture contract
+        run: |
+          grep -q 'class QubusStore' m24-core.js
+          grep -q 'class TricksterEngine' m24-core.js
+          grep -q 'resolutionIndependent:true' m24-cases.js
+          grep -q 'class CoinbaseHistoricalProvider' m24-coinbase.js
+          grep -q 'class FredMarketProvider' m24-fred-market.js
+          grep -q 'TOP_MARKDOWN_CLOSE_ONLY' m24-cases.js
+          grep -q 'INDEX_CLOSE_MACRO_MEANING' m24-cases.js
+          grep -q 'requiredForCase' m24-evidence-gate.js
+          grep -q 'class BinanceDerivativesProvider' m24-derivatives.js
+          grep -q 'class BinanceVisionFundingProvider' m24-funding-archive.js
+          grep -q 'class BinanceHistoricalDerivativesProvider' m24-funding-archive.js
+          grep -q 'BINANCE_VISION_MONTHLY_FUNDING' m24-funding-archive.js
+          grep -q 'DERIVATIVES_CONTEXT' m24-derivatives-lab.js
+          grep -q 'class TffProvider' m24-cftc.js
+          grep -q "evidenceFamily:'FUTURES_POSITIONING'" m24-cftc.js
+          grep -q 'FUTURES_POSITIONING' m24-evidence-gate.js
+          grep -q 'RESOLVED_CHECKPOINT_DATE' m24-derivatives-lab.js
+          grep -q 'class BinanceVisionMetricsProvider' m24-binance-vision.js
+          grep -q 'CHECKSUM_MISMATCH' m24-binance-vision.js
+          grep -q 'ARCHIVE_DERIVATIVES_CONTEXT' m24-binance-vision-lab.js
+          grep -q 'class FredCsvProvider' m24-macro.js
+          grep -q 'MACRO_CROSS_ASSET_CONTEXT' m24-macro-lab.js
+          grep -q 'MEANING_WORLD_CONTEXT' m24-meaning.js
+          grep -q 'HISTORICAL_TRICKSTER_ASSESSMENT' m24-trickster-lab.js
+          grep -q "intentStatus:'INTENT_UNKNOWN'" m24-trickster-lab.js
+          grep -q "actorAttribution:'NONE'" m24-trickster-lab.js
+          grep -q 'DECISION_SNAPSHOT' m24-backtest.js
+          grep -q 'BACKTEST_OUTCOME' m24-backtest.js
+          grep -q 'verifiedFundingContext' m24-backtest.js
+          grep -q 'CALIBRATION_RESULT' m24-calibration.js
+          grep -q 'INSUFFICIENT_SAMPLE' m24-calibration.js
+          grep -q 'DEFAULT_MIN_SAMPLES=30' m24-calibration.js
+          grep -q 'CASE_EVIDENCE_STATUS' m24-evidence-gate.js
+          grep -q 'CASE_ENRICHMENT_RESULT' m24-enrichment.js
+          grep -q 'HISTORICAL_REPLAY_RESULT' m24-replay.js
+          grep -q 'VERIFIED_SOURCE_SNAPSHOT' m24-verified-btc-2021.json
+          grep -q 'new M24Core.Runtime' m24.js
+
+      - name: Historical runtime smoke test
+        run: node m24-smoke-test.js
+      - name: Cross-resolution Lab contract test
+        run: node m24-resolution-test.js
+      - name: Coinbase adapter contract test
+        run: node m24-coinbase-test.js
+      - name: Fred close-only market contract test
+        run: node m24-fred-market-test.js
+      - name: Close-only index Lab contract test
+        run: node m24-index-lab-test.js
+      - name: Derivatives adapter contract test
+        run: node m24-derivatives-test.js
+      - name: Derivatives Lab contract test
+        run: node m24-derivatives-lab-test.js
+      - name: CFTC futures positioning contract test
+        run: node m24-cftc-test.js
+      - name: CBS housing provider contract test
+        run: node m24-cbs-housing-test.js
+      - name: Cross-asset relation contract test
+        run: node m24-relations-test.js
+      - name: Relation stability contract test
+        run: node m24-relation-stability-test.js
+      - name: Horizon profile contract test
+        run: node m24-horizon-profile-test.js
+      - name: Calibration expansion planner contract test
+        run: node m24-calibration-planner-test.js
+      - name: Episode generator contract test
+        run: node m24-episode-generator-test.js
+      - name: Episode universe contract test
+        run: node m24-episode-universe-test.js
+      - name: Generated mechanics case contract test
+        run: node m24-generated-case-test.js
+      - name: Generated promotion contract test
+        run: node m24-generated-promotion-test.js
+      - name: Generated enrichment batch contract test
+        run: node m24-generated-batch-test.js m24-episode-generator.js m24-episode-generator-test.js m24-episode-universe.js m24-episode-universe-test.js m24-generated-case.js m24-generated-case-test.js m24-generated-promotion.js m24-generated-promotion-test.js m24-generated-batch.js m24-generated-batch-test.js
+      - name: Pattern hypothesis contract test
+        run: node m24-patterns-test.js
+      - name: Pattern discrimination contract test
+        run: node m24-pattern-discrimination-test.js
+      - name: Cross-asset lab contract test
+        run: node m24-cross-asset-test.js
+      - name: Binance Vision archive contract test
+        run: node m24-binance-vision-test.js
+      - name: Binance Vision Lab contract test
+        run: node m24-binance-vision-lab-test.js
+      - name: Funding archive contract test
+        run: node m24-funding-archive-test.js
+      - name: Macro provider contract test
+        run: node m24-macro-test.js
+      - name: Macro Lab contract test
+        run: node m24-macro-lab-test.js
+      - name: Meaning-world contract test
+        run: node m24-meaning-test.js
+      - name: Historical Trickster contract test
+        run: node m24-trickster-lab-test.js
+      - name: Trickster cross-case contract test
+        run: node m24-trickster-crosscase-test.js
+      - name: No-lookahead backtest contract test
+        run: node m24-backtest-test.js
+      - name: Forecast calibration contract test
+        run: node m24-calibration-test.js
+      - name: Evidence promotion contract test
+        run: node m24-evidence-gate-test.js
+      - name: Source-complete enrichment contract test
+        run: node m24-enrichment-test.js
+      - name: Verified replay contract test
+        run: node m24-replay-test.js
+      - name: Historical cohort contract test
+        run: node m24-cohort-test.js
+
+      - name: Verified multi-asset snapshot contract
+        run: |
+          test -f m24-verified-btc-2019.json
+          test -f m24-verified-btc-2021.json
+          test -f m24-verified-eth-2021.json
+          test -f m24-verified-sol-2021.json
+          grep -q '"coverageProfile": "FUTURES_POSITIONING"' m24-verified-btc-2019.json
+          grep -q '"action": "WAIT"' m24-verified-btc-2019.json
+          grep -q '"coverageProfile": "EXTENDED_DERIVATIVES"' m24-verified-btc-2021.json
+          grep -q '"coverageProfile": "CORE_DERIVATIVES"' m24-verified-eth-2021.json
+          grep -q '"coverageProfile": "CORE_DERIVATIVES"' m24-verified-sol-2021.json
+
+      - name: Safety contract
+        run: |
+          grep -q 'SIMULATED_ONLY' m24.html
+          grep -q 'no broker execution' m24.html
+          grep -q 'No broker order action exists' M24-REQUIREMENTS.md
+          grep -q "mode='SIMULATED_ONLY'" m24-core.js
+          grep -q 'not proof of actor intent' m24-derivatives.js
+          grep -q 'do not identify an actor or prove manipulation' m24-binance-vision-lab.js
+          grep -q 'not a truth score' m24-meaning.js
+          grep -q "intentStatus:'INTENT_UNKNOWN'" m24-trickster-lab.js
+          grep -q "actorAttribution:'NONE'" m24-trickster-lab.js
+          grep -q 'Historical candidate only' m24-backtest.js
+          grep -q 'Outcome is scoring data only' m24-backtest.js
+          grep -q 'Do not display a probability before the minimum sample threshold is met' m24-calibration.js
+          grep -q 'never set manually' m24-enrichment.js
+          grep -q 'n=1 remains INSUFFICIENT_SAMPLE' m24-replay-e2e-test.js
+          ! grep -Eqi 'placeOrder|submitOrder|transmit[[:space:]]*=[[:space:]]*true|LIVE_ORDER' m24*.js
+
+      - name: Interaction contract
+        run: |
+          grep -q 'data-mode="lab"' m24.html
+          grep -q 'runPrimaryCompare' m24.html
+          grep -q 'renderTransactions' m24.js
+          grep -q 'Laad derivatencontext' m24-derivatives-ui.js
+          grep -q 'Laad 2021 OI/ratio archief' m24-binance-vision-ui.js
+          grep -q 'Laad macro/cross-asset' m24-macro-ui.js
+          grep -q 'Laad betekeniswereld' m24-meaning-ui.js
+          grep -q 'Draai Trickster over geladen lagen' m24-trickster-ui.js
+          grep -q 'Draai no-lookahead backtest' m24-backtest-ui.js
+          grep -q 'Controleer forecast-kalibratie' m24-calibration-ui.js
+          grep -q 'Controleer broncompleetheid' m24-evidence-ui.js
+          grep -q 'Vul BTC 2021 bewijs aan' m24-enrichment-ui.js
+          grep -q 'Laad historische case-batch' m24-cohort-ui.js
+          grep -q 'm24-enrichment-ui.js' m24-lab-ui.js
+          grep -q "LAB_RESULT" m24.js

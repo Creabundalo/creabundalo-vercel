@@ -1,0 +1,57 @@
+{
+  "type": "VERIFIED_SOURCE_SNAPSHOT",
+  "caseId": "NASDAQ-1999-2002",
+  "asset": "NASDAQ",
+  "coverageProfile": "INDEX_CLOSE_MACRO_MEANING",
+  "verification": {
+    "workflow": "M24 Source E2E",
+    "workflowRunId": 35335186979,
+    "artifactId": 10542556066,
+    "artifactDigest": "sha256:d3850c2c293411a5243502c3a3d24b61dddc9d5ee81d63aa8b0cb5342477dab7",
+    "headSha": "03078a7e72de3b0011ba3a29d770e6a1fea630f6",
+    "verifiedAt": "2026-09-18T10:32:42Z",
+    "sourceComplete": true
+  },
+  "state": "SOURCE_COMPLETE",
+  "calibrationEligible": true,
+  "priceBasis": "CLOSE_ONLY",
+  "rawCoverage": {
+    "count": 1004,
+    "firstDate": "1999-01-04",
+    "lastDate": "2002-12-31",
+    "minDate": "2002-10-09",
+    "minClose": 1114.11
+  },
+  "resolvedCheckpoints": {
+    "firstTop": "2000-03-10",
+    "secondTop": "2000-03-24",
+    "decisionAsOf": "2000-03-24T23:59:59.999Z",
+    "supportBreakDate": "2000-03-30",
+    "troughDate": "2002-10-09"
+  },
+  "evidenceLayers": {
+    "PRICE": {"state":"COMPLETE","note":"1004 NASDAQ Composite daily close observations; no OHLC or volume synthesized."},
+    "MEANING_WORLD": {"state":"COMPLETE","note":"2 scoped official timestamped sources; top coverage 1/1."},
+    "MACRO": {"state":"COMPLETE","note":"DFF, DGS10 and WTI comparable around both checkpoints."},
+    "DECISION_SNAPSHOT": {"state":"COMPLETE","note":"No-lookahead snapshot at second peak."},
+    "BACKTEST_OUTCOME": {"state":"COMPLETE","note":"Later support break and 2002 trough stored separately."},
+    "DERIVATIVES": {"state":"NOT_REQUIRED","note":"Not part of this case-specific core evidence profile."}
+  },
+  "macroAtCheckpoints": {
+    "FED_FUNDS_LEGACY": {"first":5.75,"second":5.98,"delta":0.23},
+    "TEN_YEAR": {"first":6.39,"second":6.2,"delta":-0.19},
+    "WTI": {"first":31.76,"second":27.86,"delta":-3.9}
+  },
+  "actionCandidate": {
+    "action": "WAIT",
+    "score": 0,
+    "coverage": 1
+  },
+  "sourceNotes": {
+    "price": "NASDAQ Composite (NASDAQCOM), Nasdaq Inc. via FRED, daily close",
+    "meaningFirstTop": "Federal Reserve Board, The revolution in information technology, 2000-03-06",
+    "meaningSecondTop": "SEC litigation release eConnect, 2000-03-24",
+    "macro": "Official-source series via FRED"
+  },
+  "note": "Verified non-crypto source-complete case. Close-only evidence remains close-only; no synthetic high, low, volume or derivatives are created. WAIT creates no directional forecast sample."
+}

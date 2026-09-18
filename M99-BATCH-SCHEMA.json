@@ -1,0 +1,51 @@
+{
+  "schema": "M99_BATCH_TASK_V1",
+  "required": [
+    "id",
+    "batch_id",
+    "product_ids",
+    "priority",
+    "status",
+    "goal",
+    "dependencies",
+    "inputs",
+    "outputs",
+    "acceptance",
+    "provenance_policy"
+  ],
+  "status_values": ["READY", "RUNNING", "DONE", "BLOCKED", "LATER"],
+  "priority_values": ["P0", "P1", "P2"],
+  "task_template": {
+    "id": "M99-B000-T00",
+    "batch_id": "M99-B000",
+    "product_ids": ["P00"],
+    "priority": "P0",
+    "status": "READY",
+    "goal": "",
+    "dependencies": [],
+    "inputs": [],
+    "outputs": [],
+    "acceptance": [],
+    "provenance_policy": "Every external fact must have SOURCE/lineage or SOURCE_GAP.",
+    "blocker": null,
+    "checkpoint_notes": [],
+    "started_at": null,
+    "completed_at": null
+  },
+  "batch_template": {
+    "id": "M99-B000",
+    "phase": "FILL",
+    "goal": "",
+    "status": "READY",
+    "task_ids": [],
+    "acceptance": [],
+    "checkpoint": {
+      "done": [],
+      "blocked": [],
+      "source_gaps": [],
+      "architecture_decisions": [],
+      "discoveries": [],
+      "next_ready": []
+    }
+  }
+}
