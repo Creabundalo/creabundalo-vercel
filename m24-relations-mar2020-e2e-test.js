@@ -35,7 +35,7 @@ const test=`
    provenance:[...(spx.provenance||[]),...Object.values(bundle.series).flatMap(x=>x.provenance||[])],
    rule:'Measured relation discovery only. Correlation/lead-lag does not establish causality.'
  };
- fs.writeFileSync('m24-relations-mar2020-snapshot.json',JSON.stringify(snapshot,null,2));
+ globalThis.__m24fs.writeFileSync('m24-relations-mar2020-snapshot.json',JSON.stringify(snapshot,null,2));
  console.log('M24 real-source March 2020 relation E2E OK');
  console.log(JSON.stringify(snapshot));
 })().catch(e=>{fs.writeFileSync('m24-relations-mar2020-snapshot.json',JSON.stringify({failure:{message:String(e?.message||e),stack:String(e?.stack||'')}},null,2));console.error(e);process.exit(1)});
