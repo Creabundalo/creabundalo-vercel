@@ -28,7 +28,7 @@ jobs:
             m24-funding-archive.js m24-funding-archive-test.js \
             m24-macro.js m24-macro-lab.js m24-macro-ui.js m24-macro-test.js m24-macro-lab-test.js \
             m24-meaning.js m24-meaning-ui.js m24-meaning-test.js \
-            m24-trickster-lab.js m24-trickster-ui.js m24-trickster-lab-test.js \
+            m24-trickster-lab.js m24-trickster-ui.js m24-trickster-lab-test.js m24-trickster-crosscase-test.js \
             m24-backtest.js m24-backtest-ui.js m24-backtest-test.js \
             m24-calibration.js m24-calibration-ui.js m24-calibration-test.js \
             m24-evidence-gate.js m24-evidence-gate-test.js m24-evidence-ui.js \
@@ -123,6 +123,8 @@ jobs:
         run: node m24-meaning-test.js
       - name: Historical Trickster contract test
         run: node m24-trickster-lab-test.js
+      - name: Trickster cross-case contract test
+        run: node m24-trickster-crosscase-test.js
       - name: No-lookahead backtest contract test
         run: node m24-backtest-test.js
       - name: Forecast calibration contract test
