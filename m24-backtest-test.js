@@ -40,7 +40,7 @@ const test=`
   check(!('support' in run.snapshot)&&!('outcome' in run.snapshot),'future outcome container leaked into decision snapshot');
   check(run.snapshot.meaning.count===1&&run.snapshot.meaning.sourceIds[0]==='a','post-top meaning source leaked into snapshot');
   check(!(run.snapshot.macro||[]).some(x=>x.key==='FUTURE_MACRO'),'post-top macro source leaked into snapshot');
-  check(run.snapshot.coverage.funding===true&&run.snapshot.coverage.archiveDerivatives===true,'verified source-backed derivatives should be admitted');
+  check(run.snapshot.coverage.derivatives===true&&run.snapshot.coverage.archiveDerivatives===true,'verified source-backed derivatives should be admitted');
   check(run.candidate.action==='DOWNSIDE_WATCH','expected historical downside watch candidate');
   check(!run.candidate.evidence.some(x=>x.id==='WEAK_RSI'),'rejected RSI divergence must not be scored');
   check(run.outcome.supportBreakAfterDecision===true,'later support break should be outcome-only scoring data');
@@ -52,7 +52,7 @@ const test=`
 
   const unverifiableFunding={firstTop:{count:2},secondTop:{count:2},comparison:{crowdingShift:'MORE_POSITIVE_AT_SECOND_TOP'}};
   const run3=M24Backtest.run({caseSchema,labResult:baseLab,meaningContext:meaning,derivativesContext:unverifiableFunding,archiveDerivativesContext:archive,macroContext:macro});
-  check(run3.snapshot.coverage.funding===false,'unverifiable aggregated funding must be rejected');
+  check(run3.snapshot.coverage.derivatives===false,'unverifiable aggregated derivatives must be rejected');
   check(run3.snapshot.rejectedUnverifiableAggregates.funding===true,'rejected funding aggregate must be visible');
 
   const limitedArchive={firstTop:{date:'2021-04-14',status:'SOURCE_GAP',summary:null},secondTop:{date:'2021-11-10',status:'SOURCE_GAP',summary:null},deltas:{},gaps:[{reason:'ARCHIVE_DAY_MISSING'}]};
