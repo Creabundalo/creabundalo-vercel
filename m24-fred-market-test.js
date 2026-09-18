@@ -13,4 +13,4 @@ const test=`
  console.log('M24 FRED market provider contract OK');
 })().catch(e=>{console.error(e);process.exit(1)});
 `;
-vm.runInThisContext(`${source}\\n${test}`,{filename:'m24-fred-market-test-bundle.js'});
+vm.runInThisContext(`${source}\n${test}`,{filename:'m24-fred-market-test-bundle.js'});
