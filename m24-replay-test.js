@@ -6,7 +6,7 @@ const test=`
   const check=(condition,message)=>{if(!condition)throw new Error(message)};
   const caseSchema={id:'BTC-2021-2022-TOP-MARKDOWN',asset:'BTC'};
   const snapshot={
-    type:'VERIFIED_SOURCE_SNAPSHOT',caseId:caseSchema.id,asset:'BTC',calibrationEligible:true,
+    type:'VERIFIED_SOURCE_SNAPSHOT',caseId:caseSchema.id,asset:'BTC',coverageProfile:'EXTENDED_DERIVATIVES',calibrationEligible:true,
     verification:{sourceComplete:true,workflowRunId:1,artifactDigest:'sha256:test'},
     resolvedCheckpoints:{decisionAsOf:'2021-11-10T23:59:59.999Z'},
     actionCandidate:{action:'DOWNSIDE_WATCH'}
@@ -23,6 +23,7 @@ const test=`
   check(result.pairs.length===4,'expected four horizon samples');
   check(result.direction==='DOWN','expected downside replay direction');
   check(result.pairs.every(x=>x.forecast.data.direction==='DOWN'),'forecast direction mismatch');
+  check(result.pairs.every(x=>x.forecast.data.conditions.coverageProfile==='EXTENDED_DERIVATIVES'),'coverage profile must propagate into every replay forecast');
   check(result.pairs.every(x=>x.outcome.data.directionCorrect===true),'all synthetic outcomes should be direction-correct');
   check(result.pairs.map(x=>x.horizon).join(',')==='3D,2W,1M,2M','unexpected horizon order');
   const store=new M24Core.QubusStore();M24Replay.addToStore(store,result);
