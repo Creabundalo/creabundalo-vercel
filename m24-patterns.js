@@ -6,7 +6,7 @@ globalThis.M24Patterns = (() => {
     return null;
   };
 
-  function fibGeometry({firstTop,reaction,secondTop,trough}={}){
+  function fibGeometry({firstTop,reaction,secondTop,trough,tolerance=0.05}={}){
     const a=valueOf(firstTop),b=valueOf(reaction),c=valueOf(secondTop),d=valueOf(trough);
     if(![a,b,c,d].every(finite)||a===b) return {family:'FIBONACCI',status:'INSUFFICIENT'};
     const base=Math.abs(a-b);
@@ -14,13 +14,15 @@ globalThis.M24Patterns = (() => {
     const markdownExtension=round(Math.abs(c-d)/base);
     const refs=[0.382,0.5,0.618,0.786,1,1.272,1.618,2,2.618];
     const nearest=x=>refs.map(r=>({level:r,error:round(Math.abs(x-r))})).sort((x,y)=>x.error-y.error)[0];
+    const secondNearest=nearest(retracement),markdownNearest=nearest(markdownExtension);
     return {
-      family:'FIBONACCI',status:'OBSERVED',
+      family:'FIBONACCI',status:'MEASURED_GEOMETRY',
       baseSwing:{from:a,to:b,size:round(base)},
-      secondLegRatio:retracement,secondLegNearest:nearest(retracement),
-      markdownExtensionRatio:markdownExtension,markdownNearest:nearest(markdownExtension),
+      secondLegRatio:retracement,secondLegNearest:secondNearest,secondLegReferenceMatch:secondNearest.error<=tolerance,
+      markdownExtensionRatio:markdownExtension,markdownNearest,markdownReferenceMatch:markdownNearest.error<=tolerance,
+      tolerance,
       causalStatus:'NOT_ESTABLISHED',
-      rule:'Ratios are descriptive geometry. Proximity to a Fibonacci level does not establish predictive power or causality.'
+      rule:'Ratios are descriptive geometry. A reference match is defined only by the explicit tolerance and does not establish predictive power or causality.'
     };
   }
 
@@ -83,10 +85,11 @@ globalThis.M24Patterns = (() => {
     for(let i=1;i<pivots.length;i++) dirs.push(Math.sign(pivots[i].value-pivots[i-1].value));
     const alternating=dirs.every((x,i)=>i===0||x!==dirs[i-1]);
     return {
-      family:'ELLIOTT_SWING_CANDIDATE',status:alternating?'OBSERVED':'NOT_OBSERVED',
+      family:'ELLIOTT_SWING_CANDIDATE',status:alternating?'CANDIDATE_ONLY':'NOT_OBSERVED',
       pivotCount:pivots.length,pivots:pivots.slice(-8),alternating,
+      waveValidation:'NOT_PERFORMED',
       causalStatus:'NOT_ESTABLISHED',
-      rule:'This detects alternating swings only. Wave numbering and predictive Elliott interpretation remain hypotheses requiring separate validation.'
+      rule:'Alternating pivots are partly produced by the swing-extraction method itself. This is not Elliott validation; wave numbering, constraints and predictive interpretation require separate null/control testing.'
     };
   }
 
