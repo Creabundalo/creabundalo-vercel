@@ -6,7 +6,7 @@ globalThis.M24FredMarket = (() => {
     NASDAQ:Object.freeze({id:'NASDAQCOM',label:'NASDAQ Composite',source:'Nasdaq via FRED',priceBasis:'CLOSE_ONLY'})
   });
   const ms=value=>new Date(value).getTime();
-  const finite=value=>Number.isFinite(Number(value));
+  const finite=value=>{const s=String(value??'').trim();return s!==''&&s!=='.'&&Number.isFinite(Number(s))};
 
   class FredMarketError extends Error{
     constructor(code,message,detail={}){super(message);this.name='FredMarketError';this.code=code;this.detail=detail}
