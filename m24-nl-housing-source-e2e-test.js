@@ -43,6 +43,6 @@ const test=`
  check(result.calibrationEligible===true,'housing chain incomplete: '+JSON.stringify(result.evidence));
  console.log('M24 real-source NL housing 2015-2023 E2E OK');
  console.log(JSON.stringify(snap));
-})().catch(err=>{fs.writeFileSync('m24-nl-housing-source-snapshot.json',JSON.stringify({failure:{message:String(err?.message||err),stack:String(err?.stack||'')}},null,2));console.error(err);process.exit(1)});
+})().catch(err=>{globalThis.__m24fs.writeFileSync('m24-nl-housing-source-snapshot.json',JSON.stringify({failure:{message:String(err?.message||err),stack:String(err?.stack||'')}},null,2));console.error(err);process.exit(1)});
 `;
 vm.runInThisContext(`${source}\n${test}`,{filename:'m24-nl-housing-e2e-bundle.js'});
