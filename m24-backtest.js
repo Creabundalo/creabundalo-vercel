@@ -15,7 +15,7 @@ globalThis.M24Backtest = (() => {
   function macroSecondTop(macroContext,cutoffMs){
     return (macroContext?.series||[])
       .filter(x=>x.status==='COMPARABLE'&&x.secondTop?.date&&asTime(endOfDay(x.secondTop.date))<=cutoffMs)
-      .map(x=>({key:x.key,seriesId:x.seriesId,secondTop:{date:x.secondTop.date,value:x.secondTop.value,lagDays:x.secondTop.lagDays},delta:x.delta,higherMeaning:x.higherMeaning}));
+      .map(x=>({key:x.key,seriesId:x.seriesId,secondTop:{date:x.secondTop.date,value:x.secondTop.value,lagDays:x.secondTop.lagDays},delta:x.delta,pctDelta:x.pctDelta,higherMeaning:x.higherMeaning}));
   }
 
   function verifiedDerivativesContext(derivativesContext,cutoffMs){
@@ -89,6 +89,14 @@ globalThis.M24Backtest = (() => {
     const archive=snapshot.archiveDerivatives;
     if(snapshot.meaning?.direction>0.25&&archive?.secondTop?.summary?.globalLongShort>1&&Number(archive?.deltas?.globalLongShort)>0) add('ARCHIVE_LONG_SKEW',1,'Positive framing coexists with increasingly long-skewed archived positioning.');
     if(archive?.secondTop?.summary?.takerLongShortVolume>1&&Number(archive?.deltas?.takerLongShortVolume)>0) confirmations.push({id:'TAKER_BUY_CONFIRMATION',reason:'Taker buy/sell ratio confirms buy-side aggression at the archived checkpoint.'});
+    if(snapshot.scoreProfile==='CROSS_ASSET_LIQUIDITY'){
+      if(Number(snapshot.price.comparisons.priceReferenceChangePct)<-15) add('CROSS_ASSET_PRICE_SHOCK',1,'Primary equity index is more than 15% below the pre-shock baseline.');
+      const cm=Object.fromEntries((snapshot.macro||[]).map(x=>[x.key,x]));
+      if(Number(cm.VIX?.delta)>20) add('VOLATILITY_SPIKE',1,'VIX is more than 20 points above the pre-shock baseline.');
+      if(Number(cm.FIN_CONDITIONS?.delta)>0.4) add('FINANCIAL_CONDITIONS_STRESS',1,'Financial conditions tightened materially.');
+      if(Number(cm.DOLLAR?.delta)>1) add('DOLLAR_STRESS',0.5,'Broad U.S. dollar strengthened during the stress window.');
+      if(Number(cm.WTI?.pctDelta)<-20) add('OIL_DEMAND_STRESS',0.5,'WTI fell more than 20% versus the pre-shock checkpoint.');
+    }
     if(snapshot.scoreProfile==='HOUSING_SLOW_MARKET'){
       if(Number(snapshot.price.comparisons.yoyGrowthChange)<-3) add('HOUSING_GROWTH_DECELERATION',1,'Annual house-price growth slowed materially between the momentum peak and the price-level peak.');
       if(Number(snapshot.price.comparisons.transactionYoYAtSecond)<-10) add('HOUSING_TRANSACTION_WEAKNESS',1,'Housing transactions were more than 10% below the year-earlier level while the price index remained elevated.');
