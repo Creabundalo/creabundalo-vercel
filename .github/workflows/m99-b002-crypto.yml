@@ -1,0 +1,39 @@
+name: M99 B002 Crypto Batch
+
+on:
+  pull_request:
+    paths:
+      - 'm99-b002-crypto-batch.js'
+      - 'm24-cases.js'
+      - 'm24-coinbase.js'
+      - 'm24-meaning.js'
+      - 'm24-funding-archive.js'
+      - 'm24-binance-vision.js'
+      - 'm24-macro.js'
+      - 'm24-enrichment.js'
+      - 'm24-evidence-gate.js'
+      - '.github/workflows/m99-b002-crypto.yml'
+  workflow_dispatch:
+
+jobs:
+  fill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: node --check m99-b002-crypto-batch.js
+      - name: Run batch
+        run: node m99-b002-crypto-batch.js
+      - name: Upload checkpoint
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m99-b002-crypto-checkpoint
+          path: |
+            m99-b002-crypto-checkpoint.json
+            m99-*-source-snapshot.json
+          if-no-files-found: warn
