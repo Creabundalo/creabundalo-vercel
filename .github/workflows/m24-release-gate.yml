@@ -110,7 +110,9 @@ jobs:
       - name: Episode generator contract test
         run: node m24-episode-generator-test.js
       - name: Generated mechanics case contract test
-        run: node m24-generated-case-test.js m24-episode-generator.js m24-episode-generator-test.js m24-generated-case.js m24-generated-case-test.js
+        run: node m24-generated-case-test.js
+      - name: Generated promotion contract test
+        run: node m24-generated-promotion-test.js m24-episode-generator.js m24-episode-generator-test.js m24-generated-case.js m24-generated-case-test.js m24-generated-promotion.js m24-generated-promotion-test.js
       - name: Pattern hypothesis contract test
         run: node m24-patterns-test.js
       - name: Pattern discrimination contract test
