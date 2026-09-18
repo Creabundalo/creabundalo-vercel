@@ -1,0 +1,19 @@
+{
+  "type":"VERIFIED_PATTERN_DISCRIMINATION_SNAPSHOT",
+  "verification":{
+    "workflow":"M24 Pattern E2E",
+    "workflowRunId":35360886105,
+    "artifactId":10553289336,
+    "artifactDigest":"sha256:c617c6fc044bbb439915eff1f0868fe71e350b12186f11fda6513028ebd8f422",
+    "headSha":"50178d25dadc596cd61bd537bc82ecdce6c87492",
+    "verifiedAt":"2026-09-18T15:11:36Z"
+  },
+  "sample":{"directional":3,"waitControls":2,"minimumRequired":30},
+  "results":{
+    "RSI_BEARISH_DIVERGENCE":{"directionalSignals":3,"directionalTotal":3,"waitSignals":0,"waitTotal":2,"state":"INSUFFICIENT_SAMPLE","predictiveProbability":null},
+    "WYCKOFF_STRUCTURE":{"directionalSignals":3,"directionalTotal":3,"waitSignals":2,"waitTotal":2,"state":"INSUFFICIENT_SAMPLE","predictiveProbability":null},
+    "FIBONACCI_REFERENCE_MATCH":{"directionalSignals":0,"directionalTotal":3,"waitSignals":2,"waitTotal":2,"state":"INSUFFICIENT_SAMPLE","predictiveProbability":null},
+    "ELLIOTT_CANDIDATE":{"directionalSignals":3,"directionalTotal":3,"waitSignals":2,"waitTotal":2,"state":"INSUFFICIENT_SAMPLE","predictiveProbability":null}
+  },
+  "rule":"Descriptive control comparison only. No pattern is assigned predictive probability below the minimum sample gate; Elliott candidate presence is not wave validation."
+}
