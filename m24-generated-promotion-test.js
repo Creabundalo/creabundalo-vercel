@@ -3,7 +3,7 @@ const source=fs.readFileSync('m24-generated-promotion.js','utf8');
 const test=`
 (()=>{
  const check=(x,m)=>{if(!x)throw new Error(m)};
- const schema={id:'GEN-ETH-X',asset:'ETH',generated:true,generatorRule:'FAST_DISTRIBUTION_V1',episodeGroup:'ETH:X',coverageProfile:'MECHANICS_CORE_DERIVATIVES',horizonProfile:'FAST_MARKET',regimeFamily:'DISTRIBUTION_MARKDOWN'};
+ const schema={id:'GEN-ETH-X',asset:'ETH',generated:true,generatorRule:'FAST_DISTRIBUTION_V1',episodeGroup:'ETH:X',selectionEligible:true,selectionUniverseId:'FAST_DISTRIBUTION_V1',selectionWindow:{from:'2020-01-01',to:'2025-12-31'},coverageProfile:'MECHANICS_CORE_DERIVATIVES',horizonProfile:'FAST_MARKET',regimeFamily:'DISTRIBUTION_MARKDOWN'};
  const enrichment={
    state:'SOURCE_COMPLETE',calibrationEligible:true,
    backtest:{
