@@ -47,10 +47,35 @@ Use for housing and other publication-lagged slow markets.
 |---|---|---|---|
 | B018-T01 | P0 | Horizon-profile schema | DONE |
 | B018-T02 | P0 | FAST/SHOCK/SLOW clock contract | DONE |
-| B018-T03 | P0 | Real-source housing slow-market replay | RUNNING |
-| B018-T04 | P0 | Real-source March-2020 shock replay | RUNNING |
-| B018-T05 | P0 | Cohort isolation by horizon profile | RUNNING |
-| B018-T06 | P0 | Validation conclusion | BLOCKED on T03-T05 |
+| B018-T03 | P0 | Real-source housing slow-market replay | DONE |
+| B018-T04 | P0 | Real-source March-2020 shock replay | DONE |
+| B018-T05 | P0 | Cohort isolation by horizon profile | DONE |
+| B018-T06 | P0 | Validation conclusion | DONE |
 
 ## Validation principle
 The user-facing intuition “closer horizons should usually be easier to estimate” is not encoded as a guarantee. Markets can reverse violently; observed horizon-specific accuracy must be learned from compatible historical cohorts.
+
+
+## Verified result
+
+### SLOW_MARKET — NL Housing 2022
+Decision availability: 2022-08-22.
+
+- 1M: -0.1505% — correct DOWN
+- 3M: -1.5049% — correct DOWN
+- 6M: -3.5365% — correct DOWN
+- 12M: -5.4929% — correct DOWN
+
+### SHOCK — GLOBAL March 2020
+Decision checkpoint: 2020-03-16.
+
+- 1D: +5.9955% — incorrect DOWN
+- 3D: +0.9748% — incorrect DOWN
+- 1W: -6.2331% — correct DOWN
+- 2W: +10.0799% — incorrect DOWN
+- 1M: +16.6475% — incorrect DOWN
+
+### Conclusion
+Closer is not automatically more reliable. Shock regimes can reverse violently even when the stress diagnosis was correct. Horizon accuracy must therefore be calibrated by compatible market-timescale/regime cohorts.
+
+**Batch status: DONE.**
