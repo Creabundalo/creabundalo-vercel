@@ -8,6 +8,7 @@ on:
       - 'm24-eth-2021-source-e2e-test.js'
       - 'm24-sol-2021-source-e2e-test.js'
       - 'm24-replay-e2e-test.js'
+      - 'm24-verified-btc-2019.json'
       - 'm24-verified-btc-2021.json'
       - 'm24-verified-eth-2021.json'
       - 'm24-verified-sol-2021.json'
@@ -65,6 +66,7 @@ jobs:
           name: m24-2021-source-snapshots
           path: |
             m24-btc-2019-source-snapshot.json
+            m24-btc-2019-replay-snapshot.json
             m24-btc-2021-source-snapshot.json
             m24-btc-2021-replay-snapshot.json
             m24-eth-2021-source-snapshot.json
