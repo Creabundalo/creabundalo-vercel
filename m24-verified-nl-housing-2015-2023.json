@@ -1,0 +1,40 @@
+{
+  "type": "VERIFIED_SOURCE_SNAPSHOT",
+  "caseId": "NL-HOUSING-2015-2023",
+  "asset": "NL_HOUSING",
+  "coverageProfile": "HOUSING_PRICE_RATE_MEANING",
+  "verification": {
+    "workflow": "M24 Source E2E",
+    "workflowRunId": 35340856932,
+    "artifactId": 10544687977,
+    "artifactDigest": "sha256:c00028e08c448b5592a3afa027cee32594cf0b0b54c912d593bd713515053b54",
+    "headSha": "e20d5ffd8f11011f347c565b212332eadb5337d7",
+    "verifiedAt": "2026-09-18T11:41:45Z",
+    "sourceComplete": true
+  },
+  "state": "SOURCE_COMPLETE",
+  "calibrationEligible": true,
+  "resolvedCheckpoints": {
+    "firstTop": "2022-01-01",
+    "firstTopAsOf": "2022-02-28",
+    "secondTop": "2022-07-01",
+    "decisionAsOf": "2022-08-28",
+    "supportBreakDate": "2022-12-01",
+    "troughDate": "2023-04-01"
+  },
+  "housingEvidence": {
+    "firstCheckpoint": {"priceIndex":127.4,"yoyPct":20.9,"transactions":14053,"transactionYoYPct":-42.7},
+    "secondCheckpoint": {"priceIndex":132.9,"yoyPct":14.2,"transactions":16417,"transactionYoYPct":-13.8},
+    "ecbDepositRate": {"first":-0.5,"second":0.0,"delta":0.5}
+  },
+  "actionCandidate": {
+    "action": "DOWNSIDE_WATCH",
+    "score": 2,
+    "coverage": 0.6666666666666666,
+    "evidence": [
+      {"id":"HOUSING_GROWTH_DECELERATION","weight":1},
+      {"id":"HOUSING_TRANSACTION_WEAKNESS","weight":1}
+    ]
+  },
+  "note": "Verified slow-market case. Publication availability governs no-lookahead; no daily-market or crypto-derivatives fields are synthesized."
+}
