@@ -21,9 +21,9 @@ Patterns are observations/hypotheses derived from source-backed price/state data
 | B016-T01 | P0 | Pattern hypothesis record schema | DONE |
 | B016-T02 | P0 | Fibonacci geometry engine | DONE |
 | B016-T03 | P0 | RSI / structural distribution adapter | DONE |
-| B016-T04 | P0 | Swing / Elliott candidate engine | RUNNING |
-| B016-T05 | P0 | Verified cross-case pattern matrix | READY |
-| B016-T06 | P0 | Pattern ↔ mechanism comparison | READY |
+| B016-T04 | P0 | Swing / Elliott candidate engine | DONE |
+| B016-T05 | P0 | Verified cross-case pattern matrix | DONE |
+| B016-T06 | P0 | Pattern ↔ mechanism comparison | DONE |
 
 ## Evidence discipline
 Each pattern record stores:
@@ -37,3 +37,8 @@ Each pattern record stores:
 - causal status = NOT_ESTABLISHED.
 
 No pattern may create a live order by itself.
+
+
+See `M99-B016-PATTERN-MECHANISM-COMPARISON.md` for the verified control result.
+
+**Batch status: DONE.**
