@@ -91,7 +91,8 @@ globalThis.M24Replay = (() => {
       conditions:{
         historicalCaseId:caseSchema.id,replay:'VERIFIED_SOURCE_SNAPSHOT',
         coverageProfile:snapshot.coverageProfile||'UNSPECIFIED',
-        horizonProfile
+        horizonProfile,
+        regime:caseSchema.regimeFamily||caseSchema.analysis||null
       },
       calibrationState:'HISTORICAL_REPLAY',
       decisionAsOf:snapshot.resolvedCheckpoints.decisionAsOf,
