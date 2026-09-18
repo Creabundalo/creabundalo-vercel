@@ -33,7 +33,7 @@ jobs:
             m24-calibration.js m24-calibration-ui.js m24-calibration-test.js \
             m24-evidence-gate.js m24-evidence-gate-test.js m24-evidence-ui.js \
             m24-enrichment.js m24-enrichment-test.js m24-enrichment-ui.js \
-            m24-replay.js m24-replay-test.js m24-replay-e2e-test.js m24-verified-btc-2021.json \
+            m24-replay.js m24-replay-test.js m24-replay-e2e-test.js m24-verified-btc-2019.json m24-verified-btc-2021.json \
             m24-cohort.js m24-cohort-test.js m24-cohort-ui.js \
             m24-case-btc-2021.json M24-REQUIREMENTS.md M24-TECHNICAL-DESIGN.md M24-SOURCE-COMPARISON.md M24-DERIVATIVES.md M24-MACRO-CROSS-ASSET.md M24-MEANING-WORLD.md M24-BACKTEST.md M24-RELEASE-CHECKLIST.md; do test -f "$f"; done
 
@@ -118,9 +118,12 @@ jobs:
 
       - name: Verified multi-asset snapshot contract
         run: |
+          test -f m24-verified-btc-2019.json
           test -f m24-verified-btc-2021.json
           test -f m24-verified-eth-2021.json
           test -f m24-verified-sol-2021.json
+          grep -q '"coverageProfile": "FUTURES_POSITIONING"' m24-verified-btc-2019.json
+          grep -q '"action": "WAIT"' m24-verified-btc-2019.json
           grep -q '"coverageProfile": "EXTENDED_DERIVATIVES"' m24-verified-btc-2021.json
           grep -q '"coverageProfile": "CORE_DERIVATIVES"' m24-verified-eth-2021.json
           grep -q '"coverageProfile": "CORE_DERIVATIVES"' m24-verified-sol-2021.json
