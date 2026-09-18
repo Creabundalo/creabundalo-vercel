@@ -153,9 +153,29 @@
 - [x] Macro/cross-asset context is compared around resolved first/second top dates
 - [x] Timestamped meaning-world fixture covers first top / reaction / support / second top
 - [x] Historical multi-layer Trickster assessment exists and preserves evidence discipline
-- [ ] Capture an actual Coinbase daily comparison result in a source-complete Lab run
-- [ ] Implement Binance Vision ZIP/CSV metrics archive importer
-- [ ] Attach 2021 open-interest / long-short / taker-ratio archive data
-- [ ] Broaden timestamped narrative corpus beyond the first deterministic source fixture
+- [x] Capture actual Coinbase daily results in source-complete BTC / ETH / SOL Lab runs
+- [x] Implement Binance Vision ZIP/CSV metrics archive importer with SHA-256 verification
+- [x] Attach 2021 open-interest / long-short / taker-ratio archive data where available; retain ETH/SOL checkpoint archive absence as explicit source gaps
+- [x] Broaden timestamped narrative corpus to asset-scoped BTC / ETH / SOL source fixtures
 
 Release rule: M24 cannot progress from paper to real execution until historical validation, paper trading and an explicit live-execution approval gate exist.
+
+
+## Verified multi-asset cohort status
+- [x] BTC 2021 source-complete: EXTENDED_DERIVATIVES
+- [x] ETH 2021 source-complete: CORE_DERIVATIVES
+- [x] SOL 2021 source-complete: CORE_DERIVATIVES
+- [x] BTC / ETH / SOL meaning-world sources are asset/case scoped
+- [x] Replay forecasts carry evidence coverage profile
+- [x] Calibration filters CORE and EXTENDED profiles separately
+- [x] Unprofiled research view cannot replace profile-specific calibration
+- [x] BTC / ETH / SOL 3D / 2W / 1M / 2M replay contract passes
+- [x] Incorrect ETH 3D outcome remains stored as incorrect (+0.2638%)
+- [x] Source E2E run 51 green
+- [x] M24 Release Gate run 170 green
+- [x] ACTIO Release Gate run 177 green
+- [x] M24 Cohort Gate run 63 green
+- [ ] BTC 2019 evidence model resolved for pre-Binance-futures first-top period
+
+Current source-complete case count: **3/4**.
+Current replay calibration remains below the n=30 display threshold in every coverage-profile/horizon cohort.
