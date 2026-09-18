@@ -2,7 +2,8 @@ const fs=require('fs'),vm=require('vm');
 globalThis.__m24fs=fs;
 globalThis.__m24CalibrationSnapshots=[
  'm24-verified-btc-2019.json','m24-verified-btc-2021.json','m24-verified-eth-2021.json','m24-verified-sol-2021.json',
- 'm24-verified-nasdaq-2000.json','m24-verified-nl-housing-2015-2023.json','m24-verified-global-mar2020.json'
+ 'm24-verified-nasdaq-2000.json','m24-verified-nl-housing-2015-2023.json','m24-verified-global-mar2020.json',
+ 'm24-verified-generated-eth-2023-02-16.json'
 ].map(f=>JSON.parse(fs.readFileSync(f,'utf8')));
 const source=['m24-cases.js','m24-replay.js','m24-calibration-planner.js'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
 const test=`
@@ -19,10 +20,12 @@ const test=`
  const ext=byKey['EXTENDED_DERIVATIVES|FAST_MARKET|DISTRIBUTION_MARKDOWN|DOWN'];
  const housing=byKey['HOUSING_PRICE_RATE_MEANING|SLOW_MARKET|HOUSING_CYCLE_ROLLOVER|DOWN'];
  const shock=byKey['CROSS_ASSET_LIQUIDITY|SHOCK|LIQUIDITY_SHOCK|DOWN'];
+ const mechanics=byKey['MECHANICS_CORE_DERIVATIVES|FAST_MARKET|DISTRIBUTION_MARKDOWN|DOWN'];
  check(core?.currentCases===2&&core.episodeDeficit===28,'CORE crypto deficit');
  check(ext?.currentCases===1&&ext.episodeDeficit===29,'EXTENDED crypto deficit');
  check(housing?.currentCases===1&&housing.episodeDeficit===29,'housing deficit');
  check(shock?.currentCases===1&&shock.episodeDeficit===29,'shock deficit');
+ check(mechanics?.currentCases===1&&mechanics.episodeDeficit===29,'mechanics-core generated deficit');
  check(plan.skipped.filter(x=>x.reason==='NON_DIRECTIONAL').length===2,'WAIT controls should be skipped');
  check(plan.cohortGroups.every(g=>g.probabilityAllowed===false),'no current cohort should allow probability');
  const queue=M24CalibrationPlanner.expansionQueue(plan);
