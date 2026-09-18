@@ -23,7 +23,7 @@ jobs:
           for f in \
             m24.html m24.css m24.js m24-core.js m24-data.js m24-cases.js m24-historical.js m24-lab.js m24-primary-lab.js m24-lab-ui.js \
             m24-smoke-test.js m24-resolution-test.js m24-coinbase.js m24-coinbase-test.js \
-            m24-derivatives.js m24-derivatives-lab.js m24-derivatives-ui.js m24-derivatives-test.js m24-derivatives-lab-test.js \
+            m24-derivatives.js m24-derivatives-lab.js m24-derivatives-ui.js m24-derivatives-test.js m24-derivatives-lab-test.js m24-cftc.js m24-cftc-lab.js m24-cftc-test.js \
             m24-binance-vision.js m24-binance-vision-lab.js m24-binance-vision-ui.js m24-binance-vision-test.js m24-binance-vision-lab-test.js \
             m24-funding-archive.js m24-funding-archive-test.js \
             m24-macro.js m24-macro-lab.js m24-macro-ui.js m24-macro-test.js m24-macro-lab-test.js \
@@ -52,6 +52,9 @@ jobs:
           grep -q 'class BinanceHistoricalDerivativesProvider' m24-funding-archive.js
           grep -q 'BINANCE_VISION_MONTHLY_FUNDING' m24-funding-archive.js
           grep -q 'DERIVATIVES_CONTEXT' m24-derivatives-lab.js
+          grep -q 'class TffProvider' m24-cftc.js
+          grep -q "evidenceFamily:'FUTURES_POSITIONING'" m24-cftc.js
+          grep -q 'FUTURES_POSITIONING' m24-evidence-gate.js
           grep -q 'RESOLVED_CHECKPOINT_DATE' m24-derivatives-lab.js
           grep -q 'class BinanceVisionMetricsProvider' m24-binance-vision.js
           grep -q 'CHECKSUM_MISMATCH' m24-binance-vision.js
@@ -84,6 +87,8 @@ jobs:
         run: node m24-derivatives-test.js
       - name: Derivatives Lab contract test
         run: node m24-derivatives-lab-test.js
+      - name: CFTC futures positioning contract test
+        run: node m24-cftc-test.js
       - name: Binance Vision archive contract test
         run: node m24-binance-vision-test.js
       - name: Binance Vision Lab contract test
