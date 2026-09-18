@@ -19,13 +19,13 @@ globalThis.M24HousingLab = (() => {
     return {
       caseId:caseSchema.id,asset:caseSchema.asset,resolution:'M',priceBasis:'HOUSE_PRICE_INDEX',
       checkpointRoles:{firstTop:'GROWTH_MOMENTUM_PEAK',secondTop:'PRICE_LEVEL_PEAK'},
-      firstTop:{date:first.date,asOf:first.publishedAt,close:first.priceIndex,high:null,volume:first.transactions,rsi14:null,priceBasis:'HOUSE_PRICE_INDEX',yoyPct:first.yoyPct,transactions:first.transactions},
-      secondTop:{date:second.date,asOf:second.publishedAt,close:second.priceIndex,high:null,volume:second.transactions,rsi14:null,priceBasis:'HOUSE_PRICE_INDEX',yoyPct:second.yoyPct,transactions:second.transactions},
+      firstTop:{date:first.date,asOf:first.publishedAt,close:first.priceIndex,high:null,volume:first.transactions,rsi14:null,priceBasis:'HOUSE_PRICE_INDEX',yoyPct:first.yoyPct,transactions:first.transactions,transactionYoYPct:first.transactionYoYPct},
+      secondTop:{date:second.date,asOf:second.publishedAt,close:second.priceIndex,high:null,volume:second.transactions,rsi14:null,priceBasis:'HOUSE_PRICE_INDEX',yoyPct:second.yoyPct,transactions:second.transactions,transactionYoYPct:second.transactionYoYPct},
       comparisons:{
         priceHighChangePct:null,priceReferenceChangePct:pct(first.priceIndex,second.priceIndex),
         volumeChangePct:pct(first.transactions,second.transactions),rsiChange:null,rsiBearishDivergence:false,
         volumeBearishDivergence:Number.isFinite(first.transactions)&&Number.isFinite(second.transactions)&&second.transactions<first.transactions,
-        yoyGrowthChange:round(second.yoyPct-first.yoyPct)
+        yoyGrowthChange:round(second.yoyPct-first.yoyPct),transactionYoYAtSecond:second.transactionYoYPct
       },
       support:{referenceDate:support.date,referenceClose:support.priceIndex,referenceLow:null,firstCloseBelow:breakRow?.date||null,firstWeeklyCloseBelow:null,breakClose:breakRow?.priceIndex??null},
       outcome:{troughDate:trough.date,troughClose:trough.priceIndex,troughLow:null,drawdownFromSecondHighPct:null,drawdownFromSecondReferencePct:pct(second.priceIndex,trough.priceIndex)},
