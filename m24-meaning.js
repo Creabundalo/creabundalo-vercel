@@ -2,6 +2,30 @@ globalThis.M24Meaning = (() => {
   const source=spec=>Object.freeze(spec);
   const SOURCES=Object.freeze([
     source({
+      id:'SRC-FED-GLOBAL-2020-02-19-MINUTES',assets:['SPX'],caseIds:['GLOBAL-MAR2020'],publishedAt:'2020-02-19T19:00:00Z',publisher:'Federal Reserve Board',transport:'FOMC minutes release',
+      title:'Minutes of the Federal Open Market Committee, January 28-29, 2020',url:'https://www.federalreserve.gov/newsevents/pressreleases/monetary20200219a.htm',
+      frames:['PRE_SHOCK_BASELINE','MODERATE_GROWTH','POLICY_STABILITY'],direction:0.25,
+      summary:'Official pre-shock policy context available at the S&P 500 peak checkpoint.',quality:'PRIMARY_OFFICIAL'
+    }),
+    source({
+      id:'SRC-WHO-GLOBAL-2020-03-11-PANDEMIC',assets:['SPX'],caseIds:['GLOBAL-MAR2020'],publishedAt:'2020-03-11T17:00:00Z',publisher:'World Health Organization',transport:'WHO media briefing',
+      title:'WHO Director-General opening remarks on COVID-19 - 11 March 2020',url:'https://www.who.int/news-room/speeches/item/who-director-general-s-opening-remarks-at-the-media-briefing-on-covid-19---11-march-2020',
+      frames:['PANDEMIC','GLOBAL_SHOCK','ECONOMIC_DISRUPTION'],direction:-0.9,
+      summary:'WHO characterized COVID-19 as a pandemic and emphasized rapid global spread and severity.',quality:'PRIMARY_OFFICIAL'
+    }),
+    source({
+      id:'SRC-NYFED-GLOBAL-2020-03-12-REPO',assets:['SPX'],caseIds:['GLOBAL-MAR2020'],publishedAt:'2020-03-12T19:00:00Z',publisher:'Federal Reserve Bank of New York',transport:'Operating policy statement',
+      title:'Statement Regarding Treasury Reserve Management Purchases and Repurchase Operations',url:'https://www.newyorkfed.org/markets/opolicy/operating_policy_200312a',
+      frames:['TREASURY_MARKET_DISRUPTION','USD_FUNDING_STRESS','LARGE_REPO_SUPPORT'],direction:-0.85,
+      summary:'New York Fed explicitly cited disruptions in Treasury financing and expanded term repo operations and Treasury purchases.',quality:'PRIMARY_OFFICIAL'
+    }),
+    source({
+      id:'SRC-FED-GLOBAL-2020-03-15-FOMC',assets:['SPX'],caseIds:['GLOBAL-MAR2020'],publishedAt:'2020-03-15T21:00:00Z',publisher:'Federal Reserve Board',transport:'FOMC statement',
+      title:'Federal Reserve issues FOMC statement',url:'https://www.federalreserve.gov/newsevents/pressreleases/monetary20200315a.htm',
+      frames:['EMERGENCY_RATE_CUT','CREDIT_SUPPORT','GLOBAL_FINANCIAL_CONDITIONS','ENERGY_STRESS'],direction:-0.75,
+      summary:'The Fed described major disruption to economic activity and global financial conditions and cut the target range to 0-0.25 percent.',quality:'PRIMARY_OFFICIAL'
+    }),
+    source({
       id:'SRC-CBS-HOUSING-2022-02-22',assets:['NL_HOUSING'],caseIds:['NL-HOUSING-2015-2023'],publishedAt:'2022-02-22T00:00:00Z',publisher:'CBS / Kadaster',transport:'CBS news release',
       title:'Prijsstijging koopwoningen loopt op naar 21,1 procent in januari',url:'https://www.cbs.nl/nl-nl/nieuws/2022/08/prijsstijging-koopwoningen-loopt-op-naar-21-1-procent-in-januari',
       frames:['RECORD_PRICE_GROWTH','HOUSING_EUPHORIA','AFFORDABILITY_PRESSURE'],direction:0.8,
