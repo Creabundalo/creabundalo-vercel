@@ -15,7 +15,12 @@ globalThis.M24CalibrationPlanner = (() => {
     if(typeof caseResolver!=='function'||typeof profileResolver!=='function') throw new Error('Calibration planner requires case/profile resolvers.');
     const groups=new Map(),skipped=[];
     for(const snapshot of snapshots){
-      const schema=caseResolver(snapshot.caseId);
+      const schema=caseResolver(snapshot.caseId)||(snapshot.generated?{
+        id:snapshot.caseId,asset:snapshot.asset,
+        horizonProfile:snapshot.horizonProfile,
+        regimeFamily:snapshot.regimeFamily,
+        analysis:'GENERATED_MECHANICS_CORE'
+      }:null);
       if(!schema){skipped.push({caseId:snapshot.caseId,reason:'CASE_SCHEMA_MISSING'});continue}
       if(snapshot.verification?.sourceComplete!==true){skipped.push({caseId:snapshot.caseId,reason:'NOT_SOURCE_COMPLETE'});continue}
       const direction=directionFromAction(snapshot.actionCandidate?.action);
