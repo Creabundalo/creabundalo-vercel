@@ -3,6 +3,7 @@ globalThis.M24FredMarket = (() => {
   const DAY_MS=86400000;
   const CHUNK_DAYS=365;
   const SERIES=Object.freeze({
+    SPX:Object.freeze({id:'SP500',label:'S&P 500',source:'S&P Dow Jones Indices via FRED',priceBasis:'CLOSE_ONLY'}),
     NASDAQ:Object.freeze({id:'NASDAQCOM',label:'NASDAQ Composite',source:'Nasdaq via FRED',priceBasis:'CLOSE_ONLY'})
   });
   const ms=value=>new Date(value).getTime();
