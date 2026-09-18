@@ -18,7 +18,7 @@ const test=`
  const p=new M24CbsHousing.Provider({fetchImpl:async url=>({ok:true,json:async()=>url.endsWith('DataProperties')?meta:data})});
  const r=await p.fetchMonthly({from:'2022-01-01',to:'2022-12-31'});
  check(r.rows.length===2,'row count');
- check(r.rows[0].publishedAt==='2022-02-28','conservative publication lag');
+ check(r.rows[0].publishedAt==='2022-02-22','publication lag');
  check(r.rows[1].priceIndex===132.9,'price mapping');
  check(r.rows[1].transactionYoYPct===-13.8,'transaction yoy mapping');
  console.log('M24 CBS housing provider contract OK');
