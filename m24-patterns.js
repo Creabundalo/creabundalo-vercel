@@ -2,7 +2,7 @@ globalThis.M24Patterns = (() => {
   const round=(n,d=4)=>Number(Number(n).toFixed(d));
   const finite=x=>Number.isFinite(Number(x));
   const valueOf=p=>{
-    for(const k of ['high','close','priceIndex','value']) if(finite(p?.[k])) return Number(p[k]);
+    for(const k of ['high','low','close','priceIndex','value','troughLow','troughClose']) if(finite(p?.[k])) return Number(p[k]);
     return null;
   };
 
