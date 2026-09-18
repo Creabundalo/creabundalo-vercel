@@ -11,10 +11,28 @@ globalThis.M24Cases = (() => {
     providerFamily:'COINBASE_EXCHANGE',
     status:'EXECUTABLE_PRIMARY',
     calibrationEligible:false,
-    requiredLayers:['PRICE','MEANING_WORLD','DERIVATIVES','MACRO'],
+    requiredLayers:['PRICE','MEANING_WORLD','DERIVATIVES','MACRO','DECISION_SNAPSHOT','BACKTEST_OUTCOME'],
     rules:sharedRules,
     ...spec,
     note:`${spec.note||''} Checkpoint windows are search spaces; source data resolves the actual bars. Calibration eligibility remains false until required evidence layers are source-complete.`.trim()
+  });
+
+
+  const indexCloseMarkdown=(spec)=>Object.freeze({
+    analysis:'TOP_MARKDOWN_CLOSE_ONLY',
+    resolutionIndependent:true,
+    providerFamily:'FRED_MARKET_SERIES',
+    status:'EXECUTABLE_PRIMARY',
+    calibrationEligible:false,
+    requiredLayers:['PRICE','MEANING_WORLD','MACRO','DECISION_SNAPSHOT','BACKTEST_OUTCOME'],
+    coverageProfile:'INDEX_CLOSE_MACRO_MEANING',
+    rules:Object.freeze({
+      supportBreak:'FIRST_CLOSE_BELOW_SUPPORT_CLOSE_AFTER_SECOND_TOP',
+      momentum:'WILDER_RSI_14',
+      participation:'NOT_AVAILABLE_CLOSE_ONLY'
+    }),
+    ...spec,
+    note:(spec.note||'')+' Close-only index source is kept honest: no OHLC or volume is synthesized. Required evidence is case-specific rather than crypto-shaped.'
   });
 
   const cases = Object.freeze({
@@ -53,6 +71,19 @@ globalThis.M24Cases = (() => {
         markdownOutcome:{from:'2021-12-01',to:'2022-06-30',select:'MIN_LOW'}
       },
       note:'ETH 2021 first-peak / second-peak / 2022 markdown candidate.'
+    }),
+    'NASDAQ-1999-2002': indexCloseMarkdown({
+      id:'NASDAQ-1999-2002',asset:'NASDAQ',
+      window:{from:'1999-01-01',to:'2002-12-31'},
+      macroKeys:['FED_FUNDS_LEGACY','TEN_YEAR','WTI'],
+      checkpointWindows:{
+        firstTop:{from:'2000-03-06',to:'2000-03-13',select:'MAX_CLOSE'},
+        automaticReaction:{from:'2000-03-14',to:'2000-03-20',select:'MIN_CLOSE'},
+        supportReference:{from:'2000-03-14',to:'2000-03-20',select:'MIN_CLOSE'},
+        secondTop:{from:'2000-03-21',to:'2000-03-28',select:'MAX_CLOSE'},
+        markdownOutcome:{from:'2000-03-29',to:'2002-12-31',select:'MIN_CLOSE'}
+      },
+      note:'NASDAQ dot-com peak / lower-second-peak / long markdown case using daily composite closes.'
     }),
     'SOL-2021-2022-TOP-MARKDOWN': topMarkdown({
       id:'SOL-2021-2022-TOP-MARKDOWN',asset:'SOL',
