@@ -97,6 +97,8 @@ jobs:
         run: node m24-derivatives-lab-test.js
       - name: CFTC futures positioning contract test
         run: node m24-cftc-test.js
+      - name: CBS housing provider contract test
+        run: node m24-cbs-housing-test.js
       - name: Binance Vision archive contract test
         run: node m24-binance-vision-test.js
       - name: Binance Vision Lab contract test
