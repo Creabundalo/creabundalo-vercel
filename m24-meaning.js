@@ -2,6 +2,18 @@ globalThis.M24Meaning = (() => {
   const source=spec=>Object.freeze(spec);
   const SOURCES=Object.freeze([
     source({
+      id:'SRC-FED-NASDAQ-2000-03-06-IT',assets:['NASDAQ'],caseIds:['NASDAQ-1999-2002'],publishedAt:'2000-03-06T12:00:00Z',publisher:'Federal Reserve Board',transport:'Federal Reserve speech archive',
+      title:'The revolution in information technology',url:'https://www.federalreserve.gov/boarddocs/speeches/2000/20000306.htm',
+      frames:['NEW_ECONOMY','PRODUCTIVITY_BOOM','TECHNOLOGY_TRANSFORMATION','VALUATION_UNCERTAINTY'],direction:0.55,
+      summary:'Greenspan described a pivotal information-technology/productivity transformation while also noting exceptional volatility and uncertainty around valuations of newer firms.',quality:'PRIMARY_OFFICIAL'
+    }),
+    source({
+      id:'SRC-SEC-NASDAQ-2000-03-24-ECONNECT',assets:['NASDAQ'],caseIds:['NASDAQ-1999-2002'],publishedAt:'2000-03-24T12:00:00Z',publisher:'U.S. Securities and Exchange Commission',transport:'SEC litigation release',
+      title:'eConnect and Thomas S. Hughes',url:'https://www.sec.gov/enforcement-litigation/litigation-releases/lr-16484',
+      frames:['INTERNET_PROMOTION','FRAUD_RISK','SPECULATIVE_EXCESS','REGULATORY_ENFORCEMENT'],direction:-0.75,
+      summary:'The SEC described alleged false and misleading internet-related promotional claims that had been followed by a dramatic stock-price rise and trading suspension.',quality:'PRIMARY_OFFICIAL'
+    }),
+    source({
       id:'SRC-REUTERS-BTC-2019-06-26-LIBRA',assets:['BTC'],caseIds:['BTC-2019-TOP-MARKDOWN'],publishedAt:'2019-06-26T11:01:00Z',publisher:'Reuters',transport:'Investing/Reuters syndication',
       title:"Bitcoin reaches 18-month high as Facebook's Libra spurs interest",url:'https://www.investing.com/news/cryptocurrency-news/bitcoin-vaults-to-18month-highs-on-growing-popularity-1907781',
       frames:['LIBRA_MAINSTREAM_HOPE','SAFE_HAVEN_NARRATIVE','SPECULATIVE_RETURN','CME_FUTURES_ACTIVITY'],direction:0.85,
