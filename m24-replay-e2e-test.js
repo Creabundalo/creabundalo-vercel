@@ -3,7 +3,8 @@ const vm=require('vm');
 globalThis.__m24fs=fs;
 globalThis.__m24verifiedSnapshots=[
   JSON.parse(fs.readFileSync('m24-verified-btc-2021.json','utf8')),
-  JSON.parse(fs.readFileSync('m24-verified-eth-2021.json','utf8'))
+  JSON.parse(fs.readFileSync('m24-verified-eth-2021.json','utf8')),
+  JSON.parse(fs.readFileSync('m24-verified-sol-2021.json','utf8'))
 ];
 const source=['m24-core.js','m24-cases.js','m24-coinbase.js','m24-replay.js','m24-calibration.js'].map(f=>fs.readFileSync(f,'utf8')).join('\n');
 const test=`
@@ -65,8 +66,8 @@ const test=`
     forecasts:allForecasts,outcomes:allOutcomes,horizon:'3D',lens:'m24',direction:'DOWN',minSamples:30
   });
   check(extended.sampleSize===1,'EXTENDED cohort should contain BTC only');
-  check(core.sampleSize===1,'CORE cohort should contain ETH only');
-  check(research.sampleSize===2,'unprofiled research view should see both samples');
+  check(core.sampleSize===2,'CORE cohort should contain ETH and SOL');
+  check(research.sampleSize===3,'unprofiled research view should see all three samples');
   check(extended.displayProbability===null&&core.displayProbability===null&&research.displayProbability===null,
     'no cohort may display probability below n=30');
 
