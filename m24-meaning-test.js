@@ -28,7 +28,21 @@ const test=`
 
   const provenance=M24Meaning.toProvenance(ethResult.sources[0]);
   check(provenance.publisher==='Reuters'&&provenance.assets.includes('ETH'),'ETH meaning provenance scope missing');
-  console.log('M24 meaning-world test OK',JSON.stringify({btc:{firstTop:btcResult.firstTop.count,secondTop:btcResult.secondTop.count},eth:{firstTop:ethResult.firstTop.count,secondTop:ethResult.secondTop.count}}));
+
+  const sol=M24Cases.get('SOL-2021-2022-TOP-MARKDOWN');
+  const solResult=M24Meaning.analyzeCase(sol);
+  check(solResult.firstTop.count>=2,'SOL first-top source coverage missing');
+  check(solResult.secondTop.count>=2,'SOL second-top source coverage missing');
+  check(solResult.sources.every(x=>x.assets.includes('SOL')),'SOL meaning context leaked another asset source');
+  check(solResult.firstTop.dominantFrames.some(x=>x.frame==='NFT_BOOM'),'SOL first-top NFT/adoption frame missing');
+  check(solResult.secondTop.dominantFrames.some(x=>x.frame==='RECORD_HIGH'),'SOL second-top record-high frame missing');
+  check(M24Meaning.sourcesForCase(sol).every(x=>!x.assets.includes('BTC')&&!x.assets.includes('ETH')),'SOL asset filter failed');
+
+  console.log('M24 meaning-world test OK',JSON.stringify({
+    btc:{firstTop:btcResult.firstTop.count,secondTop:btcResult.secondTop.count},
+    eth:{firstTop:ethResult.firstTop.count,secondTop:ethResult.secondTop.count},
+    sol:{firstTop:solResult.firstTop.count,secondTop:solResult.secondTop.count}
+  }));
 })();
 `;
 
