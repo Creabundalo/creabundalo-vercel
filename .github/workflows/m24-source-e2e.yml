@@ -20,6 +20,9 @@ on:
       - 'm24-eth-2021-source-e2e-test.js'
       - 'm24-sol-2021-source-e2e-test.js'
       - 'm24-replay-e2e-test.js'
+      - 'm24-horizon-profile-e2e-test.js'
+      - 'm24-verified-nl-housing-2015-2023.json'
+      - 'm24-verified-global-mar2020.json'
       - 'm24-verified-btc-2019.json'
       - 'm24-verified-btc-2021.json'
       - 'm24-verified-eth-2021.json'
@@ -72,6 +75,7 @@ jobs:
           node --check m24-eth-2021-source-e2e-test.js
           node --check m24-sol-2021-source-e2e-test.js
           node --check m24-replay-e2e-test.js
+          node --check m24-horizon-profile-e2e-test.js
       - name: March 2020 relation stability
         run: node m24-relations-regime-stability-e2e-test.js
       - name: March 2020 cross-asset relation discovery
@@ -90,6 +94,8 @@ jobs:
         run: node m24-eth-2021-source-e2e-test.js
       - name: SOL 2021 real-source enrichment
         run: node m24-sol-2021-source-e2e-test.js
+      - name: Market-specific horizon profile validation
+        run: node m24-horizon-profile-e2e-test.js
       - name: BTC + ETH + SOL verified horizon replay
         run: node m24-replay-e2e-test.js
       - name: Upload source snapshots
@@ -98,6 +104,7 @@ jobs:
         with:
           name: m24-2021-source-snapshots
           path: |
+            m24-horizon-profile-validation-snapshot.json
             m24-relations-mar2020-snapshot.json
             m24-relations-regime-stability-snapshot.json
             m24-global-mar2020-source-snapshot.json
