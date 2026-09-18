@@ -35,7 +35,7 @@ const test=`
    check(structure.status!=='INSUFFICIENT',spec.id+' structure insufficient');
    check(fib.status!=='INSUFFICIENT',spec.id+' fib geometry insufficient');
    check(['OBSERVED','NOT_OBSERVED','INSUFFICIENT'].includes(rsi.status),spec.id+' RSI invalid');
-   check(['OBSERVED','NOT_OBSERVED','INSUFFICIENT'].includes(elliott.status),spec.id+' Elliott invalid');
+   check(['CANDIDATE_ONLY','NOT_OBSERVED','INSUFFICIENT'].includes(elliott.status),spec.id+' Elliott invalid');
  }
  const snapshot={
    type:'M24_VERIFIED_PATTERN_MATRIX',
@@ -43,7 +43,9 @@ const test=`
    summary:{
      rsiObserved:Object.entries(cases).filter(([,v])=>v.patterns.rsi.status==='OBSERVED').map(([k])=>k),
      structureObserved:Object.entries(cases).filter(([,v])=>v.patterns.structure.status==='OBSERVED').map(([k])=>k),
-     elliottObserved:Object.entries(cases).filter(([,v])=>v.patterns.elliott.status==='OBSERVED').map(([k])=>k)
+     elliottCandidates:Object.entries(cases).filter(([,v])=>v.patterns.elliott.status==='CANDIDATE_ONLY').map(([k])=>k),
+     fibSecondLegMatches:Object.entries(cases).filter(([,v])=>v.patterns.fib.secondLegReferenceMatch===true).map(([k])=>k),
+     fibMarkdownMatches:Object.entries(cases).filter(([,v])=>v.patterns.fib.markdownReferenceMatch===true).map(([k])=>k)
    },
    rule:'Cross-case pattern matrix. Geometry does not establish mechanism, causality or predictive edge.'
  };
