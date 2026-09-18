@@ -1,0 +1,35 @@
+{
+  "type":"VERIFIED_HORIZON_PROFILE_SNAPSHOT",
+  "verification":{
+    "workflow":"M24 Source E2E",
+    "workflowRunId":35384379715,
+    "verifiedAt":"2026-09-18T19:10:32Z",
+    "sourceComplete":true
+  },
+  "housing":{
+    "caseId":"NL-HOUSING-2015-2023",
+    "profile":"SLOW_MARKET",
+    "clock":"PUBLICATION_CALENDAR",
+    "decisionObservationDate":"2022-07-01",
+    "decisionAvailableAt":"2022-08-22",
+    "horizons":{
+      "1M":{"realizedReturnPct":-0.1505,"directionCorrect":true},
+      "3M":{"realizedReturnPct":-1.5049,"directionCorrect":true},
+      "6M":{"realizedReturnPct":-3.5365,"directionCorrect":true},
+      "12M":{"realizedReturnPct":-5.4929,"directionCorrect":true}
+    }
+  },
+  "shock":{
+    "caseId":"GLOBAL-MAR2020",
+    "profile":"SHOCK",
+    "clock":"MARKET_DAILY_FIXED_DAYS",
+    "horizons":{
+      "1D":{"realizedReturnPct":5.9955,"directionCorrect":false},
+      "3D":{"realizedReturnPct":0.9748,"directionCorrect":false},
+      "1W":{"realizedReturnPct":-6.2331,"directionCorrect":true},
+      "2W":{"realizedReturnPct":10.0799,"directionCorrect":false},
+      "1M":{"realizedReturnPct":16.6475,"directionCorrect":false}
+    }
+  },
+  "rule":"Horizon correctness is measured, not assumed. Horizon profile is part of cohort identity; FAST_MARKET, SHOCK and SLOW_MARKET samples may not be silently pooled."
+}
