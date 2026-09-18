@@ -25,6 +25,7 @@ globalThis.M24GeneratedCase = (() => {
       horizonProfile:'FAST_MARKET',
       regimeFamily:'DISTRIBUTION_MARKDOWN',
       coverageProfile:'MECHANICS_CORE_DERIVATIVES',
+      scoreProfile:'MECHANICS_CORE',
       requiredLayers:['PRICE','DERIVATIVES','MACRO','DECISION_SNAPSHOT','BACKTEST_OUTCOME'],
       rules:Object.freeze({
         supportBreak:'FIRST_CLOSE_BELOW_SUPPORT_LOW_AFTER_SECOND_TOP',
