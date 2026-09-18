@@ -1,0 +1,64 @@
+{
+  "type":"VERIFIED_SOURCE_SNAPSHOT",
+  "caseId":"GEN-ETH-FAST_DISTRIBUTION_V1-2023-02-16",
+  "asset":"ETH",
+  "generated":true,
+  "generatorRule":"FAST_DISTRIBUTION_V1",
+  "episodeGroup":"ETH:DISTRIBUTION_MARKDOWN:2023-02-16",
+  "coverageProfile":"MECHANICS_CORE_DERIVATIVES",
+  "horizonProfile":"FAST_MARKET",
+  "regimeFamily":"DISTRIBUTION_MARKDOWN",
+  "verification":{
+    "workflow":"M24 Source E2E",
+    "workflowRunId":35385987900,
+    "artifactId":10563328914,
+    "artifactDigest":"sha256:39b70ded5329dde1a7450e67941d476a84f1d015c9d8e4f223ea35640e6bd235",
+    "headSha":"b4244a9c34d9a0d781f9869b39621cb208d97360",
+    "verifiedAt":"2026-09-18T19:27:41Z",
+    "sourceComplete":true
+  },
+  "state":"SOURCE_COMPLETE",
+  "calibrationEligible":true,
+  "selection":{
+    "decisionDate":"2023-02-16",
+    "firstTopDate":"2023-01-21",
+    "peakSeparationDays":26,
+    "retestRatio":1.0372,
+    "volumeRatio":0.9486,
+    "rsiDelta":-23.5844,
+    "outcomeStatusAtSelection":"UNREAD_AT_SELECTION"
+  },
+  "resolvedCheckpoints":{
+    "firstTop":"2023-01-21",
+    "secondTop":"2023-02-16",
+    "decisionAsOf":"2023-02-16T23:59:59.999Z",
+    "supportBreakDate":"2023-03-09",
+    "troughDate":"2023-03-10"
+  },
+  "evidenceLayers":{
+    "PRICE":{"state":"COMPLETE","note":"Measured price structure exists."},
+    "MEANING_WORLD":{"state":"INCOMPLETE","note":"Not required in MECHANICS_CORE_DERIVATIVES."},
+    "DERIVATIVES":{"state":"COMPLETE","extensionState":"COMPLETE","note":"Core funding and archived positioning complete for this generated checkpoint."},
+    "MACRO":{"state":"COMPLETE","note":"7 source-backed series."},
+    "DECISION_SNAPSHOT":{"state":"COMPLETE","note":"No-lookahead decision snapshot exists."},
+    "BACKTEST_OUTCOME":{"state":"COMPLETE","note":"Later outcome exists separately from decision input."}
+  },
+  "actionCandidate":{
+    "action":"DOWNSIDE_WATCH",
+    "score":2.5,
+    "coverage":1,
+    "evidence":[
+      {"id":"WEAK_PARTICIPATION","weight":1},
+      {"id":"WEAK_RSI","weight":1},
+      {"id":"STRONGER_DOLLAR","weight":0.5}
+    ],
+    "confirmations":[]
+  },
+  "sourceNotes":{
+    "price":"Coinbase Exchange historical candles",
+    "derivatives":"Binance Vision funding + archived positioning",
+    "macro":"Official-source series via FRED",
+    "meaningWorld":"NOT_REQUIRED_FOR_THIS_COHORT"
+  },
+  "rule":"First pinned generated mechanics-core episode. It may enter only MECHANICS_CORE_DERIVATIVES × FAST_MARKET × DISTRIBUTION_MARKDOWN × DOWN cohorts. No live-order authorization."
+}
