@@ -7,8 +7,8 @@
 | Batch | Priority | Product | Scope | Dependency | Status |
 |---|---|---|---|---|---|
 | M99-B000 | P0 | P00 | Project method / PBS / WBS / queue | — | DONE |
-| M99-B001 | P0 | P01/P02 | Fundament + full fill matrix | B000 | RUNNING |
-| M99-B002 | P0 | P01/P03/P05 | Crypto lifecycle & mechanics | B001 | READY |
+| M99-B001 | P0 | P01/P02 | Fundament + full fill matrix | B000 | DONE |
+| M99-B002 | P0 | P01/P03/P05 | Crypto lifecycle & mechanics | B001 | RUNNING |
 | M99-B003 | P0 | P01/P03 | Equities / indices | B001 | READY |
 | M99-B004 | P0 | P05 | Futures / options / derivatives | B001 | READY |
 | M99-B005 | P0 | P01/P03 | Bonds / credit | B001 | READY |
@@ -36,13 +36,13 @@ Ensure the base model cannot silently omit an entire market, instrument family o
 | B001-T04 | P0 | Bubble/regime state taxonomy | DONE |
 | B001-T05 | P0 | Sensor-family catalogue | DONE |
 | B001-T06 | P0 | Asset-class × sensor applicability matrix | DONE |
-| B001-T07 | P0 | Source-registry schema | READY |
-| B001-T08 | P0 | Canonical entity-ID schema | READY |
-| B001-T09 | P0 | Batch acceptance/gap rules | READY |
-| B001-T10 | P0 | Machine-readable queue record format | READY |
+| B001-T07 | P0 | Source-registry schema | DONE |
+| B001-T08 | P0 | Canonical entity-ID schema | DONE |
+| B001-T09 | P0 | Batch acceptance/gap rules | DONE |
+| B001-T10 | P0 | Machine-readable queue record format | DONE |
 
 ### B001 acceptance criteria
-Batch B001 becomes DONE when:
+Batch B001 is **DONE**. Acceptance met:
 - all market domains are canonicalized;
 - each asset class has a sensor profile;
 - derivatives are represented both as instruments and as sensors on underlyings;
