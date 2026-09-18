@@ -1,0 +1,68 @@
+{
+  "type":"VERIFIED_SOURCE_SNAPSHOT",
+  "caseId":"GEN-ETH-FAST_DISTRIBUTION_V1-2020-07-22",
+  "asset":"ETH",
+  "generated":true,
+  "generatorRule":"FAST_DISTRIBUTION_V1",
+  "episodeGroup":"ETH:DISTRIBUTION_MARKDOWN:2020-07-22",
+  "selectionEligible":true,
+  "selectionUniverseId":"FAST_DISTRIBUTION_V1",
+  "selectionWindow":{"from":"2020-01-01","to":"2025-12-31"},
+  "coverageProfile":"MECHANICS_CORE_DERIVATIVES",
+  "horizonProfile":"FAST_MARKET",
+  "regimeFamily":"DISTRIBUTION_MARKDOWN",
+  "verification":{
+    "workflow":"M24 Source E2E",
+    "workflowRunId":35386664179,
+    "artifactId":10563684625,
+    "artifactDigest":"sha256:5e8d7b4ca3158335f4d0160608f4ea76c147be8840cdda5086acedfb47c28d7d",
+    "headSha":"3744825bd6af3c2eed88db026995f65c4f3ea562",
+    "verifiedAt":"2026-09-18T19:34:56Z",
+    "sourceComplete":true
+  },
+  "state":"SOURCE_COMPLETE",
+  "calibrationEligible":true,
+  "selection":{
+    "decisionDate":"2020-07-22",
+    "firstTopDate":"2020-02-15",
+    "peakSeparationDays":158,
+    "retestRatio":0.9293,
+    "volumeRatio":0.6079,
+    "rsiDelta":-4.1286,
+    "outcomeStatusAtSelection":"UNREAD_AT_SELECTION"
+  },
+  "resolvedCheckpoints":{
+    "firstTop":"2020-02-15",
+    "secondTop":"2020-07-22",
+    "decisionAsOf":"2020-07-22T23:59:59.999Z",
+    "supportBreakDate":null,
+    "troughDate":"2020-07-23"
+  },
+  "evidenceLayers":{
+    "PRICE":{"state":"COMPLETE","note":"Measured price structure exists."},
+    "MEANING_WORLD":{"state":"INCOMPLETE","note":"Not required in MECHANICS_CORE_DERIVATIVES."},
+    "DERIVATIVES":{"state":"COMPLETE","extensionState":"SOURCE_LIMITED","note":"Core funding complete; archived positioning extension source-limited and retained explicitly."},
+    "MACRO":{"state":"COMPLETE","note":"7 source-backed series."},
+    "DECISION_SNAPSHOT":{"state":"COMPLETE","note":"No-lookahead decision snapshot exists."},
+    "BACKTEST_OUTCOME":{"state":"COMPLETE","note":"Later outcome exists separately from decision input."}
+  },
+  "actionCandidate":{
+    "action":"DOWNSIDE_WATCH",
+    "score":3,
+    "coverage":1,
+    "evidence":[
+      {"id":"FAILED_RETEST","weight":1},
+      {"id":"FAILED_RETEST_WEAK_PARTICIPATION","weight":1},
+      {"id":"STRONGER_DOLLAR","weight":0.5},
+      {"id":"TIGHTER_FINANCIAL_CONDITIONS","weight":0.5}
+    ],
+    "confirmations":[]
+  },
+  "sourceNotes":{
+    "price":"Coinbase Exchange historical candles",
+    "derivatives":"Binance Vision funding; positioning extension source-limited",
+    "macro":"Official-source series via FRED",
+    "meaningWorld":"NOT_REQUIRED_FOR_THIS_COHORT"
+  },
+  "rule":"First canonical generated mechanics-core episode. Selection came from frozen FAST_DISTRIBUTION_V1 universe before outcome inspection. Eligible only for the exact mechanics-core FAST/DISTRIBUTION/DOWN cohort; no live-order authorization."
+}
