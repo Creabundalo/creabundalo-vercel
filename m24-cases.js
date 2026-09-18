@@ -35,6 +35,19 @@ globalThis.M24Cases = (() => {
     note:(spec.note||'')+' Close-only index source is kept honest: no OHLC or volume is synthesized. Required evidence is case-specific rather than crypto-shaped.'
   });
 
+  const housingCycle=(spec)=>Object.freeze({
+    analysis:'HOUSING_CYCLE',
+    resolutionIndependent:false,
+    providerFamily:'CBS_KADASTER_HOUSING',
+    status:'EXECUTABLE_PRIMARY',
+    calibrationEligible:false,
+    requiredLayers:['PRICE','MEANING_WORLD','MACRO','DECISION_SNAPSHOT','BACKTEST_OUTCOME'],
+    coverageProfile:'HOUSING_PRICE_RATE_MEANING',
+    scoreProfile:'HOUSING_SLOW_MARKET',
+    ...spec,
+    note:(spec.note||'')+' Housing is modeled as a slow market with publication lag; no daily-market or derivatives assumptions are forced.'
+  });
+
   const cases = Object.freeze({
     'BTC-2019-TOP-MARKDOWN': topMarkdown({
       id:'BTC-2019-TOP-MARKDOWN',asset:'BTC',
@@ -84,6 +97,19 @@ globalThis.M24Cases = (() => {
         markdownOutcome:{from:'2000-03-29',to:'2002-12-31',select:'MIN_CLOSE'}
       },
       note:'NASDAQ dot-com peak / lower-second-peak / long markdown case using daily composite closes.'
+    }),
+    'NL-HOUSING-2015-2023': housingCycle({
+      id:'NL-HOUSING-2015-2023',asset:'NL_HOUSING',
+      window:{from:'2020-01-01',to:'2023-12-31'},
+      macroKeys:['ECB_DEPOSIT_RATE'],
+      checkpointWindows:{
+        firstTop:{from:'2021-11-01',to:'2022-02-28',select:'MAX_YOY'},
+        automaticReaction:{from:'2022-02-01',to:'2022-05-31',select:'MAX_INDEX'},
+        supportReference:{from:'2021-12-01',to:'2022-01-31',select:'MAX_INDEX'},
+        secondTop:{from:'2022-06-01',to:'2022-08-31',select:'MAX_INDEX'},
+        markdownOutcome:{from:'2022-09-01',to:'2023-12-31',select:'MIN_INDEX'}
+      },
+      note:'NL existing-home cycle: peak YoY growth → peak price level → 2022/23 correction.'
     }),
     'SOL-2021-2022-TOP-MARKDOWN': topMarkdown({
       id:'SOL-2021-2022-TOP-MARKDOWN',asset:'SOL',
