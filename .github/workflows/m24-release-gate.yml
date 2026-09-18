@@ -111,6 +111,15 @@ jobs:
       - name: Historical cohort contract test
         run: node m24-cohort-test.js
 
+      - name: Verified multi-asset snapshot contract
+        run: |
+          test -f m24-verified-btc-2021.json
+          test -f m24-verified-eth-2021.json
+          test -f m24-verified-sol-2021.json
+          grep -q '"coverageProfile": "EXTENDED_DERIVATIVES"' m24-verified-btc-2021.json
+          grep -q '"coverageProfile": "CORE_DERIVATIVES"' m24-verified-eth-2021.json
+          grep -q '"coverageProfile": "CORE_DERIVATIVES"' m24-verified-sol-2021.json
+
       - name: Safety contract
         run: |
           grep -q 'SIMULATED_ONLY' m24.html
