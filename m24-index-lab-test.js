@@ -24,4 +24,4 @@ const test=`
  console.log('M24 close-only index Lab contract OK');
 })();
 `;
-try{vm.runInThisContext(`${source}\\n${test}`,{filename:'m24-index-lab-test-bundle.js'})}catch(e){console.error(e);process.exit(1)}
+try{vm.runInThisContext(`${source}\n${test}`,{filename:'m24-index-lab-test-bundle.js'})}catch(e){console.error(e);process.exit(1)}
