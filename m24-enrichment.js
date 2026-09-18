@@ -18,11 +18,12 @@ globalThis.M24Enrichment = (() => {
 
   function addPayloads(store,payloads,meta){return (payloads||[]).map(payload=>addPayload(store,payload,meta))}
 
-  async function ensurePrice({store,caseSchema,priceProvider=null,granularity=86400}={}){
+  async function ensurePrice({store,caseSchema,priceProvider=null,priceLab=null,granularity=86400}={}){
     let record=latestCaseRecord(store,caseSchema.id,['LAB_RESULT_PRIMARY','LAB_RESULT']);
     if(record) return {record,result:clone(record.data),created:false};
     if(!priceProvider) throw new Error('Case enrichment needs a measured price layer or priceProvider.');
-    const measured=await M24PrimaryLab.runCase({provider:priceProvider,caseSchema,granularity});
+    const lab=priceLab||M24PrimaryLab;
+    const measured=await lab.runCase({provider:priceProvider,caseSchema,granularity});
     record=store.add(M24Core.record('LAB_RESULT_PRIMARY',measured.result,{
       subjectId:caseSchema.asset,resolution:'D',evidenceStatus:M24Core.EVIDENCE.MECHANISM_VISIBLE,confidence:1,provenance:measured.result.provenance||[]
     }));
@@ -31,7 +32,7 @@ globalThis.M24Enrichment = (() => {
 
   async function runCase({store,caseSchema,providers={},granularity=86400}={}){
     if(!store||!caseSchema) throw new Error('Case enrichment requires store and case schema.');
-    const price=await ensurePrice({store,caseSchema,priceProvider:providers.price,granularity});
+    const price=await ensurePrice({store,caseSchema,priceProvider:providers.price,priceLab:providers.priceLab,granularity});
     const labResult=price.result;
 
     const meaning=M24Meaning.analyzeCase(caseSchema);
@@ -52,7 +53,7 @@ globalThis.M24Enrichment = (() => {
     }
 
     if(!providers.macro) throw new Error('Macro provider is required.');
-    const macro=await M24MacroLab.runCase({provider:providers.macro,caseSchema,labResult});
+    const macro=await M24MacroLab.runCase({provider:providers.macro,caseSchema,labResult,keys:providers.macroKeys||caseSchema.macroKeys||M24MacroLab.DEFAULT_KEYS});
     addPayloads(store,M24MacroLab.toRecordPayloads(macro),{subjectId:caseSchema.asset,resolution:'CHECKPOINT_CONTEXT'});
 
     const backtest=M24Backtest.run({
