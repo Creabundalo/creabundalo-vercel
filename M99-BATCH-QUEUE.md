@@ -22,8 +22,8 @@
 | M99-B013 | P0 | P03/P08 | Historical bubbles / crashes / regimes | B002-B012 | DONE |
 | M99-B014 | P1 | P09 | Cross-asset relation discovery | B002-B013 | DONE |
 | M99-B015 | P0 | P02/P14 | Source-gap / quality sweep | B002-B014 | DONE |
-| M99-B016 | P0 | P08 | Pattern hypothesis validation | B013-B015 | RUNNING |
-| M99-B017 | P0 | P07 | Trickster validation across cases | B013-B016 | READY |
+| M99-B016 | P0 | P08 | Pattern hypothesis validation | B013-B015 | DONE |
+| M99-B017 | P0 | P07 | Trickster validation across cases | B013-B016 | RUNNING |
 | M99-B018 | P0 | P10 | Horizon/timescale validation | B013-B016 | READY |
 | M99-B019 | P0 | P10/P14 | Calibration cohort expansion | B016-B018 | READY_WITH_DEPENDENCIES |
 
