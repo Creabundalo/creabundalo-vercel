@@ -72,7 +72,7 @@ const test=`
     'no cohort may display probability below n=30');
 
   console.log('M24 verified multi-asset replay E2E OK');
-  console.log(JSON.stringify({BTC:summaries.BTC,ETH:summaries.ETH,cohorts:{extendedN:extended.sampleSize,coreN:core.sampleSize,researchN:research.sampleSize}}));
+  console.log(JSON.stringify({BTC:summaries.BTC,ETH:summaries.ETH,SOL:summaries.SOL,cohorts:{extendedN:extended.sampleSize,coreN:core.sampleSize,researchN:research.sampleSize}}));
 })().catch(err=>{
   globalThis.__m24fs.writeFileSync('m24-replay-failure.json',JSON.stringify({type:'M24_VERIFIED_REPLAY_FAILURE',message:String(err?.message||err),stack:String(err?.stack||'')},null,2));
   console.error(err);process.exit(1);
