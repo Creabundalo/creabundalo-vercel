@@ -1,5 +1,6 @@
 globalThis.M24EvidenceGate = (() => {
   const REQUIRED=Object.freeze(['PRICE','MEANING_WORLD','DERIVATIVES','MACRO','DECISION_SNAPSHOT','BACKTEST_OUTCOME']);
+  const requiredForCase=caseSchema=>Array.isArray(caseSchema?.requiredLayers)&&caseSchema.requiredLayers.length?[...caseSchema.requiredLayers]:[...REQUIRED];
   const clone=value=>structuredClone(value);
 
   function recordsOf(input){
@@ -108,19 +109,20 @@ globalThis.M24EvidenceGate = (() => {
       DECISION_SNAPSHOT:simpleState(records,caseSchema.id,'DECISION_SNAPSHOT','No-lookahead decision snapshot exists.'),
       BACKTEST_OUTCOME:simpleState(records,caseSchema.id,'BACKTEST_OUTCOME','Later outcome exists separately from decision input.')
     };
-    const missing=REQUIRED.filter(key=>layers[key].state!=='COMPLETE');
+    const requiredLayers=requiredForCase(caseSchema);
+    const missing=requiredLayers.filter(key=>!layers[key]||layers[key].state!=='COMPLETE');
     const calibrationEligible=missing.length===0;
-    const coverageProfile=layers.DERIVATIVES.coverageProfile||(layers.DERIVATIVES.extensionState==='COMPLETE'?'EXTENDED_DERIVATIVES':'CORE_DERIVATIVES');
+    const coverageProfile=caseSchema.coverageProfile||layers.DERIVATIVES.coverageProfile||(layers.DERIVATIVES.extensionState==='COMPLETE'?'EXTENDED_DERIVATIVES':'CORE_DERIVATIVES');
     return {
       type:'CASE_EVIDENCE_STATUS',caseId:caseSchema.id,asset:caseSchema.asset,
-      requiredLayers:[...REQUIRED],layers:clone(layers),missingLayers:missing,
+      requiredLayers,layers:clone(layers),missingLayers:missing,
       calibrationEligible,coverageProfile,
       state:calibrationEligible?'SOURCE_COMPLETE':'INCOMPLETE',
-      rule:'Source completeness requires the common cross-asset core. Optional positioning extensions remain explicit in coverageProfile and may not be silently mixed in calibration cohorts.'
+      rule:'Source completeness uses the case/domain required evidence profile. Non-applicable crypto-specific layers are not forced onto other markets; coverageProfile remains explicit for calibration.'
     };
   }
 
   function toRecordPayload(result){return {type:'CASE_EVIDENCE_STATUS',data:result,evidenceStatus:'MECHANISM_VISIBLE',confidence:1,provenance:[]}}
 
-  return {REQUIRED,assess,toRecordPayload};
+  return {REQUIRED,requiredForCase,assess,toRecordPayload};
 })();
