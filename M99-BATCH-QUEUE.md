@@ -19,7 +19,7 @@
 | M99-B010 | P0 | P02/P09 | Positioning / flows / cross-asset | B001 | DONE |
 | M99-B011 | P0 | P02/P09 | Macro / real economy | B001 | DONE |
 | M99-B012 | P0 | P06 | Meaning world | B001 | DONE |
-| M99-B013 | P0 | P03/P08 | Historical bubbles / crashes / regimes | B002-B012 | READY |
+| M99-B013 | P0 | P03/P08 | Historical bubbles / crashes / regimes | B002-B012 | RUNNING |
 | M99-B014 | P1 | P09 | Cross-asset relation discovery | B002-B013 | LATER |
 | M99-B015 | P0 | P02/P14 | Source-gap / quality sweep | B002-B013 | LATER |
 
@@ -131,3 +131,16 @@ This blocker does not block other B001-dependent batches. **M99-B003 — Equitie
 - M99-B002 → DONE
 - M99-B004 → DONE
 - M99-B013 → READY
+
+
+## M99-B013 checkpoint
+### DONE
+- regime/state model v0.1;
+- cross-asset historical case registry;
+- source-readiness matrix across crypto, equities, credit, commodities, FX, housing, funding and cross-asset crises.
+
+### RUNNING
+- B013-T04 first non-crypto executable case: **NASDAQ-1999-2002**.
+
+### Principle
+Broad research windows are registered first; source data resolves actual checkpoints. Source-complete cases may remain non-directional and therefore contribute zero forecast samples.
