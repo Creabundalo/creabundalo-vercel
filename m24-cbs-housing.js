@@ -54,7 +54,9 @@ globalThis.M24CbsHousing = (() => {
       const price=pickChild(meta.rows,['prijsindex','bestaande koopwoningen'],['prijsindex','verkoopprijzen'])||pickProperty(meta.rows,['prijsindex','verkoopprijzen']);
       const yoy=pickChild(meta.rows,['prijsindex','bestaande koopwoningen'],['jaar eerder']);
       const sales=pickChild(meta.rows,['verkochte woningen'],['verkochte woningen'])||pickProperty(meta.rows,['verkochte woningen']);
-      const salesYoy=pickChild(meta.rows,['verkochte woningen'],['jaar eerder']);
+      const salesYoy=pickChild(meta.rows,['verkochte woningen'],['jaar eerder'])
+        ||(sales?(meta.rows||[]).find(p=>p.Type!=='TopicGroup'&&p.Key&&p.ParentID===sales.ParentID&&p.Unit==='%'&&Number(p.Position)>Number(sales.Position))||null:null)
+        ||pickProperty(meta.rows,['verkochte woningen','jaar eerder']);
       if(!price||!yoy||!sales||!salesYoy) throw new CbsHousingError('METADATA_MAPPING_FAILED','Could not map CBS housing fields',{price,yoy,sales,keys:meta.rows.map(x=>({k:x.Key,t:x.Title}))});
       const rows=data.rows.map(r=>{
         const date=periodCodeToDate(r.Perioden);
