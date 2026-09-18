@@ -18,11 +18,11 @@ globalThis.M24Backtest = (() => {
       .map(x=>({key:x.key,seriesId:x.seriesId,secondTop:{date:x.secondTop.date,value:x.secondTop.value,lagDays:x.secondTop.lagDays},delta:x.delta,higherMeaning:x.higherMeaning}));
   }
 
-  function verifiedFundingContext(derivativesContext,cutoffMs){
+  function verifiedDerivativesContext(derivativesContext,cutoffMs){
     if(!derivativesContext?.secondTop?.asOf||!derivativesContext?.firstTop?.asOf) return null;
     if(asTime(derivativesContext.secondTop.asOf)>cutoffMs||asTime(derivativesContext.firstTop.asOf)>cutoffMs) return null;
     if(Number(derivativesContext.firstTop.count||0)<1||Number(derivativesContext.secondTop.count||0)<1) return null;
-    return clone({firstTop:derivativesContext.firstTop,secondTop:derivativesContext.secondTop,comparison:derivativesContext.comparison,cutoffPolicy:derivativesContext.cutoffPolicy||null});
+    return clone({evidenceFamily:derivativesContext.evidenceFamily||'PERPETUAL_FUNDING',sourceMode:derivativesContext.sourceMode||null,coverageProfile:derivativesContext.coverageProfile||null,firstTop:derivativesContext.firstTop,secondTop:derivativesContext.secondTop,comparison:derivativesContext.comparison,cutoffPolicy:derivativesContext.cutoffPolicy||null});
   }
 
   function verifiedArchiveContext(archiveContext,cutoffMs){
@@ -41,7 +41,7 @@ globalThis.M24Backtest = (() => {
     if(asTime(endOfDay(labResult.secondTop.date))>cutoffMs) throw new Error('Backtest asOf precedes resolved second top.');
 
     const meaning=meaningContext?aggregateMeaningSources(meaningContext.sources,cutoff):null;
-    const funding=verifiedFundingContext(derivativesContext,cutoffMs);
+    const derivatives=verifiedDerivativesContext(derivativesContext,cutoffMs);\n    const funding=derivatives?.evidenceFamily==='PERPETUAL_FUNDING'?derivatives:null;
     const archive=verifiedArchiveContext(archiveDerivativesContext,cutoffMs);
     const macro=macroContext?macroSecondTop(macroContext,cutoffMs):null;
 
@@ -58,10 +58,10 @@ globalThis.M24Backtest = (() => {
         }
       },
       meaning,
-      funding,
+      derivatives,funding,
       archiveDerivatives:archive,
       macro,
-      coverage:{price:true,meaning:Boolean(meaning),funding:Boolean(funding),archiveDerivatives:Boolean(archive),macro:Boolean(macro?.length)},
+      coverage:{price:true,meaning:Boolean(meaning),derivatives:Boolean(derivatives),archiveDerivatives:Boolean(archive),macro:Boolean(macro?.length)},
       excludedFutureFields:['support.firstCloseBelow','support.firstWeeklyCloseBelow','outcome.troughDate','outcome.troughLow','outcome.drawdownFromSecondHighPct'],
       rejectedUnverifiableAggregates:{funding:Boolean(derivativesContext)&&!funding,archiveDerivatives:Boolean(archiveDerivativesContext)&&!archive,macro:Boolean(macroContext)&&!macro?.length},
       rule:'Only information provably available by asOf may enter this record. Outcome is evaluated later in a separate record; source-gap archive objects do not count as loaded evidence.'
@@ -74,7 +74,7 @@ globalThis.M24Backtest = (() => {
     const add=(id,weight,reason)=>{score+=weight;evidence.push({id,weight,reason})};
     if(snapshot.price.comparisons.volumeBearishDivergence) add('WEAK_PARTICIPATION',1,'Second top has lower measured volume than first top.');
     if(snapshot.price.comparisons.rsiBearishDivergence) add('WEAK_RSI',1,'Measured RSI bearish divergence is present.');
-    if(snapshot.meaning?.direction>0.25&&snapshot.funding?.comparison?.crowdingShift==='MORE_POSITIVE_AT_SECOND_TOP') add('BULLISH_NARRATIVE_LONG_CROWDING',1,'Positive framing coexists with more-positive funding available by the decision cutoff.');
+    if(snapshot.meaning?.direction>0.25&&snapshot.derivatives?.evidenceFamily==='PERPETUAL_FUNDING'&&snapshot.derivatives?.comparison?.crowdingShift==='MORE_POSITIVE_AT_SECOND_TOP') add('BULLISH_NARRATIVE_LONG_CROWDING',1,'Positive framing coexists with more-positive funding available by the decision cutoff.');
     const archive=snapshot.archiveDerivatives;
     if(snapshot.meaning?.direction>0.25&&archive?.secondTop?.summary?.globalLongShort>1&&Number(archive?.deltas?.globalLongShort)>0) add('ARCHIVE_LONG_SKEW',1,'Positive framing coexists with increasingly long-skewed archived positioning.');
     if(archive?.secondTop?.summary?.takerLongShortVolume>1&&Number(archive?.deltas?.takerLongShortVolume)>0) confirmations.push({id:'TAKER_BUY_CONFIRMATION',reason:'Taker buy/sell ratio confirms buy-side aggression at the archived checkpoint.'});
@@ -109,5 +109,5 @@ globalThis.M24Backtest = (() => {
     return {caseId:snapshot.caseId,snapshot,candidate,outcome};
   }
 
-  return {aggregateMeaningSources,macroSecondTop,verifiedFundingContext,verifiedArchiveContext,buildDecisionSnapshot,scoreCandidate,evaluateOutcome,run};
+  const verifiedFundingContext=verifiedDerivativesContext;\n  return {aggregateMeaningSources,macroSecondTop,verifiedDerivativesContext,verifiedFundingContext,verifiedArchiveContext,buildDecisionSnapshot,scoreCandidate,evaluateOutcome,run};
 })();
