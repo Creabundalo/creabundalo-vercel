@@ -8,6 +8,8 @@ on:
       - 'm24-fred-market.js'
       - 'm24-nasdaq-2000-source-e2e-test.js'
       - 'm24-nl-housing-source-e2e-test.js'
+      - 'm24-global-mar2020-source-e2e-test.js'
+      - 'm24-cross-asset-lab.js'
       - 'm24-cbs-housing.js'
       - 'm24-housing-lab.js'
       - 'm24-btc-2019-source-e2e-test.js'
@@ -51,6 +53,8 @@ jobs:
           node --check m24-source-e2e-test.js
           node --check m24-nasdaq-2000-source-e2e-test.js
           node --check m24-nl-housing-source-e2e-test.js
+          node --check m24-global-mar2020-source-e2e-test.js
+          node --check m24-cross-asset-lab.js
           node --check m24-cbs-housing.js
           node --check m24-housing-lab.js
           node --check m24-fred-market.js
@@ -61,6 +65,8 @@ jobs:
           node --check m24-eth-2021-source-e2e-test.js
           node --check m24-sol-2021-source-e2e-test.js
           node --check m24-replay-e2e-test.js
+      - name: GLOBAL March 2020 real-source enrichment
+        run: node m24-global-mar2020-source-e2e-test.js
       - name: NL housing 2015-2023 real-source enrichment
         run: node m24-nl-housing-source-e2e-test.js
       - name: NASDAQ 1999-2002 real-source enrichment
@@ -81,6 +87,7 @@ jobs:
         with:
           name: m24-2021-source-snapshots
           path: |
+            m24-global-mar2020-source-snapshot.json
             m24-nl-housing-source-snapshot.json
             m24-nasdaq-2000-source-snapshot.json
             m24-btc-2019-source-snapshot.json
