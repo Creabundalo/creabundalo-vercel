@@ -62,6 +62,42 @@ globalThis.M24Meaning = (() => {
       title:'Bitcoin, ether hit all-time highs as momentum accelerates',url:'https://uk.investing.com/news/economy/fast-money-drives-bitcoin-ether-to-new-record-highs-2506449',
       frames:['RECORD_HIGH','CRYPTO_ADOPTION','INFLATION_CONCERN','MOMENTUM_AND_FLOWS'],direction:0.9,
       summary:'Coverage framed ether and bitcoin records around adoption enthusiasm, inflation concerns, momentum and flows into the asset class.',quality:'PRIMARY_MEDIA_SYNDICATED'
+    }),
+    source({
+      id:'SRC-COINDESK-SOL-2021-09-03-NFT',assets:['SOL'],caseIds:['SOL-2021-2022-TOP-MARKDOWN'],publishedAt:'2021-09-03T09:34:00Z',publisher:'CoinDesk',transport:'CoinDesk',
+      title:"Solana’s SOL Replaces Dogecoin as 7th Largest Cryptocurrency",url:'https://www.coindesk.com/markets/2021/09/03/solanas-sol-replaces-dogecoin-as-7th-largest-cryptocurrency',
+      frames:['NFT_BOOM','ETHEREUM_COMPETITOR','RECORD_HIGH','ADOPTION_MOMENTUM'],direction:0.8,
+      summary:'Coverage framed SOL strength around record prices, NFT activity and its rise among the largest crypto assets.',quality:'PRIMARY_CRYPTO_MEDIA'
+    }),
+    source({
+      id:'SRC-COINDESK-SOL-2021-09-07-FTXNFT',assets:['SOL'],caseIds:['SOL-2021-2022-TOP-MARKDOWN'],publishedAt:'2021-09-07T15:25:00Z',publisher:'CoinDesk',transport:'CoinDesk',
+      title:'Solana Climbs 30% on Back of FTX NFT Marketplace Launch',url:'https://www.coindesk.com/markets/2021/09/07/solana-climbs-30-on-back-of-ftx-nft-marketplace-launch',
+      frames:['FTX_ECOSYSTEM','NFT_BOOM','RECORD_HIGH','POSITIVE_MOMENTUM'],direction:0.9,
+      summary:'Coverage linked a fresh SOL record to FTX NFT-marketplace activity and strong ecosystem momentum.',quality:'PRIMARY_CRYPTO_MEDIA'
+    }),
+    source({
+      id:'SRC-THEBLOCK-SOL-2021-09-14-OUTAGE',assets:['SOL'],caseIds:['SOL-2021-2022-TOP-MARKDOWN'],publishedAt:'2021-09-14T14:06:00Z',publisher:'The Block',transport:'The Block',
+      title:'Solana experiences transaction stoppage as developers report intermittent instability',url:'https://www.theblock.co/news/business/2021-09-14-solana-experiences-transaction-stoppage-as-developers-report-intermittent-instability-117624',
+      frames:['NETWORK_OUTAGE','OPERATIONAL_RISK','TRANSACTION_OVERLOAD'],direction:-0.8,
+      summary:'Reporting described a transaction stoppage and validator restart process after extreme transaction load.',quality:'PRIMARY_CRYPTO_MEDIA'
+    }),
+    source({
+      id:'SRC-YAHOO-SOL-2021-10-11-FTXMARKET',assets:['SOL'],caseIds:['SOL-2021-2022-TOP-MARKDOWN'],publishedAt:'2021-10-11T20:28:00Z',publisher:'Yahoo Finance',transport:'Yahoo Finance',
+      title:'FTX launches US marketplace for solana NFTs with plans to expand to ethereum-based tokens',url:'https://finance.yahoo.com/news/ftx-launches-us-marketplace-solana-202844072.html',
+      frames:['NFT_MARKETPLACE','FTX_ECOSYSTEM','NETWORK_ADOPTION'],direction:0.65,
+      summary:'Coverage emphasized continued NFT-market infrastructure and FTX support for the Solana ecosystem.',quality:'SECONDARY_FINANCIAL_MEDIA'
+    }),
+    source({
+      id:'SRC-COINDESK-SOL-2021-11-04-ATH',assets:['SOL'],caseIds:['SOL-2021-2022-TOP-MARKDOWN'],publishedAt:'2021-11-04T14:36:00Z',publisher:'CoinDesk',transport:'CoinDesk',
+      title:'Ethereum Alternatives and Gaming Tokens Outperform BTC and ETH',url:'https://www.coindesk.com/markets/2021/11/04/ethereum-alternatives-and-gaming-tokens-outperform-btc-and-eth',
+      frames:['RECORD_HIGH','ETHEREUM_ALTERNATIVE','OUTPERFORMANCE','POSITIVE_MOMENTUM'],direction:0.9,
+      summary:'Coverage highlighted SOL at a new all-time high while Ethereum alternatives outperformed larger crypto assets.',quality:'PRIMARY_CRYPTO_MEDIA'
+    }),
+    source({
+      id:'SRC-DAILYCOIN-SOL-2021-11-07-ATH',assets:['SOL'],caseIds:['SOL-2021-2022-TOP-MARKDOWN'],publishedAt:'2021-11-07T13:05:00Z',publisher:'DailyCoin',transport:'Investing.com syndication',
+      title:'Solana Reaches a New All-Time High',url:'https://www.investing.com/news/cryptocurrency-news/solana-reaches-a-new-alltime-high-2670806',
+      frames:['RECORD_HIGH','MARKET_CAP_RANK','ETHEREUM_COMPETITOR','POSITIVE_MOMENTUM'],direction:0.85,
+      summary:'Coverage described SOL reaching roughly $260 and moving further up the crypto market-cap rankings.',quality:'SECONDARY_CRYPTO_MEDIA'
     })
   ]);
 
