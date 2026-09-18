@@ -9,16 +9,16 @@
 | M99-B000 | P0 | P00 | Project method / PBS / WBS / queue | — | DONE |
 | M99-B001 | P0 | P01/P02 | Fundament + full fill matrix | B000 | DONE |
 | M99-B002 | P0 | P01/P03/P05 | Crypto lifecycle & mechanics | B001 | BLOCKED |
-| M99-B003 | P0 | P01/P03 | Equities / indices | B001 | READY |
-| M99-B004 | P0 | P05 | Futures / options / derivatives | B001 | READY |
-| M99-B005 | P0 | P01/P03 | Bonds / credit | B001 | READY |
-| M99-B006 | P0 | P01/P03 | Gold / silver / commodities | B001 | READY |
-| M99-B007 | P0 | P01/P03 | FX | B001 | READY |
-| M99-B008 | P0 | P01/P03 | Housing / real estate | B001 | READY |
-| M99-B009 | P0 | P01/P02 | Money / funding / collateral / liquidity | B001 | READY |
-| M99-B010 | P0 | P02/P09 | Positioning / flows / cross-asset | B001 | READY |
-| M99-B011 | P0 | P02/P09 | Macro / real economy | B001 | READY |
-| M99-B012 | P0 | P06 | Meaning world | B001 | READY |
+| M99-B003 | P0 | P01/P03 | Equities / indices | B001 | DONE |
+| M99-B004 | P0 | P05 | Futures / options / derivatives | B001 | BLOCKED |
+| M99-B005 | P0 | P01/P03 | Bonds / credit | B001 | DONE |
+| M99-B006 | P0 | P01/P03 | Gold / silver / commodities | B001 | DONE |
+| M99-B007 | P0 | P01/P03 | FX | B001 | DONE |
+| M99-B008 | P0 | P01/P03 | Housing / real estate | B001 | DONE |
+| M99-B009 | P0 | P01/P02 | Money / funding / collateral / liquidity | B001 | DONE |
+| M99-B010 | P0 | P02/P09 | Positioning / flows / cross-asset | B001 | DONE |
+| M99-B011 | P0 | P02/P09 | Macro / real economy | B001 | DONE |
+| M99-B012 | P0 | P06 | Meaning world | B001 | DONE |
 | M99-B013 | P0 | P03/P08 | Historical bubbles / crashes / regimes | B002-B012 | READY_WITH_DEPENDENCIES |
 | M99-B014 | P1 | P09 | Cross-asset relation discovery | B002-B013 | LATER |
 | M99-B015 | P0 | P02/P14 | Source-gap / quality sweep | B002-B013 | LATER |
@@ -84,3 +84,36 @@ BTC's June/July 2019 case predates Binance Futures. M99 needs an older historica
 
 ### Project continuation
 This blocker does not block other B001-dependent batches. **M99-B003 — Equities / indices remains the next READY batch.**
+
+
+## Multi-batch checkpoint B003-B012
+
+### DONE
+- B003 Equities / indices
+- B005 Bonds / credit
+- B006 Gold / silver / commodities
+- B007 FX
+- B008 Housing / real estate
+- B009 Money / funding / collateral / liquidity
+- B010 Positioning / flows
+- B011 Macro / real economy
+- B012 Meaning world
+
+### BLOCKED
+- B002 Crypto — remaining BTC 2019 historical-derivatives dependency + crypto options handoff.
+- B004 Futures / options / derivatives — domain/taxonomy/source map is filled, but detailed historical listed-options access and the older BTC/CME adapter remain unresolved.
+
+### Architecture discoveries folded into the base
+- ON_CHAIN_NETWORK
+- STABLECOIN_LIQUIDITY
+- FUNDAMENTALS / CORPORATE_ACTIONS / SECURITY_MASTER
+- CONTRACT_LIFECYCLE / VOLATILITY_SURFACE / TERM_STRUCTURE
+- YIELD_CURVE / CREDIT_SPREAD / DURATION_CONVEXITY
+- PHYSICAL_BALANCE / INVENTORY / SEASONALITY / LOCATION_QUALITY_BASIS
+- RATE_DIFFERENTIAL_CARRY / FX_REGIME
+- HOUSING LOCATION_HIERARCHY / AFFORDABILITY / MORTGAGE_FINANCE / PUBLICATION_LAG
+- BALANCE_SHEET_STATE / COLLATERAL_NETWORK / REPO_FUNDING
+- REPORTING_LAG / RELEASE_VINTAGE
+
+### Next project-critical run
+**M99-B004-RESOLVE** — generalize derivatives evidence profiles and implement/use a historical pre-Binance BTC derivatives path (CME/CFTC) without requiring perpetual-funding data that did not yet exist.
