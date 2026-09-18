@@ -1,7 +1,7 @@
 const fs=require('fs'),vm=require('vm');
 globalThis.__m24fs=fs;
 const files=[
-  'm24-core.js','m24-lab.js','m24-primary-lab.js','m24-coinbase.js','m24-episode-generator.js','m24-generated-case.js',
+  'm24-core.js','m24-lab.js','m24-primary-lab.js','m24-coinbase.js','m24-episode-generator.js','m24-episode-universe.js','m24-generated-case.js',
   'm24-binance-vision.js','m24-derivatives.js','m24-funding-archive.js','m24-derivatives-lab.js','m24-binance-vision-lab.js',
   'm24-macro.js','m24-macro-lab.js','m24-meaning.js','m24-backtest.js','m24-evidence-gate.js','m24-enrichment.js'
 ];
@@ -11,17 +11,20 @@ const test=`
   const check=(x,m)=>{if(!x)throw new Error(m)};
   const priceProvider=new M24Coinbase.CoinbaseHistoricalProvider();
 
-  // Selection window/rule is fixed before enrichment/outcome inspection.
+  // Canonical universe/window is frozen before enrichment/outcome inspection.
+  const selectionWindow=M24EpisodeUniverse.assetWindow('ETH','FAST_DISTRIBUTION_V1');
   const selectionSource=await priceProvider.getBarsForAsset('ETH',{
-    start:'2023-01-01T00:00:00Z',end:'2023-12-31T23:59:59Z',granularity:86400
+    start:selectionWindow.from+'T00:00:00Z',end:selectionWindow.to+'T23:59:59Z',granularity:86400
   });
-  const scan=M24EpisodeGenerator.scanFastMarket({asset:'ETH',bars:selectionSource.bars});
-  check(scan.candidates.length>=1,'no ETH 2023 generated candidate');
+  const scan=M24EpisodeUniverse.scanCanonical({asset:'ETH',bars:selectionSource.bars,universeId:'FAST_DISTRIBUTION_V1'});
+  check(scan.candidates.length>=1,'no canonical ETH generated candidate');
   const candidate=scan.candidates[0];
+  check(M24EpisodeUniverse.verifyCandidate(candidate).eligible===true,'canonical selection verification failed');
   const caseSchema=M24GeneratedCase.fromEpisodeCandidate(candidate);
   const integrity=M24GeneratedCase.assertNoOutcomeLeak(caseSchema,candidate);
   check(integrity.valid===true,'generated case outcome leak guard failed');
   check(caseSchema.coverageProfile==='MECHANICS_CORE_DERIVATIVES','generated coverage profile');
+  check(caseSchema.selectionEligible===true&&caseSchema.selectionUniverseId==='FAST_DISTRIBUTION_V1','generated canonical selection identity');
   check(caseSchema.requiredLayers.includes('MEANING_WORLD')===false,'generated mechanics profile must not require meaning');
 
   const store=new M24Core.QubusStore();
@@ -42,12 +45,14 @@ const test=`
     episodeGroup:candidate.episodeGroup,
     candidate:{
       asset:candidate.asset,decisionDate:candidate.decisionDate,firstTopDate:candidate.firstTop.date,
-      observed:candidate.observed,outcomeStatus:candidate.outcomeStatus
+      observed:candidate.observed,outcomeStatus:candidate.outcomeStatus,
+      selectionUniverseId:candidate.selectionUniverseId,selectionWindow:candidate.selectionWindow
     },
     caseSchema:{
       id:caseSchema.id,window:caseSchema.window,coverageProfile:caseSchema.coverageProfile,
       horizonProfile:caseSchema.horizonProfile,regimeFamily:caseSchema.regimeFamily,
-      requiredLayers:caseSchema.requiredLayers,scoreProfile:caseSchema.scoreProfile
+      requiredLayers:caseSchema.requiredLayers,scoreProfile:caseSchema.scoreProfile,
+      selectionEligible:caseSchema.selectionEligible,selectionUniverseId:caseSchema.selectionUniverseId
     },
     enrichment:{
       state:result.state,calibrationEligible:result.calibrationEligible,
