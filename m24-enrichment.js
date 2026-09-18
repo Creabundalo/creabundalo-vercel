@@ -41,12 +41,15 @@ globalThis.M24Enrichment = (() => {
     }));
 
     if(!providers.derivatives) throw new Error('Derivatives provider is required.');
-    const derivatives=await M24DerivativesLab.runCase({provider:providers.derivatives,caseSchema,labResult});
-    addPayloads(store,M24DerivativesLab.toRecordPayloads(derivatives),{subjectId:caseSchema.asset,resolution:'CHECKPOINT_BOUNDED'});
+    const derivativesLab=providers.derivativesLab||M24DerivativesLab;
+    const derivatives=await derivativesLab.runCase({provider:providers.derivatives,caseSchema,labResult});
+    addPayloads(store,derivativesLab.toRecordPayloads(derivatives),{subjectId:caseSchema.asset,resolution:'CHECKPOINT_BOUNDED'});
 
-    if(!providers.archive) throw new Error('Derivatives archive provider is required.');
-    const archive=await M24BinanceVisionLab.runCase({provider:providers.archive,caseSchema,labResult});
-    addPayloads(store,M24BinanceVisionLab.toRecordPayloads(archive),{subjectId:caseSchema.asset,resolution:'ARCHIVE_CHECKPOINTS'});
+    let archive=null;
+    if(providers.archive){
+      archive=await M24BinanceVisionLab.runCase({provider:providers.archive,caseSchema,labResult});
+      addPayloads(store,M24BinanceVisionLab.toRecordPayloads(archive),{subjectId:caseSchema.asset,resolution:'ARCHIVE_CHECKPOINTS'});
+    }
 
     if(!providers.macro) throw new Error('Macro provider is required.');
     const macro=await M24MacroLab.runCase({provider:providers.macro,caseSchema,labResult});
@@ -54,7 +57,7 @@ globalThis.M24Enrichment = (() => {
 
     const backtest=M24Backtest.run({
       caseSchema,labResult,meaningContext:meaning,
-      derivativesContext:derivatives.fundingContext,
+      derivativesContext:derivatives.context||derivatives.fundingContext,
       archiveDerivativesContext:archive,
       macroContext:macro.context
     });
