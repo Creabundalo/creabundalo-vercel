@@ -1,7 +1,7 @@
 # M99 — Master Batch Queue v0.1
 
 ## Current phase
-**FASE A — FILL**
+**FASE B — VALIDATE**
 
 ## Batch plan
 | Batch | Priority | Product | Scope | Dependency | Status |
@@ -20,8 +20,12 @@
 | M99-B011 | P0 | P02/P09 | Macro / real economy | B001 | DONE |
 | M99-B012 | P0 | P06 | Meaning world | B001 | DONE |
 | M99-B013 | P0 | P03/P08 | Historical bubbles / crashes / regimes | B002-B012 | DONE |
-| M99-B014 | P1 | P09 | Cross-asset relation discovery | B002-B013 | RUNNING |
-| M99-B015 | P0 | P02/P14 | Source-gap / quality sweep | B002-B013 | LATER |
+| M99-B014 | P1 | P09 | Cross-asset relation discovery | B002-B013 | DONE |
+| M99-B015 | P0 | P02/P14 | Source-gap / quality sweep | B002-B014 | DONE |
+| M99-B016 | P0 | P08 | Pattern hypothesis validation | B013-B015 | RUNNING |
+| M99-B017 | P0 | P07 | Trickster validation across cases | B013-B016 | READY |
+| M99-B018 | P0 | P10 | Horizon/timescale validation | B013-B016 | READY |
+| M99-B019 | P0 | P10/P14 | Calibration cohort expansion | B016-B018 | READY_WITH_DEPENDENCIES |
 
 ## M99-B001 — Fundament + full fill matrix
 ### Goal
@@ -148,3 +152,26 @@ Broad research windows are registered first; source data resolves actual checkpo
 Cross-asset relation discovery.
 
 First rule: a relation is always scoped by subjects, time window, resolution, regime and evidence status. M99 does not store timeless claims such as “asset A always follows asset B”.
+
+
+## FASE A closeout — FILL
+- B000–B015 completed.
+- No unresolved structural P0 source/architecture blocker.
+- Open source limitations are explicit P1/P2 or conditional case blockers.
+- Calibration n<30 and live execution remain hard later gates.
+
+## FASE B — VALIDATE
+### M99-B016 — Pattern hypothesis validation
+Test RSI, Wyckoff-like state structure, Elliott-wave hypotheses and Fibonacci relations against the verified case library without treating any pattern as a cause.
+
+### M99-B017 — Trickster validation
+Measure meaning-world ↔ mechanism/flow divergence across source-complete cases.
+
+### M99-B018 — Horizon/timescale validation
+Define horizon profiles by market timescale. A housing market must not inherit 3D/2W horizons merely because crypto uses them.
+
+### M99-B019 — Calibration cohort expansion
+Generate enough compatible historical samples per horizon/regime/coverage profile before any probability may be displayed.
+
+### Safety
+M99 remains `SIMULATED_ONLY / PAPER`. FASE B does not authorize live orders.
