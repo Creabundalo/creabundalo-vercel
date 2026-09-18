@@ -2,6 +2,18 @@ globalThis.M24Meaning = (() => {
   const source=spec=>Object.freeze(spec);
   const SOURCES=Object.freeze([
     source({
+      id:'SRC-REUTERS-BTC-2019-06-26-LIBRA',assets:['BTC'],caseIds:['BTC-2019-TOP-MARKDOWN'],publishedAt:'2019-06-26T11:01:00Z',publisher:'Reuters',transport:'Investing/Reuters syndication',
+      title:"Bitcoin reaches 18-month high as Facebook's Libra spurs interest",url:'https://www.investing.com/news/cryptocurrency-news/bitcoin-vaults-to-18month-highs-on-growing-popularity-1907781',
+      frames:['LIBRA_MAINSTREAM_HOPE','SAFE_HAVEN_NARRATIVE','SPECULATIVE_RETURN','CME_FUTURES_ACTIVITY'],direction:0.85,
+      summary:'Coverage framed the 18-month high around Libra-driven mainstream expectations, alternative-asset demand and renewed speculative interest; Reuters also noted rising CME bitcoin-futures activity.',quality:'PRIMARY_MEDIA_SYNDICATED'
+    }),
+    source({
+      id:'SRC-REUTERS-BTC-2019-07-09-LIBRA',assets:['BTC'],caseIds:['BTC-2019-TOP-MARKDOWN'],publishedAt:'2019-07-09T08:58:00Z',publisher:'Reuters',transport:'Investing/Reuters syndication',
+      title:"Bitcoin near two-week highs, fueled by hopes for Facebook's Libra",url:'https://www.investing.com/news/forex-news/bitcoin-near-twoweek-highs-fueled-by-hopes-for-facebooks-libra-1918194',
+      frames:['LIBRA_MAINSTREAM_HOPE','ADOPTION_MOMENTUM','VOLATILITY','USAGE_GROWTH'],direction:0.8,
+      summary:'Coverage described bitcoin near a two-week high with continued optimism around Libra and wider crypto acceptance, while emphasizing persistent high volatility.',quality:'PRIMARY_MEDIA_SYNDICATED'
+    }),
+    source({
       id:'SRC-REUTERS-2021-04-14-COINBASE',assets:['BTC'],caseIds:['BTC-2021-2022-TOP-MARKDOWN'],publishedAt:'2021-04-14T06:02:00Z',publisher:'Reuters',transport:'Yahoo/Reuters syndication',
       title:"Coinbase listing marks latest step in crypto's march to the mainstream",
       url:'https://tech.yahoo.com/general/articles/coinbase-listing-marks-latest-step-060207358.html',
