@@ -23,9 +23,9 @@
 | M99-B014 | P1 | P09 | Cross-asset relation discovery | B002-B013 | DONE |
 | M99-B015 | P0 | P02/P14 | Source-gap / quality sweep | B002-B014 | DONE |
 | M99-B016 | P0 | P08 | Pattern hypothesis validation | B013-B015 | DONE |
-| M99-B017 | P0 | P07 | Trickster validation across cases | B013-B016 | RUNNING |
-| M99-B018 | P0 | P10 | Horizon/timescale validation | B013-B016 | READY |
-| M99-B019 | P0 | P10/P14 | Calibration cohort expansion | B016-B018 | READY_WITH_DEPENDENCIES |
+| M99-B017 | P0 | P07 | Trickster validation across cases | B013-B016 | DONE |
+| M99-B018 | P0 | P10 | Horizon/timescale validation | B013-B016 | DONE |
+| M99-B019 | P0 | P10/P14 | Calibration cohort expansion | B016-B018 | RUNNING |
 
 ## M99-B001 — Fundament + full fill matrix
 ### Goal
@@ -175,3 +175,26 @@ Generate enough compatible historical samples per horizon/regime/coverage profil
 
 ### Safety
 M99 remains `SIMULATED_ONLY / PAPER`. FASE B does not authorize live orders.
+
+
+## M99-B017 final checkpoint
+- verified Trickster cross-case validation complete on 7 source-complete cases;
+- divergence/alignment/meaning-ahead states discriminate descriptively;
+- WAIT negative controls preserved;
+- manipulation, actor intent and predictive edge remain explicitly unestablished.
+
+**Status: DONE.**
+
+## M99-B018 final checkpoint
+- FAST_MARKET, SHOCK and SLOW_MARKET clocks validated;
+- housing publication-calendar replay verified;
+- March-2020 shock replay verified with horizon-specific right/wrong outcomes retained;
+- horizon profile is part of calibration cohort identity.
+
+**Status: DONE.**
+
+## M99-B019 checkpoint
+### RUNNING
+Calibration cohort expansion.
+
+First objective: compute the exact verified sample deficit per compatible horizon / coverage profile / horizon profile before adding any new cases.
