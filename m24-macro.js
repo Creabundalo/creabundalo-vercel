@@ -2,6 +2,7 @@ globalThis.M24Macro = (() => {
   const FRED_CSV='https://fred.stlouisfed.org/graph/fredgraph.csv';
   const DAY_MS=86400000;
   const SERIES=Object.freeze({
+    ECB_DEPOSIT_RATE:Object.freeze({id:'ECBDFR',label:'ECB Deposit Facility Rate',family:'RATES',units:'percent',frequency:'daily',source:'European Central Bank',higherMeaning:'TIGHTER_EURO_RATE'}),
     FED_FUNDS:Object.freeze({id:'EFFR',label:'Effective Fed Funds Rate',family:'RATES',units:'percent',frequency:'daily',source:'Federal Reserve Bank of New York',higherMeaning:'TIGHTER_SHORT_RATE'}),
     FED_FUNDS_LEGACY:Object.freeze({id:'DFF',label:'Federal Funds Effective Rate',family:'RATES',units:'percent',frequency:'daily',source:'Board of Governors of the Federal Reserve System',higherMeaning:'TIGHTER_SHORT_RATE'}),
     TEN_YEAR:Object.freeze({id:'DGS10',label:'10Y Treasury Yield',family:'RATES',units:'percent',frequency:'daily',source:'Board of Governors of the Federal Reserve System',higherMeaning:'HIGHER_LONG_RATE'}),
