@@ -1,0 +1,44 @@
+name: M24 Trickster E2E
+
+on:
+  pull_request:
+    paths:
+      - 'm24-trickster-lab.js'
+      - 'm24-trickster-crosscase-test.js'
+      - 'm24-trickster-crosscase-e2e-test.js'
+      - 'm24-cases.js'
+      - 'm24-meaning.js'
+      - 'm24-verified-btc-2019.json'
+      - 'm24-verified-btc-2021.json'
+      - 'm24-verified-eth-2021.json'
+      - 'm24-verified-sol-2021.json'
+      - 'm24-verified-nasdaq-2000.json'
+      - 'm24-verified-nl-housing-2015-2023.json'
+      - 'm24-verified-global-mar2020.json'
+      - '.github/workflows/m24-trickster-e2e.yml'
+  workflow_dispatch:
+
+jobs:
+  verified-cross-case:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax
+        run: |
+          node --check m24-trickster-lab.js
+          node --check m24-trickster-crosscase-test.js
+          node --check m24-trickster-crosscase-e2e-test.js
+      - name: Trickster cross-case contract
+        run: node m24-trickster-crosscase-test.js
+      - name: Verified snapshot Trickster validation
+        run: node m24-trickster-crosscase-e2e-test.js
+      - name: Upload Trickster snapshot
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m24-trickster-crosscase
+          path: m24-trickster-crosscase-snapshot.json
+          if-no-files-found: ignore
