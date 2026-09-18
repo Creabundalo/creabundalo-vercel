@@ -63,7 +63,8 @@ globalThis.M24Backtest = (() => {
           rsiBearishDivergence:Boolean(labResult.comparisons.rsiBearishDivergence),
           volumeBearishDivergence:Boolean(labResult.comparisons.volumeBearishDivergence),
           priceReferenceChangePct:labResult.comparisons.priceReferenceChangePct??null,
-          yoyGrowthChange:labResult.comparisons.yoyGrowthChange??null
+          yoyGrowthChange:labResult.comparisons.yoyGrowthChange??null,
+          transactionYoYAtSecond:labResult.comparisons.transactionYoYAtSecond??null
         }
       },
       meaning,
@@ -90,7 +91,7 @@ globalThis.M24Backtest = (() => {
     if(archive?.secondTop?.summary?.takerLongShortVolume>1&&Number(archive?.deltas?.takerLongShortVolume)>0) confirmations.push({id:'TAKER_BUY_CONFIRMATION',reason:'Taker buy/sell ratio confirms buy-side aggression at the archived checkpoint.'});
     if(snapshot.scoreProfile==='HOUSING_SLOW_MARKET'){
       if(Number(snapshot.price.comparisons.yoyGrowthChange)<-3) add('HOUSING_GROWTH_DECELERATION',1,'Annual house-price growth slowed materially between the momentum peak and the price-level peak.');
-      if(Number(snapshot.price.comparisons.volumeChangePct)<-10) add('HOUSING_TRANSACTION_WEAKNESS',1,'Housing transaction activity weakened materially while the price index remained elevated.');
+      if(Number(snapshot.price.comparisons.transactionYoYAtSecond)<-10) add('HOUSING_TRANSACTION_WEAKNESS',1,'Housing transactions were more than 10% below the year-earlier level while the price index remained elevated.');
     }
     const macro=Object.fromEntries((snapshot.macro||[]).map(x=>[x.key,x]));
     if(Number(macro.DOLLAR?.delta)>0) add('STRONGER_DOLLAR',0.5,'Broad U.S. dollar is stronger versus first-top checkpoint.');
