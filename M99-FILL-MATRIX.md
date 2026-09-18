@@ -1,19 +1,32 @@
-# M99 — Fill Matrix v0.1
+# M99 — Fill Matrix v0.2
 
 Legend: **C** = core, **E** = extended/when available, **—** = usually not applicable.
 
-| Market | Price/Vol | Volatility | Futures | Options | Funding/Perps | Credit/Rates | Liquidity | Positioning/Flow | Macro | Meaning | Bubble/Regime | Outcome |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| Crypto | C | C | C | E | C | E | C | C | C | C | C | C |
-| Equities | C | C | E | C | — | C | C | C | C | C | C | C |
-| Indices/ETFs | C | C | C | C | — | C | C | C | C | C | C | C |
-| Bonds/Credit | C | C | C | C | — | C | C | C | C | C | C | C |
-| Gold/Silver | C | C | C | C | — | C | C | C | C | C | C | C |
-| Oil/Gas | C | C | C | C | — | C | C | C | C | C | C | C |
-| FX | C | C | C | C | E | C | C | C | C | C | C | C |
-| Housing | C | C | E | E | — | C | C | C | C | C | C | C |
-| Commercial RE | C | C | E | E | — | C | C | C | C | C | C | C |
-| Money/Funding | C | C | C | E | E | C | C | C | C | C | C | C |
+| Market | Price/Vol | Volatility | Futures | Options | Funding/Perps | On-chain/Network | Credit/Rates | Liquidity | Positioning/Flow | Macro | Meaning | Bubble/Regime | Outcome |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Crypto | C | C | C | E | C | C | E | C | C | C | C | C | C |
+| Equities | C | C | E | C | — | — | C | C | C | C | C | C | C |
+| Indices/ETFs | C | C | C | C | — | — | C | C | C | C | C | C | C |
+| Bonds/Credit | C | C | C | C | — | — | C | C | C | C | C | C | C |
+| Gold/Silver | C | C | C | C | — | — | C | C | C | C | C | C | C |
+| Oil/Gas | C | C | C | C | — | — | C | C | C | C | C | C | C |
+| FX | C | C | C | C | E | — | C | C | C | C | C | C | C |
+| Housing | C | C | E | E | — | — | C | C | C | C | C | C | C |
+| Commercial RE | C | C | E | E | — | — | C | C | C | C | C | C | C |
+| Money/Funding | C | C | C | E | E | — | C | C | C | C | C | C | C |
+
+## Crypto-specific on-chain/network sensor profile
+Fill only where methodology is explicit and comparable:
+- transaction / settlement activity;
+- fees;
+- supply state;
+- staking / validator state where applicable;
+- exchange inflow/outflow where provenance is reliable;
+- stablecoin supply and settlement flows;
+- bridge / DeFi collateral state where relevant;
+- realized-cap style metrics only with methodology/version stored.
+
+On-chain metrics are chain-specific; they are not assumed interchangeable across BTC, ETH and SOL.
 
 ## Derivatives sensor profile
 Where applicable fill:
