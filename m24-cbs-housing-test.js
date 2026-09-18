@@ -4,10 +4,12 @@ const test=`
 (async()=>{
  const check=(x,m)=>{if(!x)throw new Error(m)};
  const meta={value:[
-  {Key:'Prijsindex_1',Title:'Prijsindex bestaande koopwoningen'},
-  {Key:'Jaar_2',Title:'Prijsindex bestaande koopwoningen Ontwikkeling ten opzichte van een jaar eerder'},
-  {Key:'Aantal_3',Title:'Aantal verkochte woningen'},
-  {Key:'AantalJaar_4',Title:'Aantal verkochte woningen Ontwikkeling ten opzichte van een jaar eerder'}
+  {ID:1,Type:'TopicGroup',Key:'',Title:'Prijsindex bestaande koopwoningen'},
+  {ID:2,ParentID:1,Position:1,Type:'Topic',Key:'Prijsindex_1',Title:'Prijsindex verkoopprijzen',Unit:'2020=100'},
+  {ID:4,ParentID:1,Position:3,Type:'Topic',Key:'Jaar_2',Title:'Ontwikkeling t.o.v. een jaar eerder',Description:'De procentuele ontwikkeling ten opzichte van dezelfde periode een jaar eerder.',Unit:'%'},
+  {ID:5,Type:'TopicGroup',Key:'',Title:'Verkochte woningen'},
+  {ID:6,ParentID:5,Position:4,Type:'Topic',Key:'Aantal_3',Title:'Verkochte woningen',Unit:'aantal'},
+  {ID:8,ParentID:5,Position:6,Type:'Topic',Key:'AantalJaar_4',Title:'Ontwikkeling t.o.v. een jaar eerder',Description:'De procentuele ontwikkeling ten opzichte van dezelfde periode een jaar eerder.',Unit:'%'}
  ]};
  const data={value:[
   {Perioden:'2022MM01',Prijsindex_1:127.4,Jaar_2:20.9,Aantal_3:14000,AantalJaar_4:-42.7},
