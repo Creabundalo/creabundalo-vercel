@@ -22,6 +22,7 @@ on:
       - 'm24-replay-e2e-test.js'
       - 'm24-horizon-profile-e2e-test.js'
       - 'm24-episode-generator.js'
+      - 'm24-episode-universe.js'
       - 'm24-episode-generator-e2e-test.js'
       - 'm24-generated-case.js'
       - 'm24-generated-case-e2e-test.js'
@@ -83,6 +84,7 @@ jobs:
           node --check m24-replay-e2e-test.js
           node --check m24-horizon-profile-e2e-test.js
           node --check m24-episode-generator.js
+          node --check m24-episode-universe.js
           node --check m24-episode-generator-e2e-test.js
           node --check m24-generated-case.js
           node --check m24-generated-case-e2e-test.js
