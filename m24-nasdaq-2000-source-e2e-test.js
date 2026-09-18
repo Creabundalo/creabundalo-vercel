@@ -16,10 +16,13 @@ const test=`
    macro:new M24Macro.FredCsvProvider(),
    macroKeys:caseSchema.macroKeys
  };
+ const raw=await providers.price.getBarsForAsset(caseSchema.asset,{start:`${caseSchema.window.from}T00:00:00Z`,end:`${caseSchema.window.to}T23:59:59Z`});
  const result=await M24Enrichment.runCase({store,caseSchema,providers});
+ const minBar=raw.bars.reduce((a,b)=>!a||b.close<a.close?b:a,null);
  const snapshot={
    type:'M24_REAL_SOURCE_ENRICHMENT_SNAPSHOT',caseId:caseSchema.id,asset:caseSchema.asset,
    state:result.state,calibrationEligible:result.calibrationEligible,coverageProfile:result.evidence.coverageProfile,
+   rawCoverage:{count:raw.bars.length,firstDate:raw.bars[0]?.date||null,lastDate:raw.bars.at(-1)?.date||null,minDate:minBar?.date||null,minClose:minBar?.close??null},
    resolvedCheckpoints:{
      firstTop:result.backtest.snapshot.price.firstTop.date,
      secondTop:result.backtest.snapshot.price.secondTop.date,
@@ -35,6 +38,9 @@ const test=`
    rule:'Close-only NASDAQ case uses case-specific evidence requirements. No OHLC, volume or derivatives evidence is fabricated.'
  };
  globalThis.__m24fs.writeFileSync('m24-nasdaq-2000-source-snapshot.json',JSON.stringify(snapshot,null,2));
+ check(raw.bars.at(-1)?.date>='2002-12-30','NASDAQ raw source did not cover the requested 1999-2002 window');
+ check(minBar?.date==='2002-10-09'&&Math.abs(minBar.close-1114.11)<0.01,'NASDAQ long-window minimum mismatch');
+ check(result.backtest.outcome.troughDate==='2002-10-09','NASDAQ markdown outcome must resolve from full 2002 history');
  check(result.backtest.snapshot.price.firstTop.high===null,'NASDAQ source must remain close-only');
  check(result.backtest.snapshot.price.firstTop.volume===null,'NASDAQ volume must not be synthesized');
  check(result.meaning.firstTop.count>=1&&result.meaning.secondTop.count>=1,'NASDAQ meaning-world top coverage incomplete');
