@@ -39,7 +39,7 @@ globalThis.M24CbsHousing = (() => {
     async fetchMonthly({from='2020-01-01',to='2023-12-31'}={}){
       const [meta,data]=await Promise.all([this.json('DataProperties'),this.json('TypedDataSet')]);
       const price=pickProperty(meta.rows,['prijsindex','bestaande koopwoningen']);
-      const yoy=pickProperty(meta.rows,['ontwikkeling','jaar eerder']);
+      const yoy=pickProperty(meta.rows,['prijsindex','ontwikkeling','jaar eerder']);
       const sales=pickProperty(meta.rows,['aantal','verkochte woningen']);
       const salesYoy=pickProperty(meta.rows,['verkochte woningen','ontwikkeling','jaar eerder']);
       if(!price||!yoy||!sales||!salesYoy) throw new CbsHousingError('METADATA_MAPPING_FAILED','Could not map CBS housing fields',{price,yoy,sales,keys:meta.rows.map(x=>({k:x.Key,t:x.Title}))});
