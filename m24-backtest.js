@@ -41,7 +41,8 @@ globalThis.M24Backtest = (() => {
     if(asTime(endOfDay(labResult.secondTop.date))>cutoffMs) throw new Error('Backtest asOf precedes resolved second top.');
 
     const meaning=meaningContext?aggregateMeaningSources(meaningContext.sources,cutoff):null;
-    const derivatives=verifiedDerivativesContext(derivativesContext,cutoffMs);\n    const funding=derivatives?.evidenceFamily==='PERPETUAL_FUNDING'?derivatives:null;
+    const derivatives=verifiedDerivativesContext(derivativesContext,cutoffMs);
+    const funding=derivatives?.evidenceFamily==='PERPETUAL_FUNDING'?derivatives:null;
     const archive=verifiedArchiveContext(archiveDerivativesContext,cutoffMs);
     const macro=macroContext?macroSecondTop(macroContext,cutoffMs):null;
 
@@ -109,5 +110,6 @@ globalThis.M24Backtest = (() => {
     return {caseId:snapshot.caseId,snapshot,candidate,outcome};
   }
 
-  const verifiedFundingContext=verifiedDerivativesContext;\n  return {aggregateMeaningSources,macroSecondTop,verifiedDerivativesContext,verifiedFundingContext,verifiedArchiveContext,buildDecisionSnapshot,scoreCandidate,evaluateOutcome,run};
+  const verifiedFundingContext=verifiedDerivativesContext;
+  return {aggregateMeaningSources,macroSecondTop,verifiedDerivativesContext,verifiedFundingContext,verifiedArchiveContext,buildDecisionSnapshot,scoreCandidate,evaluateOutcome,run};
 })();
