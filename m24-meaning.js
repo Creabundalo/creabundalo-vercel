@@ -2,6 +2,24 @@ globalThis.M24Meaning = (() => {
   const source=spec=>Object.freeze(spec);
   const SOURCES=Object.freeze([
     source({
+      id:'SRC-CBS-HOUSING-2022-02-22',assets:['NL_HOUSING'],caseIds:['NL-HOUSING-2015-2023'],publishedAt:'2022-02-22T00:00:00Z',publisher:'CBS / Kadaster',transport:'CBS news release',
+      title:'Prijsstijging koopwoningen loopt op naar 21,1 procent in januari',url:'https://www.cbs.nl/nl-nl/nieuws/2022/08/prijsstijging-koopwoningen-loopt-op-naar-21-1-procent-in-januari',
+      frames:['RECORD_PRICE_GROWTH','HOUSING_EUPHORIA','AFFORDABILITY_PRESSURE'],direction:0.8,
+      summary:'Official CBS/Kadaster release reported the strongest annual existing-home price increase since the series began.',quality:'PRIMARY_OFFICIAL'
+    }),
+    source({
+      id:'SRC-CBS-HOUSING-2022-08-22',assets:['NL_HOUSING'],caseIds:['NL-HOUSING-2015-2023'],publishedAt:'2022-08-22T00:00:00Z',publisher:'CBS / Kadaster',transport:'CBS news release',
+      title:'Prijsstijging koopwoningen vlakt in juli opnieuw af',url:'https://www.cbs.nl/nl-nl/nieuws/2022/34/prijsstijging-koopwoningen-vlakt-in-juli-opnieuw-af',
+      frames:['PRICE_PEAK','GROWTH_DECELERATION','TRANSACTION_DECLINE'],direction:-0.35,
+      summary:'Official release showed prices still rising to a new level while annual growth slowed and transactions were lower than a year earlier.',quality:'PRIMARY_OFFICIAL'
+    }),
+    source({
+      id:'SRC-ECB-2022-07-21-RATE-HIKE',assets:['NL_HOUSING'],caseIds:['NL-HOUSING-2015-2023'],publishedAt:'2022-07-21T12:15:00Z',publisher:'European Central Bank',transport:'ECB press release',
+      title:'Monetary policy decisions',url:'https://www.ecb.europa.eu/press/pr/date/2022/html/ecb.mp220721~53e5bdd317.en.html',
+      frames:['RATE_NORMALIZATION','FINANCING_TIGHTENING','INFLATION_RESPONSE'],direction:-0.7,
+      summary:'ECB announced a 50bp increase in key policy rates, marking a material tightening in euro-area financing conditions.',quality:'PRIMARY_OFFICIAL'
+    }),
+    source({
       id:'SRC-FED-NASDAQ-2000-03-06-IT',assets:['NASDAQ'],caseIds:['NASDAQ-1999-2002'],publishedAt:'2000-03-06T12:00:00Z',publisher:'Federal Reserve Board',transport:'Federal Reserve speech archive',
       title:'The revolution in information technology',url:'https://www.federalreserve.gov/boarddocs/speeches/2000/20000306.htm',
       frames:['NEW_ECONOMY','PRODUCTIVITY_BOOM','TECHNOLOGY_TRANSFORMATION','VALUATION_UNCERTAINTY'],direction:0.55,
