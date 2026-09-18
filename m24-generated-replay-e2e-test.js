@@ -50,7 +50,8 @@ const test=`
       outcomeClose:outcome.data.outcomeClose
     }])),
     calibration:Object.fromEntries(Object.entries(calibration).map(([h,x])=>[h,{sampleSize:x.sampleSize,state:x.state,displayProbability:x.displayProbability}])),
-    rule:'First generated mechanics-core episode contributes one sample per FAST_MARKET horizon only inside its exact compatible cohort. Probability remains null at n=1.'
+    selectionEligible:snapshot.selectionEligible===true,
+    rule:'Integration replay plumbing only when selectionEligible=false. Calibration planner must ignore noncanonical generated snapshots even though replay mechanics can be tested.'
   };
   globalThis.__m24fs.writeFileSync('m24-generated-mechanics-core-replay-snapshot.json',JSON.stringify(summary,null,2));
   console.log('M24 generated mechanics-core replay E2E OK');
