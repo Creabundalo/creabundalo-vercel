@@ -1,0 +1,33 @@
+{
+  "schema":"M99_SOURCE_GAP_REGISTER_V1",
+  "phase":"FILL",
+  "phaseDecision":"COMPLETE",
+  "structuralP0Open":0,
+  "rules":[
+    "Missing data is never zero-filled.",
+    "Accepted limitations remain visible in coverage profiles.",
+    "Conditional P0 gaps block only the affected case promotion.",
+    "Calibration and live-execution gates are separate from source-fill completion."
+  ],
+  "gaps":[
+    {"id":"QG-001","domain":"HOUSING","priority":"P0","state":"RESOLVED_BY_SUBSTITUTE","blocking":false},
+    {"id":"QG-002","domain":"CRYPTO_OPTIONS","priority":"P1","state":"OPEN","blocking":false},
+    {"id":"QG-003","domain":"LISTED_OPTIONS","priority":"P1","state":"ACCEPTED_LIMITATION","blocking":false},
+    {"id":"QG-004","domain":"FUTURES_HISTORY","priority":"P1","state":"ACCEPTED_LIMITATION","blocking":false},
+    {"id":"QG-005","domain":"ON_CHAIN_NETWORK","priority":"P1","state":"OPEN","blocking":false},
+    {"id":"QG-006","domain":"CRYPTO_SPOT_MULTI_VENUE","priority":"P1","state":"OPEN","blocking":false},
+    {"id":"QG-007","domain":"LIQUIDATIONS","priority":"P1","state":"OPEN","blocking":false},
+    {"id":"QG-008","domain":"CDS","priority":"P1","state":"OPEN","blocking":false},
+    {"id":"QG-009","domain":"PRECIOUS_METALS_BENCHMARK","priority":"P1","state":"ACCEPTED_LIMITATION","blocking":false},
+    {"id":"QG-010","domain":"ETF_FLOWS","priority":"P1","state":"OPEN","blocking":false},
+    {"id":"QG-011","domain":"SECURITIES_LENDING","priority":"P2","state":"OPTIONAL_GAP","blocking":false},
+    {"id":"QG-012","domain":"HOUSING_CREDIT","priority":"P1","state":"OPEN_ENRICHMENT","blocking":false},
+    {"id":"QG-013","domain":"EQUITY_BREADTH_FUNDAMENTALS","priority":"P1","state":"OPEN_ENRICHMENT","blocking":false},
+    {"id":"QG-014","domain":"UK_GILTS","priority":"P1","state":"SOURCE_PATH","blocking":false},
+    {"id":"QG-015","domain":"OIL_CONTRACT_CURVE","priority":"CONDITIONAL_P0","state":"SOURCE_PATH","blocking":false},
+    {"id":"QG-016","domain":"MEANING_AUTOMATION","priority":"P1","state":"OPEN","blocking":false},
+    {"id":"QG-017","domain":"RELATION_BREADTH","priority":"P1","state":"BREADTH_GAP","blocking":false},
+    {"id":"QG-018","domain":"CALIBRATION","priority":"P0_LATER","state":"CALIBRATION_GAP","blocking":true,"blocks":"PROBABILITY_AND_LIVE"},
+    {"id":"QG-019","domain":"EXECUTION","priority":"SAFETY_P0","state":"INTENTIONALLY_BLOCKED","blocking":true,"blocks":"LIVE_EXECUTION"}
+  ]
+}
