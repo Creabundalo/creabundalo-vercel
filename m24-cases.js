@@ -48,6 +48,19 @@ globalThis.M24Cases = (() => {
     note:(spec.note||'')+' Housing is modeled as a slow market with publication lag; no daily-market or derivatives assumptions are forced.'
   });
 
+  const crossAssetShock=(spec)=>Object.freeze({
+    analysis:'CROSS_ASSET_SHOCK',
+    resolutionIndependent:true,
+    providerFamily:'FRED_MARKET_SERIES',
+    status:'EXECUTABLE_PRIMARY',
+    calibrationEligible:false,
+    requiredLayers:['PRICE','MEANING_WORLD','MACRO','DECISION_SNAPSHOT','BACKTEST_OUTCOME'],
+    coverageProfile:'CROSS_ASSET_LIQUIDITY',
+    scoreProfile:'CROSS_ASSET_LIQUIDITY',
+    ...spec,
+    note:(spec.note||'')+' Cross-asset shock cases use a pre-shock baseline and system-stress checkpoint; no double-top semantics are implied.'
+  });
+
   const cases = Object.freeze({
     'BTC-2019-TOP-MARKDOWN': topMarkdown({
       id:'BTC-2019-TOP-MARKDOWN',asset:'BTC',
@@ -110,6 +123,19 @@ globalThis.M24Cases = (() => {
         markdownOutcome:{from:'2022-09-01',to:'2023-12-31',select:'MIN_INDEX'}
       },
       note:'NL existing-home cycle: peak YoY growth → peak price level → 2022/23 correction.'
+    }),
+    'GLOBAL-MAR2020': crossAssetShock({
+      id:'GLOBAL-MAR2020',asset:'SPX',
+      window:{from:'2019-12-01',to:'2020-06-30'},
+      macroKeys:['VIX','DOLLAR','TEN_YEAR','FIN_CONDITIONS','FED_ASSETS','WTI','FED_FUNDS_LEGACY'],
+      checkpointWindows:{
+        firstTop:{from:'2020-02-17',to:'2020-02-21',select:'MAX_CLOSE'},
+        automaticReaction:{from:'2020-03-09',to:'2020-03-12',select:'MIN_CLOSE'},
+        supportReference:{from:'2020-03-12',to:'2020-03-16',select:'MIN_CLOSE'},
+        secondTop:{from:'2020-03-12',to:'2020-03-16',select:'MIN_CLOSE'},
+        markdownOutcome:{from:'2020-03-17',to:'2020-03-31',select:'MIN_CLOSE'}
+      },
+      note:'March 2020 global liquidity/volatility shock using SPX as primary market state and official cross-asset stress sensors.'
     }),
     'SOL-2021-2022-TOP-MARKDOWN': topMarkdown({
       id:'SOL-2021-2022-TOP-MARKDOWN',asset:'SOL',
