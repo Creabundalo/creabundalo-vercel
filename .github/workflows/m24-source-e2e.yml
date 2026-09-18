@@ -4,7 +4,8 @@ on:
   pull_request:
     paths:
       - 'm24-source-e2e-test.js'
-      - 'm24-eth-2021-source-e2e-test.js'\n      - 'm24-sol-2021-source-e2e-test.js'
+      - 'm24-eth-2021-source-e2e-test.js'
+      - 'm24-sol-2021-source-e2e-test.js'
       - 'm24-replay-e2e-test.js'
       - 'm24-verified-btc-2021.json'
       - 'm24-verified-eth-2021.json'
@@ -37,13 +38,16 @@ jobs:
       - name: Syntax
         run: |
           node --check m24-source-e2e-test.js
-          node --check m24-eth-2021-source-e2e-test.js\n          node --check m24-sol-2021-source-e2e-test.js
+          node --check m24-eth-2021-source-e2e-test.js
+          node --check m24-sol-2021-source-e2e-test.js
           node --check m24-replay-e2e-test.js
       - name: BTC 2021 real-source enrichment
         run: node m24-source-e2e-test.js
       - name: ETH 2021 real-source enrichment
         run: node m24-eth-2021-source-e2e-test.js
-      - name: SOL 2021 real-source enrichment\n        run: node m24-sol-2021-source-e2e-test.js\n      - name: BTC + ETH verified horizon replay
+      - name: SOL 2021 real-source enrichment
+        run: node m24-sol-2021-source-e2e-test.js
+      - name: BTC + ETH verified horizon replay
         run: node m24-replay-e2e-test.js
       - name: Upload source snapshots
         if: always()
@@ -53,7 +57,8 @@ jobs:
           path: |
             m24-btc-2021-source-snapshot.json
             m24-btc-2021-replay-snapshot.json
-            m24-eth-2021-source-snapshot.json\n            m24-sol-2021-source-snapshot.json
+            m24-eth-2021-source-snapshot.json
             m24-eth-2021-replay-snapshot.json
+            m24-sol-2021-source-snapshot.json
             m24-replay-failure.json
           if-no-files-found: ignore
