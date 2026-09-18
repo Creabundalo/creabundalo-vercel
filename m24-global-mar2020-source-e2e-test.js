@@ -44,6 +44,7 @@ const test=`
  check(result.evidence.requiredLayers.includes('DERIVATIVES')===false,'cross-asset profile must not force derivatives');
  check(result.evidence.coverageProfile==='CROSS_ASSET_LIQUIDITY','cross-asset coverage profile mismatch');
  check(result.backtest.candidate.action==='DOWNSIDE_WATCH','expected cross-asset historical downside watch');
+ check(!result.backtest.candidate.evidence.some(x=>x.id==='STRONGER_DOLLAR'||x.id==='TIGHTER_FINANCIAL_CONDITIONS'),'cross-asset profile must not double count generic dollar/NFCI evidence');
  check(result.calibrationEligible===true,'March 2020 source chain incomplete: '+JSON.stringify(result.evidence));
  console.log('M24 real-source GLOBAL March 2020 E2E OK');
  console.log(JSON.stringify(snapshot));
