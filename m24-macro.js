@@ -14,7 +14,7 @@ globalThis.M24Macro = (() => {
 
   const byId=Object.freeze(Object.fromEntries(Object.entries(SERIES).map(([key,value])=>[value.id,{key,...value}])));
   const ms=value=>new Date(value).getTime();
-  const finite=value=>Number.isFinite(Number(value));
+  const finite=value=>{const s=String(value??'').trim();return s!==''&&s!=='.'&&Number.isFinite(Number(s))};
   const round=(n,d=4)=>Number(Number(n).toFixed(d));
 
   class MacroSourceError extends Error{
