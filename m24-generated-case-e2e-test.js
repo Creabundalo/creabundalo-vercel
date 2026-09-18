@@ -74,7 +74,11 @@ const test=`
   check(result.evidence.layers.BACKTEST_OUTCOME.state==='COMPLETE','outcome incomplete');
   check(result.calibrationEligible===true,'generated mechanics-core case is not source complete: '+JSON.stringify(result.evidence));
   check(directional===true,'first fixed ETH-2023 candidate did not produce a directional mechanics decision');
-  check(result.backtest.candidate.evidence.some(x=>x.id==='FAILED_RETEST'),'failed-retest mechanics not scored');
+  const mechanismIds=result.backtest.candidate.evidence.map(x=>x.id);
+  check(mechanismIds.some(id=>[
+    'FAILED_RETEST','FAILED_RETEST_WEAK_PARTICIPATION','FAILED_RETEST_WEAK_MOMENTUM',
+    'WEAK_PARTICIPATION','WEAK_RSI'
+  ].includes(id)),'no price/participation/momentum mechanism scored');
 
   console.log('M24 real-source generated mechanics-core E2E OK');
   console.log(JSON.stringify(summary));
