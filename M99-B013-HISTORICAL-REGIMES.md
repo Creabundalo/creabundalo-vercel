@@ -10,9 +10,9 @@ Build a cross-asset historical case library that allows M99 to test whether mech
 | B013-T02 | P0 | Cross-asset historical case registry | DONE |
 | B013-T03 | P0 | Source-readiness matrix per case | DONE |
 | B013-T04 | P0 | First non-crypto executable case | DONE |
-| B013-T05 | P0 | First housing executable case | RUNNING |
-| B013-T06 | P0 | March-2020 cross-asset case | READY |
-| B013-T07 | P0 | Regime comparison output | BLOCKED on T04-T06 |
+| B013-T05 | P0 | First housing executable case | DONE |
+| B013-T06 | P0 | March-2020 cross-asset case | DONE |
+| B013-T07 | P0 | Regime comparison output | DONE |
 
 ## Selection principle
 The library intentionally includes:
@@ -33,9 +33,9 @@ A source-complete case can remain non-directional and therefore contribute zero 
 
 ## Next executable targets
 1. `NASDAQ-1999-2002` — DONE, SOURCE_COMPLETE, non-directional WAIT.
-2. `NL-HOUSING-2015-2023` — RUNNING, first slow-market/vintage-aware case.
+2. `NL-HOUSING-2015-2023` — DONE, SOURCE_COMPLETE, DOWNSIDE_WATCH with publication-lag control.
 3. `OIL-APR2020` — commodity contract/physical-balance mechanics.
-4. `GLOBAL-MAR2020` — cross-asset liquidity cascade.
+4. `GLOBAL-MAR2020` — DONE, SOURCE_COMPLETE cross-asset liquidity cascade.
 
 These four cases deliberately stress different sensor families.
 
@@ -50,3 +50,14 @@ These four cases deliberately stress different sensor families.
 - coverage profile: `INDEX_CLOSE_MACRO_MEANING`;
 - action candidate: `WAIT`;
 - no synthetic OHLC, volume or derivatives.
+
+
+### B013 final result
+- NASDAQ 1999–2002: SOURCE_COMPLETE / WAIT.
+- NL Housing 2015–2023: SOURCE_COMPLETE / DOWNSIDE_WATCH; January 2022 YoY growth peak, July 2022 price-level peak, decision availability 2022-08-22.
+- GLOBAL March 2020: SOURCE_COMPLETE / DOWNSIDE_WATCH; cross-asset liquidity-shock profile.
+- Cross-asset regime comparison and machine-readable mechanism matrix completed.
+
+**Batch status: DONE.**
+
+The key result is that recurring price shapes are not treated as universal causes. M99 now compares transferable mechanism families such as participation state and financing/liquidity state while retaining domain-specific sensors.
