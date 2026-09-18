@@ -1,0 +1,62 @@
+{
+  "schema":"M99_CALIBRATION_EXPANSION_QUEUE_V1",
+  "minimumCompatibleSamples":30,
+  "queues":[
+    {
+      "id":"CAL-CORE-FAST-DOWN",
+      "priority":"P0",
+      "coverageProfile":"CORE_DERIVATIVES",
+      "horizonProfile":"FAST_MARKET",
+      "regimeFamily":"DISTRIBUTION_MARKDOWN",
+      "direction":"DOWN",
+      "currentCases":2,
+      "deficit":28,
+      "seedCases":["ETH-2021-2022-TOP-MARKDOWN","SOL-2021-2022-TOP-MARKDOWN"],
+      "strategy":"Add independent source-complete crypto distribution/markdown episodes using the same core derivatives evidence class. Prefer existing Coinbase/Binance/FRED/meaning adapters before adding new providers."
+    },
+    {
+      "id":"CAL-SHOCK-DOWN",
+      "priority":"P0",
+      "coverageProfile":"CROSS_ASSET_LIQUIDITY",
+      "horizonProfile":"SHOCK",
+      "regimeFamily":"LIQUIDITY_SHOCK",
+      "direction":"DOWN",
+      "currentCases":1,
+      "deficit":29,
+      "seedCases":["GLOBAL-MAR2020"],
+      "strategy":"Add distinct non-overlapping liquidity/volatility shock episodes with cross-asset stress sensors and explicit event-time information."
+    },
+    {
+      "id":"CAL-HOUSING-SLOW-DOWN",
+      "priority":"P0",
+      "coverageProfile":"HOUSING_PRICE_RATE_MEANING",
+      "horizonProfile":"SLOW_MARKET",
+      "regimeFamily":"HOUSING_CYCLE_ROLLOVER",
+      "direction":"DOWN",
+      "currentCases":1,
+      "deficit":29,
+      "seedCases":["NL-HOUSING-2015-2023"],
+      "strategy":"Add independent housing cycles/countries with price index, financing/rates, activity and publication-lag evidence."
+    },
+    {
+      "id":"CAL-EXTENDED-FAST-DOWN",
+      "priority":"P1",
+      "coverageProfile":"EXTENDED_DERIVATIVES",
+      "horizonProfile":"FAST_MARKET",
+      "regimeFamily":"DISTRIBUTION_MARKDOWN",
+      "direction":"DOWN",
+      "currentCases":1,
+      "deficit":29,
+      "seedCases":["BTC-2021-2022-TOP-MARKDOWN"],
+      "strategy":"Expand only where historical OI/long-short/taker positioning is truly available; never upgrade CORE samples synthetically."
+    }
+  ],
+  "rules":[
+    "WAIT/non-directional cases do not count.",
+    "One independent episode contributes at most one sample per horizon/cohort.",
+    "Overlapping duplicate windows are grouped and deduplicated.",
+    "Coverage and horizon profiles may not be silently mixed.",
+    "Probability remains hidden below n=30.",
+    "Live execution remains disabled."
+  ]
+}
