@@ -1,0 +1,19 @@
+{
+  "type":"VERIFIED_TRICKSTER_CROSS_CASE_SNAPSHOT",
+  "verification":{
+    "workflow":"M24 Trickster E2E",
+    "workflowRunId":35361574385,
+    "artifactId":10555035089,
+    "artifactDigest":"sha256:878ea8a47f6e558be7a5fc8dbe7272e71a43878db42d8dcf41432b4f7ae029a6",
+    "headSha":"0d1b59d9e58c1f46389a27ae1099239170e156f7",
+    "verifiedAt":"2026-09-18T15:18:14Z"
+  },
+  "sampleSize":7,
+  "states":{
+    "DIVERGENCE_VISIBLE":["BTC-2021-2022-TOP-MARKDOWN","ETH-2021-2022-TOP-MARKDOWN","SOL-2021-2022-TOP-MARKDOWN"],
+    "ALIGNMENT_VISIBLE":["NL-HOUSING-2015-2023","GLOBAL-MAR2020"],
+    "MEANING_AHEAD_OF_MECHANISM":["BTC-2019-TOP-MARKDOWN","NASDAQ-1999-2002"]
+  },
+  "guards":{"intentStatus":"INTENT_UNKNOWN","actorAttribution":"NONE","manipulationStatus":"NOT_ESTABLISHED","predictiveStatus":"NOT_CALIBRATED"},
+  "rule":"Trickster classifies meaning↔mechanism relationship type. It is neither a manipulation detector nor a directional trading signal."
+}
