@@ -1,5 +1,5 @@
 const fs=require('fs'),vm=require('vm');
-const snapshots=[
+globalThis.__m24CalibrationSnapshots=[
  'm24-verified-btc-2019.json','m24-verified-btc-2021.json','m24-verified-eth-2021.json','m24-verified-sol-2021.json',
  'm24-verified-nasdaq-2000.json','m24-verified-nl-housing-2015-2023.json','m24-verified-global-mar2020.json'
 ].map(f=>JSON.parse(fs.readFileSync(f,'utf8')));
@@ -8,7 +8,7 @@ const test=`
 (()=>{
  const check=(x,m)=>{if(!x)throw new Error(m)};
  const plan=M24CalibrationPlanner.buildInventory({
-   snapshots,
+   snapshots:globalThis.__m24CalibrationSnapshots,
    caseResolver:id=>M24Cases.get(id),
    profileResolver:schema=>M24Replay.profileForCase(schema),
    minSamples:30
