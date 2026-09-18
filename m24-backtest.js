@@ -46,6 +46,11 @@ globalThis.M24Backtest = (() => {
     const archive=verifiedArchiveContext(archiveDerivativesContext,cutoffMs);
     const macro=macroContext?macroSecondTop(macroContext,cutoffMs):null;
 
+    const rawCoverage={price:true,meaning:Boolean(meaning),derivatives:Boolean(derivatives),archiveDerivatives:Boolean(archive),macro:Boolean(macro?.length)};
+    const profileMap={PRICE:'price',MEANING_WORLD:'meaning',DERIVATIVES:'derivatives',MACRO:'macro'};
+    const profileInputs=caseSchema.coverageProfile?(caseSchema.requiredLayers||[]).map(x=>profileMap[x]).filter(Boolean):null;
+    const decisionCoverage=profileInputs?.length?profileInputs.filter(k=>rawCoverage[k]).length/profileInputs.length:null;
+
     const snapshot={
       type:'DECISION_SNAPSHOT',caseId:caseSchema.id,asset:caseSchema.asset,asOf:cutoff,
       price:{
@@ -62,7 +67,8 @@ globalThis.M24Backtest = (() => {
       derivatives,funding,
       archiveDerivatives:archive,
       macro,
-      coverage:{price:true,meaning:Boolean(meaning),derivatives:Boolean(derivatives),archiveDerivatives:Boolean(archive),macro:Boolean(macro?.length)},
+      coverage:rawCoverage,
+      decisionCoverage,
       excludedFutureFields:['support.firstCloseBelow','support.firstWeeklyCloseBelow','outcome.troughDate','outcome.troughLow','outcome.drawdownFromSecondHighPct'],
       rejectedUnverifiableAggregates:{funding:Boolean(derivativesContext)&&!funding,archiveDerivatives:Boolean(archiveDerivativesContext)&&!archive,macro:Boolean(macroContext)&&!macro?.length},
       rule:'Only information provably available by asOf may enter this record. Outcome is evaluated later in a separate record; source-gap archive objects do not count as loaded evidence.'
@@ -85,7 +91,7 @@ globalThis.M24Backtest = (() => {
 
     const loaded=Object.values(snapshot.coverage).filter(Boolean).length;
     const total=Object.keys(snapshot.coverage).length;
-    const coverage=loaded/total;
+    const coverage=Number.isFinite(snapshot.decisionCoverage)?snapshot.decisionCoverage:(loaded/total);
     const action=coverage<0.6?'INSUFFICIENT_CONTEXT':score>=2?'DOWNSIDE_WATCH':'WAIT';
     return {type:'ACTION_CANDIDATE',asOf:snapshot.asOf,score,coverage,action,evidence,confirmations,rule:'Historical candidate only; not calibrated performance and not a live order signal.'};
   }
@@ -99,6 +105,7 @@ globalThis.M24Backtest = (() => {
       supportBreakDate:breakDate,
       troughDate:labResult.outcome?.troughDate||null,
       drawdownFromSecondHighPct:labResult.outcome?.drawdownFromSecondHighPct??null,
+      drawdownFromSecondReferencePct:labResult.outcome?.drawdownFromSecondReferencePct??labResult.outcome?.drawdownFromSecondHighPct??null,
       rule:'Outcome is scoring data only and was not available to the decision snapshot.'
     };
   }
