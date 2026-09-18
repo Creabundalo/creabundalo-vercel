@@ -6,7 +6,7 @@
 | BTC-2021-2022-TOP-MARKDOWN | Crypto | Coinbase | Binance Vision | Reuters | SOURCE_COMPLETE_REPLAYED | none |
 | ETH-2021-2022-TOP-MARKDOWN | Crypto | Coinbase | Binance Vision core | Reuters | SOURCE_COMPLETE_REPLAYED | extended positioning source-limited |
 | SOL-2021-2022-TOP-MARKDOWN | Crypto | Coinbase | Binance Vision core | scoped media/protocol | SOURCE_COMPLETE_REPLAYED | extended positioning source-limited |
-| NASDAQ-1999-2002 | Equity/index | Nasdaq/FRED path | SEC fundamentals + rates/credit | filings/media | SOURCE_READY | generic non-crypto price/fundamental adapter |
+| NASDAQ-1999-2002 | Equity/index | NASDAQCOM via FRED/Nasdaq | case-specific macro profile; close-only index architecture | Fed/SEC official sources | SOURCE_COMPLETE | none; optional breadth/fundamentals remain extended |
 | SPX-2007-2009 | Equity/index | exchange/index/FRED path | credit/funding/volatility | filings/official/media | SOURCE_READY | historical constituent/breadth design |
 | EQUITY-MAR2020 | Equity/index | exchange/index | VIX/funding/rates | official/media | SOURCE_READY | consolidated multi-source adapter |
 | GME-2021 | Equity | exchange data | FINRA short interest + options | SEC/media | SOURCE_PATH | listed-options historical dataset/access |
