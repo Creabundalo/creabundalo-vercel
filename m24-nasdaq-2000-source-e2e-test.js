@@ -49,4 +49,4 @@ const test=`
  console.error(err);process.exit(1);
 });
 `;
-vm.runInThisContext(`${source}\\n${test}`,{filename:'m24-nasdaq-2000-source-e2e-bundle.js'});
+vm.runInThisContext(`${source}\n${test}`,{filename:'m24-nasdaq-2000-source-e2e-bundle.js'});
