@@ -42,8 +42,10 @@ globalThis.M24Macro = (() => {
 
   function compareAtCheckpoints(seriesResult,labResult){
     const meta=seriesResult.meta;
-    const first=closestOnOrBefore(seriesResult.records,labResult.firstTop.date,meta.frequency==='weekly'?10:5);
-    const second=closestOnOrBefore(seriesResult.records,labResult.secondTop.date,meta.frequency==='weekly'?10:5);
+    const firstDate=String(labResult.firstTop?.asOf||labResult.firstTop.date).slice(0,10);
+    const secondDate=String(labResult.secondTop?.asOf||labResult.secondTop.date).slice(0,10);
+    const first=closestOnOrBefore(seriesResult.records,firstDate,meta.frequency==='weekly'?10:5);
+    const second=closestOnOrBefore(seriesResult.records,secondDate,meta.frequency==='weekly'?10:5);
     const delta=first&&second?round(second.value-first.value):null;
     const pctDelta=first&&second&&first.value!==0?round(((second.value/first.value)-1)*100,2):null;
     return {key:seriesResult.key,seriesId:meta.id,label:meta.label,family:meta.family,units:meta.units,higherMeaning:meta.higherMeaning,firstTop:first,secondTop:second,delta,pctDelta,status:first&&second?'COMPARABLE':'SOURCE_GAP',provenance:seriesResult.provenance};
