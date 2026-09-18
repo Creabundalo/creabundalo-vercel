@@ -200,3 +200,32 @@ No learned change may silently alter real-money execution.
 - Paper/live mode is explicit per transaction.
 - `SIMULATED_ONLY` is permanently visible in v0.1.
 - No broker order action exists.
+
+
+## Verified multi-asset calibration cohort
+
+Historical source-complete cases are evidence-derived, not manually promoted.
+
+Current verified cohort:
+- BTC 2021–22 — `EXTENDED_DERIVATIVES`
+- ETH 2021–22 — `CORE_DERIVATIVES`
+- SOL 2021–22 — `CORE_DERIVATIVES`
+- BTC 2019 — pending; first-top period predates the available Binance futures funding history and must not be forced into a later-era derivatives profile.
+
+Coverage profiles are calibration dimensions:
+- `EXTENDED_DERIVATIVES`: core funding plus historical OI / long-short / taker-positioning extension.
+- `CORE_DERIVATIVES`: core checkpoint funding is complete, while optional extended positioning is unavailable and retained as explicit source gaps.
+- `UNPROFILED_RESEARCH`: may inspect samples across profiles, but may not be used as the calibrated probability cohort.
+
+Every verified directional case is replayed independently at `3D / 2W / 1M / 2M`.
+A replay forecast must carry its evidence coverage profile into `FORECAST_INSTANCE.conditions.coverageProfile`.
+Calibration must filter by coverage profile; samples with different evidence coverage may not be silently pooled.
+
+Current profile sample counts per replay horizon:
+- `EXTENDED_DERIVATIVES`: n=1 (BTC 2021)
+- `CORE_DERIVATIVES`: n=2 (ETH 2021 + SOL 2021)
+- unprofiled research view: n=3
+
+No probability may be displayed before the relevant filtered cohort reaches n=30.
+
+Integrity rule: an incorrect horizon outcome is retained exactly as measured. Example: the ETH 2021 historical DOWN candidate was incorrect at 3D (+0.2638%) but correct at 2W / 1M / 2M. M24 may not smooth this into an overall “correct” label.
