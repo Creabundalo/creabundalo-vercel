@@ -31,7 +31,7 @@ const test=`
    evidenceLayers:Object.fromEntries(Object.entries(result.evidence.layers).map(([k,v])=>[k,{state:v.state,note:v.note}])),
    rule:'Housing is a slow-market case: publication availability governs no-lookahead. No daily-market or crypto-derivatives fields are synthesized.'
  };
- fs.writeFileSync('m24-nl-housing-source-snapshot.json',JSON.stringify(snap,null,2));
+ globalThis.__m24fs.writeFileSync('m24-nl-housing-source-snapshot.json',JSON.stringify(snap,null,2));
  check(result.backtest.snapshot.asOf.startsWith('2022-08'),'housing decision must use publication lag after July 2022');
  check(result.backtest.snapshot.price.firstTop.yoyPct>=20,'expected housing YoY momentum peak');
  check(result.backtest.snapshot.price.secondTop.yoyPct<result.backtest.snapshot.price.firstTop.yoyPct,'housing growth should decelerate by second checkpoint');
