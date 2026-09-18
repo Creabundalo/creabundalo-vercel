@@ -105,6 +105,8 @@ jobs:
         run: node m24-relation-stability-test.js
       - name: Pattern hypothesis contract test
         run: node m24-patterns-test.js
+      - name: Pattern discrimination contract test
+        run: node m24-pattern-discrimination-test.js
       - name: Cross-asset lab contract test
         run: node m24-cross-asset-test.js
       - name: Binance Vision archive contract test
