@@ -120,6 +120,61 @@
       const record=await get('records',id);
       return record?decryptRecord(record):null;
     },
+    async listRecordMetadata(prefix=''){
+      if(!db)await api.init();
+      const records=await getAll('records');
+      return records
+        .filter(r=>!prefix||r.id.startsWith(prefix))
+        .map(r=>({id:r.id,privacyClass:r.privacyClass,updatedAt:r.updatedAt}))
+        .sort((a,b)=>a.id.localeCompare(b.id));
+    },
+    async listJSON(prefix=''){
+      if(!db)await api.init();
+      const records=await getAll('records');
+      const selected=records.filter(r=>!prefix||r.id.startsWith(prefix)).sort((a,b)=>a.id.localeCompare(b.id));
+      const out=[];
+      for(const record of selected){
+        out.push({
+          id:record.id,
+          privacyClass:record.privacyClass,
+          updatedAt:record.updatedAt,
+          value:await decryptRecord(record)
+        });
+      }
+      return out;
+    },
+    async commitJSONBatch({append=[],upsert=[]}={}){
+      if(!db)await api.init();
+      if(!dataKey)throw new Error('VAULT_LOCKED');
+      const preparedAppend=[];
+      const preparedUpsert=[];
+      for(const item of append){
+        if(!item?.id)throw new Error('BATCH_ID_REQUIRED');
+        const encrypted=await encryptRecord(item.id,item.value);
+        preparedAppend.push({
+          id:item.id,format:'json',privacyClass:item.privacyClass||'PRIVATE',
+          updatedAt:new Date().toISOString(),...encrypted
+        });
+      }
+      for(const item of upsert){
+        if(!item?.id)throw new Error('BATCH_ID_REQUIRED');
+        const encrypted=await encryptRecord(item.id,item.value);
+        preparedUpsert.push({
+          id:item.id,format:'json',privacyClass:item.privacyClass||'PRIVATE',
+          updatedAt:new Date().toISOString(),...encrypted
+        });
+      }
+      await new Promise((resolve,reject)=>{
+        const t=db.transaction('records','readwrite');
+        const r=t.objectStore('records');
+        for(const record of preparedAppend)r.add(record);
+        for(const record of preparedUpsert)r.put(record);
+        t.oncomplete=()=>resolve();
+        t.onerror=()=>reject(t.error);
+        t.onabort=()=>reject(t.error||new Error('BATCH_COMMIT_ABORTED'));
+      });
+      return {appended:preparedAppend.length,upserted:preparedUpsert.length};
+    },
     async exportEncryptedSnapshot(){
       if(!db)await api.init();
       if(!meta)throw new Error('VAULT_NOT_INITIALIZED');

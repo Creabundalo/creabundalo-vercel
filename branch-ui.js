@@ -15,6 +15,10 @@ const seed = {
 };
 
 let state = window.CreaSemanticCore.ensureState(load());
+let semanticOutbox = [];
+let semanticCommitPromise = null;
+let semanticRevision = 0;
+let semanticCommittedRevision = 0;
 let zoom = 1;
 let pan = {x: 120, y: 80};
 let dragging = false;
@@ -45,6 +49,7 @@ function uid(prefix='n'){
 function coreDispatch(type,payload={},source={surface:'creabundalo-ui'}){
   const result=window.CreaSemanticCore.dispatch(state,type,payload,source);
   state=result.state;
+  if(result.event) semanticOutbox.push(result.event);
   return result;
 }
 function load(){
@@ -58,16 +63,52 @@ function save(){
   const status = window.CreaVault?.status?.();
   if(status?.initialized){
     if(status.unlocked){
-      window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'})
-        .then(async()=>{
-          await window.CreaVaultHealth?.success?.('local');
-          window.CreaVaultPolicy?.maybeAutoContinuity?.().catch(()=>{});
-        })
-        .catch(err=>{window.CreaVaultHealth?.error?.('local',err);console.error('Vault save failed',err)});
+      semanticRevision++;
+      queueSemanticCommit();
     }
     return;
   }
   localStorage.setItem(KEY, JSON.stringify(state));
+}
+
+function queueSemanticCommit(){
+  if(semanticCommitPromise) return semanticCommitPromise;
+
+  semanticCommitPromise=(async()=>{
+    let totalEvents=0;
+    try{
+      while(semanticCommittedRevision<semanticRevision || semanticOutbox.length){
+        const targetRevision=semanticRevision;
+        const batch=semanticOutbox.splice(0);
+        const snapshot=structuredClone(state);
+
+        try{
+          const result=await window.CreaSemanticEventStore.commit(snapshot,batch);
+          totalEvents+=result.appended||0;
+          semanticCommittedRevision=targetRevision;
+        }catch(err){
+          semanticOutbox=[...batch,...semanticOutbox];
+          await window.CreaVaultHealth?.error?.('local',err);
+          throw err;
+        }
+      }
+      await window.CreaVaultHealth?.success?.('local');
+      window.CreaVaultPolicy?.maybeAutoContinuity?.().catch(()=>{});
+      return {ok:true,events:totalEvents,revision:semanticCommittedRevision};
+    }catch(err){
+      console.error('Semantic commit failed',err);
+      throw err;
+    }finally{
+      semanticCommitPromise=null;
+    }
+  })();
+
+  return semanticCommitPromise;
+}
+
+async function commitSemanticNow(){
+  semanticRevision++;
+  return queueSemanticCommit();
 }
 function current(){
   return state.nodes.find(n => n.id === state.currentId) || state.nodes[0];
@@ -277,15 +318,28 @@ function handleCommand(raw){
 
 
 
-function renderAudit(){
+async function renderAudit(){
   const list=$('auditList');
   if(!list) return;
-  const events=window.CreaSemanticCore.audit(state,{limit:120}).slice().reverse();
+
+  let events=[];
+  const vault=window.CreaVault?.status?.();
+  if(vault?.initialized && vault.unlocked){
+    try{
+      await queueSemanticCommit();
+      events=(await window.CreaSemanticEventStore.listEvents()).slice(-120).reverse();
+    }catch{
+      events=window.CreaSemanticCore.audit(state,{limit:120}).slice().reverse();
+    }
+  }else{
+    events=window.CreaSemanticCore.audit(state,{limit:120}).slice().reverse();
+  }
+
   list.innerHTML='';
   if(!events.length){
     const empty=document.createElement('div');
     empty.className='audit-empty';
-    empty.textContent='Nog geen Semantic Core-events in deze state.';
+    empty.textContent='Nog geen Semantic Core-events.';
     list.appendChild(empty);
     return;
   }
@@ -298,7 +352,8 @@ function renderAudit(){
     const time=new Date(event.occurredAt);
     left.innerHTML='<strong></strong><small></small>';
     left.querySelector('strong').textContent=event.type;
-    left.querySelector('small').textContent=Number.isNaN(time.getTime())?event.occurredAt:time.toLocaleString('nl-NL');
+    left.querySelector('small').textContent=(Number.isNaN(time.getTime())?event.occurredAt:time.toLocaleString('nl-NL'))+
+      (Number.isFinite(Number(event.streamPosition))?' · #'+event.streamPosition:'');
     mid.innerHTML='<code></code><small></small>';
     mid.querySelector('code').textContent=event.eventId;
     mid.querySelector('small').textContent=(event.source?.surface||'')+(event.source?.adapter?' · '+event.source.adapter:'');
@@ -306,6 +361,32 @@ function renderAudit(){
     right.querySelector('code').textContent=JSON.stringify(event.payload);
     row.append(left,mid,right);
     list.appendChild(row);
+  }
+}
+
+async function verifySemanticReplay(){
+  const status=$('replayStatus');
+  const vault=window.CreaVault?.status?.();
+  if(!vault?.initialized || !vault.unlocked){
+    status.textContent='Replay check vereist een ontgrendelde Vault.';
+    status.classList.add('alert');
+    return;
+  }
+  status.textContent='Replay controleren…';
+  status.classList.remove('alert');
+  try{
+    await commitSemanticNow();
+    const result=await window.CreaSemanticEventStore.verifyReplay(state);
+    if(result.ok){
+      status.textContent='REPLAY OK · '+result.eventCount+' events · hash '+result.currentHash.slice(0,12)+'…';
+      status.classList.remove('alert');
+    }else{
+      status.textContent='REPLAY MISMATCH · projection '+(result.currentHash||'').slice(0,12)+'… · replay '+(result.replayHash||'').slice(0,12)+'…';
+      status.classList.add('alert');
+    }
+  }catch(err){
+    status.textContent='Replay check fout: '+err.message;
+    status.classList.add('alert');
   }
 }
 
@@ -607,7 +688,7 @@ async function importOverlayContext(){
     if(lastSession?.lastFocusedNodeId && byId(lastSession.lastFocusedNodeId)){
       coreDispatch('NODE_FOCUSED',{nodeId:lastSession.lastFocusedNodeId},{surface:'browser-extension',adapter:lastSession.adapter,host:lastSession.host});
     }
-    await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
+    await commitSemanticNow();
     await window.CreaVaultHealth?.success?.('local');
     await window.CreaOverlayBridge.ack(events.map(e=>e.eventId));
     render();
@@ -672,11 +753,29 @@ async function initVaultUI(){
     vaultButton.textContent='VAULT · N/A';
   }
 }
+
+async function restoreSemanticStateFromVault(){
+  const eventState=await window.CreaSemanticEventStore.restore();
+  if(eventState){
+    semanticOutbox=[];
+    return window.CreaSemanticCore.ensureState(eventState);
+  }
+
+  const legacy=await window.CreaVault.loadJSON(KEY);
+  const base=window.CreaSemanticCore.ensureState(legacy||state);
+  const migrated=await window.CreaSemanticEventStore.ensureMigrated(base);
+  semanticOutbox=[];
+  return window.CreaSemanticCore.ensureState(migrated.state);
+}
+
 async function setupVault(){
   const pass=vaultPassphrase.value;
   try{
     const result=await window.CreaVault.setup(pass);
     await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
+    const migrated=await window.CreaSemanticEventStore.ensureMigrated(state);
+    state=window.CreaSemanticCore.ensureState(migrated.state);
+    semanticOutbox=[];
     localStorage.removeItem(KEY);
     vaultRecoveryOutput.value=result.recoveryKey;
     recoveryBox.classList.remove('hidden');
@@ -691,9 +790,7 @@ async function setupVault(){
 async function unlockVault(){
   try{
     await window.CreaVault.unlock(vaultPassphrase.value);
-    const restored=await window.CreaVault.loadJSON(KEY);
-    if(restored) state=window.CreaSemanticCore.ensureState(restored);
-    else await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
+    state=await restoreSemanticStateFromVault();
     vaultPassphrase.value='';
     updateVaultUi();
     render();
@@ -705,8 +802,7 @@ async function unlockVault(){
 async function recoverVault(){
   try{
     await window.CreaVault.recover(vaultRecoveryInput.value);
-    const restored=await window.CreaVault.loadJSON(KEY);
-    if(restored) state=window.CreaSemanticCore.ensureState(restored);
+    state=await restoreSemanticStateFromVault();
     vaultRecoveryInput.value='';
     updateVaultUi();
     render();
@@ -718,7 +814,7 @@ async function recoverVault(){
 }
 async function lockVault(){
   try{
-    await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
+    await commitSemanticNow();
   }catch{}
   window.CreaVault.lock();
   state=structuredClone(seed);
@@ -893,6 +989,7 @@ $('verifyContinuityButton').onclick=verifyContinuity;
 $('analyzeRetentionButton').onclick=analyzeRetention;
 $('applyRetentionButton').onclick=applyRetention;
 $('refreshAuditButton').onclick=renderAudit;
+$('verifyReplayButton').onclick=verifySemanticReplay;
 $('vaultImportButton').onclick=()=>vaultImportInput.click();
 vaultImportInput.onchange=()=>importVaultSnapshot(vaultImportInput.files?.[0]);
 $('copyRecoveryButton').onclick=async()=>{
@@ -925,8 +1022,12 @@ viewport.addEventListener('pointermove',e=>{
 viewport.addEventListener('pointerup',()=>{dragging=false;dragStart=null});
 viewport.addEventListener('pointercancel',()=>{dragging=false;dragStart=null});
 
-render();
-requestAnimationFrame(centerCurrent);
-initVaultUI();
-refreshOverlayBridgeStatus().catch(()=>{});
-window.CreaVaultPolicy?.start?.();
+(async function startCreabundalo(){
+  await initVaultUI();
+  render();
+  requestAnimationFrame(centerCurrent);
+  refreshOverlayBridgeStatus().catch(()=>{});
+  window.CreaVaultPolicy?.start?.();
+})().catch(err=>{
+  console.error('Creabundalo startup failed',err);
+});

@@ -20,6 +20,9 @@
     state.semantic.version=VERSION;
     state.semantic.events=Array.isArray(state.semantic.events)?state.semantic.events:[];
     state.semantic.appliedEventIds=Array.isArray(state.semantic.appliedEventIds)?state.semantic.appliedEventIds:[];
+    const positions=state.semantic.events.map(e=>Number(e.streamPosition)).filter(Number.isFinite);
+    const inferred=positions.length?Math.max(...positions)+1:0;
+    state.semantic.nextPosition=Math.max(Number(state.semantic.nextPosition)||0,inferred);
     return state;
   }
   function byId(state,id){return state.nodes.find(n=>n.id===id)||null}
@@ -66,7 +69,7 @@
   function rememberEvent(state,event){
     state.semantic.events.push(event);
     state.semantic.appliedEventIds.push(event.eventId);
-    if(state.semantic.events.length>5000) state.semantic.events=state.semantic.events.slice(-5000);
+    if(state.semantic.events.length>250) state.semantic.events=state.semantic.events.slice(-250);
     if(state.semantic.appliedEventIds.length>10000) state.semantic.appliedEventIds=state.semantic.appliedEventIds.slice(-10000);
   }
   function apply(state,event,{record=true}={}){
@@ -78,6 +81,14 @@
     let changed=false;
 
     switch(event.type){
+      case 'PROJECTION_SEEDED': {
+        const projection=p.projection||{};
+        state.nodes=structuredClone(Array.isArray(projection.nodes)?projection.nodes:[]);
+        state.currentId=projection.currentId||state.nodes[0]?.id||null;
+        state.lens=projection.lens||'all';
+        changed=true;
+        break;
+      }
       case 'NODE_CREATED': {
         if(typeof p.node?.id!=='string') throw new Error('NODE_ID_REQUIRED');
         if(byId(state,p.node.id)) break;
@@ -89,7 +100,7 @@
           kind:safeText(p.node.kind||'branch',40),
           scope:safeText(p.node.scope||'work',40),
           status:safeText(p.node.status||'active',40),
-          createdAt:Number(p.node.createdAt)||Date.now(),
+          createdAt:Number(p.node.createdAt)||Date.parse(event.occurredAt)||0,
           source:safeText(p.node.source||event.source.surface,80),
           externalRef:p.node.externalRef||null,
           provenance:p.node.provenance||{
@@ -163,7 +174,9 @@
     return {state,changed,deduplicated:false,event};
   }
   function dispatch(state,type,payload={},source={}){
+    state=ensureState(state);
     const event=makeEvent(type,payload,source);
+    event.streamPosition=state.semantic.nextPosition++;
     return apply(state,event,{record:true});
   }
   function importEvent(state,event,mapper){
@@ -182,9 +195,39 @@
     state=ensureState(state);
     return state.semantic.events.slice(-limit);
   }
+  function emptyState(){
+    return ensureState({nodes:[],currentId:null,lens:'all'});
+  }
+  function replay(events=[]){
+    const ordered=[...events].sort((a,b)=>{
+      const ap=Number.isFinite(Number(a.streamPosition))?Number(a.streamPosition):Number.MAX_SAFE_INTEGER;
+      const bp=Number.isFinite(Number(b.streamPosition))?Number(b.streamPosition):Number.MAX_SAFE_INTEGER;
+      if(ap!==bp) return ap-bp;
+      const at=Date.parse(a.occurredAt)||0,bt=Date.parse(b.occurredAt)||0;
+      if(at!==bt) return at-bt;
+      return String(a.eventId).localeCompare(String(b.eventId));
+    });
+    let state=emptyState();
+    for(const event of ordered){
+      const result=apply(state,event,{record:true});
+      state=result.state;
+      if(Number.isFinite(Number(event.streamPosition))){
+        state.semantic.nextPosition=Math.max(state.semantic.nextPosition,Number(event.streamPosition)+1);
+      }
+    }
+    return state;
+  }
+  function projection(state){
+    state=ensureState(state);
+    return {
+      nodes:structuredClone(state.nodes),
+      currentId:state.currentId,
+      lens:state.lens
+    };
+  }
 
   window.CreaSemanticCore={
     SCHEMA,VERSION,uid,safeText,ensureState,byId,ancestors,
-    makeEvent,validateEvent,apply,dispatch,importEvent,audit
+    makeEvent,validateEvent,apply,dispatch,importEvent,audit,emptyState,replay,projection
   };
 })();
