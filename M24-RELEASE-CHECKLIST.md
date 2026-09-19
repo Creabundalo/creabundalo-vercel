@@ -194,3 +194,18 @@ Current replay calibration remains below the n=30 display threshold in every cov
 - [x] No live broker execution path is introduced
 - [ ] GitHub M24 Release Gate green on release/m24-d0-11-10
 - [ ] Vercel preview visually reviewed
+
+
+## D0.11.11 LIVE VERCEL gate
+- [x] Vercel is the active deployment target until the user explicitly activates Scaleway
+- [x] Scaleway remains LATER / NOT ACTIVE and is not required by this release
+- [x] Main market canvas uses Vercel serverless source adapters before any model fallback
+- [x] BTC / ETH / SOL use Coinbase Exchange market data
+- [x] WTI uses official-upstream daily data via FRED
+- [x] Tesla uses a public market-data feed and is labelled delayed/secondary
+- [x] Cross-asset panel uses a Vercel serverless FRED bundle
+- [x] Source failure becomes SOURCE_GAP / FALLBACK; never a fake live value
+- [x] UI visibly separates LIVE / DELAYED / MODEL / SNAPSHOT / PAPER
+- [x] Live data does not enable live order execution
+- [ ] M24 Release Gate green on release/m24-d0-11-11-live-vercel
+- [ ] Vercel preview visually reviewed
