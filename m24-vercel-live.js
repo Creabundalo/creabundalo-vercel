@@ -72,6 +72,24 @@ globalThis.M24VercelLive = (() => {
         };
       }
     }
+    async getOptionsState(asset){
+      try{
+        const r=await this.fetchImpl('/api/m24/options?asset='+encodeURIComponent(asset),{headers:{Accept:'application/json'},cache:'no-store'});
+        const x=await r.json();
+        if(!r?.ok||x.sourceStatus==='SOURCE_GAP') return {...x,sourceStatus:'SOURCE_GAP'};
+        return x;
+      }catch(err){
+        return {
+          schema:'m24.options.live.v0.1',
+          asset,
+          sourceStatus:'SOURCE_GAP',
+          freshness:'SOURCE_GAP',
+          quality:'PRIMARY_OPTIONS_EXCHANGE',
+          error:String(err.message||err),
+          provenance:[]
+        };
+      }
+    }
     async getHistoricalCase(id){return this.fallback.getHistoricalCase(id)}
   }
   return {VercelMarketProvider};

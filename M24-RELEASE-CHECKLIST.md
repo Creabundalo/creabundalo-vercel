@@ -250,3 +250,20 @@ Current replay calibration remains below the n=30 display threshold in every cov
 - [x] Deterministic live-derivatives contract test added
 - [ ] GitHub M24 Release Gate green on release/m24-d0-11-15-derivatives-live
 - [ ] Visual browser review
+
+
+## D0.11.16 Options Live Chain
+- [x] Deribit public options book-summary API exposed through Vercel
+- [x] Supported assets: BTC / ETH / SOL
+- [x] Unsupported assets remain explicit N/A; no synthetic options data
+- [x] Front-expiry ATM IV derived from live option summaries
+- [x] ATM put-call IV skew shown explicitly as ATM skew, not mislabeled 25-delta skew
+- [x] Front-expiry put/call open-interest ratio derived
+- [x] Front/back IV term structure derived
+- [x] OPTIONS_STATE stored in Qubus with provenance
+- [x] Visible options meaning block added
+- [x] Live wiring matrix includes options API → normalisation → Qubus → M24 → freshness
+- [x] Options metrics remain context; no calibrated probability or standalone trade signal
+- [x] Deterministic API + runtime contract tests added
+- [ ] GitHub M24 Release Gate green on release/m24-d0-11-16-options-live
+- [ ] Visual browser review

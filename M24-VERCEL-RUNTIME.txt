@@ -42,3 +42,4 @@ m24-source-health.js
 api/m24/market.js
 api/m24/cross.js
 api/m24/derivatives.js
+api/m24/options.js

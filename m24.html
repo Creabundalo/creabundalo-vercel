@@ -17,7 +17,7 @@
       <div class="status-block">
         <span class="status-pill live-data">LIVE DATA</span>
         <span class="status-pill safety">SIMULATED_ONLY</span>
-        <span class="status-pill">v0.3 · D0.11.15 LIVE VERCEL · DERIVATIVES</span>
+        <span class="status-pill">v0.3 · D0.11.16 LIVE VERCEL · OPTIONS</span>
       </div>
     </header>
 
@@ -36,6 +36,7 @@
     <section class="data-status panel compact" aria-label="Datastatus">
       <span>PRIJS <strong id="livePriceStatus" class="source-state">LOADING</strong></span>
       <span>DERIVATEN <strong id="liveDerivativesStatus" class="source-state">LOADING</strong></span>
+      <span>OPTIES <strong id="liveOptionsStatus" class="source-state">LOADING</strong></span>
       <span>CROSS-ASSET <strong id="liveCrossStatus" class="source-state">LOADING</strong></span>
       <span>BETEKENIS <strong id="meaningLayerStatus" class="source-state">MODEL</strong></span>
       <span>WORLD <strong id="worldLayerStatus" class="source-state">SNAPSHOT</strong></span>
@@ -109,6 +110,15 @@
       <p id="derivativesMeaning" class="footnote">Funding en open interest geven positionering/leverage weer; geen bewijs van actorintentie.</p>
     </section>
 
+    <section id="optionsPanel" class="panel options-panel competence-learning">
+      <div class="panel-head">
+        <div><p class="eyebrow">OPTIONS</p><h2>Volatiliteit & positionering</h2></div>
+        <span id="optionsSourceBadge" class="source-badge">LOADING</span>
+      </div>
+      <div id="optionsGrid" class="options-grid"></div>
+      <p id="optionsMeaning" class="footnote">IV, ATM put-call skew, term structure en put/call open interest zijn marktcontext; geen gekalibreerde kans en geen zelfstandig trade-signaal.</p>
+    </section>
+
     <section id="crossAssetPanel" class="panel cross-panel competence-learning">
       <div class="panel-head"><div><p class="eyebrow">CROSS-ASSET</p><h2>Marktcontext</h2></div><span class="muted">Vercel API · daily context</span></div>
       <div class="cross-grid" id="crossGrid"></div>
@@ -160,7 +170,7 @@
       <div id="observationLog" class="observation-log"></div>
     </section>
 
-    <footer class="footerline"><span>M24 v0.3 · D0.11.15 LIVE VERCEL · Derivatives Live Chain · no broker execution</span><a href="M24-REQUIREMENTS.md">Requirements</a></footer>
+    <footer class="footerline"><span>M24 v0.3 · D0.11.16 LIVE VERCEL · Options Live Chain · no broker execution</span><a href="M24-REQUIREMENTS.md">Requirements</a></footer>
   </main>
   <script src="m24-cases.js"></script>
   <script src="m24-coinbase.js"></script>
