@@ -293,7 +293,10 @@ async function refreshContinuityHealth(){
   $('healthRestoreDot').className='continuity-dot '+healthClass(h.restore.lastError?'ERROR':(h.restore.lastSuccess?'OK':'UNKNOWN'));
   $('healthRestoreText').textContent='laatste herstel '+h.labels.restore+(h.restore.lastSource?' · '+h.restore.lastSource:'');
 
-  const warnings=window.CreaVaultPolicy?.continuityWarnings?.(h) || [];
+  const warnings=window.CreaVaultPolicy?.continuityWarnings?.(h,{
+    syncEnabled:syncProvider?.mode==='AVAILABLE',
+    backupEnabled:backupProvider?.mode==='AVAILABLE'
+  }) || [];
   const policyText=$('healthPolicyText');
   policyText.classList.toggle('alert',warnings.length>0);
   policyText.textContent=warnings.length
