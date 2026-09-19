@@ -83,6 +83,14 @@ jobs:
 
       - name: Historical runtime smoke test
         run: node m24-smoke-test.js
+      - name: Strategic current-world contract test
+        run: |
+          test -f m24-world.js
+          test -f m24-world-test.js
+          test -f m24-world-snapshot.json
+          grep -q 'm24-world.js' m24.html
+          grep -q 'NO PROBABILITY' m24.html
+          node m24-world-test.js
       - name: Cross-resolution Lab contract test
         run: node m24-resolution-test.js
       - name: Coinbase adapter contract test
