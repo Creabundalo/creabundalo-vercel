@@ -183,6 +183,54 @@ globalThis.M24 = (() => {
     }
   }
 
+  function fundingPct(value){
+    return Number.isFinite(Number(value))?`${(Number(value)*100).toFixed(4)}%`:'—';
+  }
+  function derivativesReadingText(code){
+    const map={
+      LONG_LEVERAGE_EXPANDING:'Open interest loopt op en funding is positief: long-leverage neemt toe.',
+      SHORT_LEVERAGE_EXPANDING:'Open interest loopt op en funding is negatief: short-leverage neemt toe.',
+      LEVERAGE_CONTRACTING:'Open interest neemt af: leverage wordt afgebouwd.',
+      LEVERAGE_STABLE:'Funding en open interest tonen geen sterke leverage-uitbreiding.',
+      INSUFFICIENT_DATA:'Nog onvoldoende derivatendata voor een betekenisvolle leverage-lezing.'
+    };
+    return map[code]||String(code||'Geen lezing');
+  }
+  function renderDerivatives(){
+    const d=snapshot.derivatives||{};
+    const grid=$('#derivativesGrid');
+    const status=$('#liveDerivativesStatus');
+    const badge=$('#derivativesSourceBadge');
+    const meaning=$('#derivativesMeaning');
+
+    if(d.sourceStatus==='NOT_APPLICABLE'||d.sourceStatus==='NOT_AVAILABLE'){
+      if(grid) grid.innerHTML=`<div class="derivatives-na"><strong>Niet van toepassing</strong><span>Voor ${state.asset} is in deze bronset geen ondersteunde perpetual-derivatenlaag gekoppeld.</span></div>`;
+      if(status){status.textContent='N/A';status.dataset.state='MODEL';}
+      if(badge){badge.textContent='N/A';badge.dataset.state='FALLBACK';}
+      if(meaning) meaning.textContent='M24 verzint hier geen derivatendata; deze laag blijft expliciet niet van toepassing.';
+      return;
+    }
+
+    if(d.sourceStatus!=='OK'){
+      if(grid) grid.innerHTML=`<div class="derivatives-na"><strong>Source gap</strong><span>${d.error||'Derivatenbron tijdelijk niet beschikbaar.'}</span></div>`;
+      if(status){status.textContent='SOURCE GAP';status.dataset.state='PARTIAL';}
+      if(badge){badge.textContent='SOURCE GAP';badge.dataset.state='FALLBACK';}
+      if(meaning) meaning.textContent='Geen live derivatencontext gebruikt zolang de bron niet aantoonbaar beschikbaar is.';
+      return;
+    }
+
+    const funding=d.funding||{},oi=d.openInterest||{},reading=d.interpretation?.leverageReading;
+    if(grid){
+      grid.innerHTML=`
+        <div class="derivative-card"><span>Funding nu</span><strong>${fundingPct(funding.currentRate)}</strong><small>avg recent ${fundingPct(funding.averageRecentRate)} · n=${funding.observations??'—'}</small></div>
+        <div class="derivative-card"><span>Open interest</span><strong>${Number.isFinite(Number(oi.changeRecentPct))?(Number(oi.changeRecentPct)>=0?'+':'')+Number(oi.changeRecentPct).toFixed(2)+'%':'—'}</strong><small>recent venster · n=${oi.observations??'—'}</small></div>
+        <div class="derivative-card"><span>M24 betekenis</span><strong class="derivatives-reading">${reading||'INSUFFICIENT_DATA'}</strong><small>${d.asOf?'as-of '+d.asOf:'live derivatives'}</small></div>`;
+    }
+    if(status){status.textContent='LIVE';status.dataset.state='LIVE';}
+    if(badge){badge.textContent='BINANCE USD-M · LIVE';badge.dataset.state='LIVE';}
+    if(meaning) meaning.textContent=derivativesReadingText(reading)+' Dit is positioneringscontext, geen zelfstandig trade-signaal.';
+  }
+
   function renderCross(){
     const g=$('#crossGrid');g.innerHTML=snapshot.cross.map(x=>`<div class="cross-card"><span>${x.name}</span><strong class="${x.className}">${x.direction}</strong><small>${x.state}${x.asOf?' · '+x.asOf:''}</small></div>`).join('');
     const live=$('#liveCrossStatus');
@@ -263,7 +311,7 @@ globalThis.M24 = (() => {
     `).join('');
   }
 
-  function renderAll(){renderChart();renderMeaning();renderCross();renderForecast();renderHistory();renderTransactions();renderObservations();renderBreadcrumb();renderMode();renderLens();renderDataStatus();renderSourceHealth();renderCompetence()}
+  function renderAll(){renderChart();renderMeaning();renderDerivatives();renderCross();renderForecast();renderHistory();renderTransactions();renderObservations();renderBreadcrumb();renderMode();renderLens();renderDataStatus();renderSourceHealth();renderCompetence()}
 
   async function refresh(){
     snapshot=await runtime.snapshot(state.asset,{window:state.level,resolution:state.resolution,lens:state.lens,mode:state.mode});
