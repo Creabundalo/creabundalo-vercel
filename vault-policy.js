@@ -1,9 +1,10 @@
 (() => {
   const POLICY=Object.freeze({
-    autoSyncMinMs:15*60*1000,
+    autoSyncMinMs:6*60*60*1000,
     autoBackupMinMs:6*60*60*1000,
     verifyWarnMs:7*24*60*60*1000,
     syncWarnMs:24*60*60*1000,
+    semanticSyncWarnMs:15*60*1000,
     backupWarnMs:7*24*60*60*1000,
     retention:{daily:14,weekly:12,monthly:24}
   });
@@ -112,9 +113,10 @@
     }
   }
 
-  function continuityWarnings(health,{syncEnabled=false,backupEnabled=false}={}){
+  function continuityWarnings(health,{syncEnabled=false,semanticSyncEnabled=false,backupEnabled=false}={}){
     const out=[];
-    if(syncEnabled && ageMs(health.scaleway?.lastSuccess)>POLICY.syncWarnMs) out.push('Scaleway sync ouder dan 24 uur');
+    if(syncEnabled && ageMs(health.scaleway?.lastSuccess)>POLICY.syncWarnMs) out.push('Vault snapshot ouder dan 24 uur');
+    if(semanticSyncEnabled && ageMs(health.semanticSync?.lastSuccess)>POLICY.semanticSyncWarnMs) out.push('Semantic event sync ouder dan 15 minuten');
     if(backupEnabled && ageMs(health.independent?.lastSuccess)>POLICY.backupWarnMs) out.push('Onafhankelijke backup ouder dan 7 dagen');
     if(
       syncEnabled && health.scaleway?.lastSuccess &&
