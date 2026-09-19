@@ -1,6 +1,6 @@
 globalThis.M24 = (() => {
   const state = {
-    asset:'BTC', lens:'m24', mode:'story', level:'episode', resolution:'D',
+    asset:'BTC', lens:'m24', mode:'story', level:'episode', resolution:'D', competence:'analysis',
     overlays:{momentum:true,fibonacci:true,trickster:true,cross:true,patterns:true}
   };
   let runtime=null;
@@ -8,6 +8,7 @@ globalThis.M24 = (() => {
   let forecasts=[];
   let transactions=[];
   let labResult=null;
+  let currentStoryFlag=null;
 
   const $ = s => document.querySelector(s);
   const $$ = s => [...document.querySelectorAll(s)];
@@ -50,6 +51,86 @@ globalThis.M24 = (() => {
   function clear(el){while(el&&el.firstChild)el.removeChild(el.firstChild)}
   function svg(tag,attrs={}){const el=document.createElementNS(svgNS,tag);Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v));return el}
 
+  const EVIDENCE_LABELS=Object.freeze({
+    MECHANISM_VISIBLE:'Gemeten mechanisme',
+    PLAUSIBLE_INTERPRETATION:'Mogelijke uitleg',
+    INTENT_UNKNOWN:'Intentie onbekend',
+    SOURCE_GAP:'Bron ontbreekt'
+  });
+  const ACTION_LABELS=Object.freeze({
+    WAIT:'Nog niets doen',
+    TEST:'Eerst toetsen',
+    'DOWNSIDE WATCH':'Opletten op neerwaartse bevestiging',
+    'DOWNSIDE CANDIDATE':'Neerwaartse kandidaat',
+    'SHORT CANDIDATE':'Short-kandidaat',
+    'LONG CANDIDATE':'Long-kandidaat'
+  });
+
+  function competenceProjection(){
+    return globalThis.CompetenceProjection
+      ? globalThis.CompetenceProjection.projectionFor(state.competence)
+      : {label:'Analyse',description:'Vaktaal en mechanismen.',showEvidenceCodes:true,showRawSources:false,showGlossary:false};
+  }
+  function projectEvidence(code){
+    const p=competenceProjection();
+    return p.showEvidenceCodes?code:(EVIDENCE_LABELS[code]||String(code||'Onbekend'));
+  }
+  function projectAction(code){
+    const p=competenceProjection();
+    return p.showEvidenceCodes?code:(ACTION_LABELS[code]||String(code||'Geen actie'));
+  }
+  function glossaryText(f){
+    const bits=[];
+    if(f?.action==='WAIT') bits.push('WAIT = nog geen bevestiging; M24 doet niets.');
+    if(String(f?.action||'').includes('WATCH')) bits.push('Watch = patroon volgen, nog geen transactie.');
+    if(String(f?.action||'').includes('CANDIDATE')) bits.push('Kandidaat = hypothese is sterker, maar uitvoering blijft apart.');
+    if(f?.evidence==='MECHANISM_VISIBLE') bits.push('Gemeten mechanisme = zichtbaar in de gebruikte data.');
+    if(f?.evidence==='PLAUSIBLE_INTERPRETATION') bits.push('Mogelijke uitleg = past bij de data, maar is niet bewezen.');
+    return bits.join(' ');
+  }
+  function renderStoryProjection(f){
+    if(!f) return;
+    const badge=$('#evidenceBadge'),action=$('#actionCandidate');
+    $('#storyTitle').textContent=f.title;
+    badge.dataset.raw=f.evidence||'';
+    badge.textContent=projectEvidence(f.evidence);
+    action.dataset.raw=f.action||'';
+    action.textContent=projectAction(f.action);
+    $('#storyBody').innerHTML=`<p><strong>Wat zie je?</strong> ${f.what}</p><p><strong>Wat speelt eronder?</strong> ${f.why}</p><p><strong>Betekeniswereld:</strong> ${f.meaning}</p><p><strong>M24-lezing:</strong> ${f.reading}</p>`;
+    const glossary=$('#competenceGlossary');
+    if(glossary) glossary.textContent=glossaryText(f)||'Dezelfde marktbetekenis blijft staan; alleen de hoeveelheid uitleg verandert.';
+    const trace=$('#expertTrace');
+    if(trace){
+      trace.textContent=JSON.stringify({
+        evidence:f.evidence,
+        action:f.action,
+        asset:state.asset,
+        lens:state.lens,
+        level:state.level,
+        resolution:state.resolution,
+        mechanisms:snapshot?.market?.mechanisms||[],
+        sourceStatus:snapshot?.market?.sourceStatus||'MODEL',
+        sourceAsOf:snapshot?.market?.sourceAsOf||null,
+        sourceQuality:snapshot?.market?.sourceQuality||null
+      },null,2);
+    }
+  }
+  function renderCompetence(){
+    const cp=globalThis.CompetenceProjection
+      ? globalThis.CompetenceProjection.applyToDocument(document,state.competence)
+      : competenceProjection();
+    const select=$('#competenceSelect');
+    if(select) select.value=state.competence;
+    const hint=$('#competenceHint');
+    if(hint) hint.textContent=`${cp.label} — ${cp.description} De data en M24-logica veranderen niet.`;
+    if(currentStoryFlag) renderStoryProjection(currentStoryFlag);
+    else{
+      const badge=$('#evidenceBadge'),action=$('#actionCandidate');
+      if(badge) badge.textContent=projectEvidence(badge.dataset.raw||'MECHANISM_VISIBLE');
+      if(action) action.textContent=projectAction(action.dataset.raw||'WAIT');
+    }
+  }
+
   function renderChart(){
     const a=snapshot.market,pts=pointsFor(a.values);
     $('#priceLine').setAttribute('d',linePath(pts));$('#priceArea').setAttribute('d',areaPath(pts));
@@ -78,8 +159,8 @@ globalThis.M24 = (() => {
   function renderTrickster(pts){const l=$('#tricksterLayer');clear(l);l.style.display=state.overlays.trickster?'':'none';if(!state.overlays.trickster)return;const p=pts[Math.floor(pts.length*.5)];l.append(svg('rect',{x:p.x-55,y:45,width:180,height:255,rx:18,class:'trickster-zone'}));const t=svg('text',{x:p.x-42,y:65,class:'overlay-text'});t.textContent='Trickster watch';l.append(t)}
 
   function showStory(f){
-    $('#storyTitle').textContent=f.title;$('#evidenceBadge').textContent=f.evidence;$('#actionCandidate').textContent=f.action;
-    $('#storyBody').innerHTML=`<p><strong>Wat zie je?</strong> ${f.what}</p><p><strong>Wat speelt eronder?</strong> ${f.why}</p><p><strong>Betekeniswereld:</strong> ${f.meaning}</p><p><strong>M24-lezing:</strong> ${f.reading}</p>`;
+    currentStoryFlag=f;
+    renderStoryProjection(f);
   }
 
   function renderMeaning(){
@@ -90,8 +171,16 @@ globalThis.M24 = (() => {
       ai:['AI-native: welke oude relaties verschuiven als compute/automatisering arbeid en productie herschikken?','Experimentele toekomstlens; nog geen bewezen vervanger van Legacy.']
     };
     const v=variants[state.lens];$('#narrativeText').textContent=v[0];$('#mechanismText').textContent=v[1];
-    $('#tricksterResult').textContent=trick.data.directionConflict?'DISCREPANTIE GEVONDEN — intentie onbekend':'GEEN HARDE DISCREPANTIE — monitor';
-    $('#tricksterDetail').textContent=`${trick.data.summary} Mechanismen: ${(trick.data.mechanisms||[]).join(', ')||'geen hard patroon'}. Intentie blijft ${trick.data.intentStatus}.`;
+    const cp=competenceProjection();
+    if(cp.showEvidenceCodes){
+      $('#tricksterResult').textContent=trick.data.directionConflict?'DISCREPANTIE GEVONDEN — intentie onbekend':'GEEN HARDE DISCREPANTIE — monitor';
+      $('#tricksterDetail').textContent=`${trick.data.summary} Mechanismen: ${(trick.data.mechanisms||[]).join(', ')||'geen hard patroon'}. Intentie blijft ${trick.data.intentStatus}.`;
+    }else{
+      $('#tricksterResult').textContent=trick.data.directionConflict?'Verhaal en meting lopen uiteen':'Geen duidelijke tegenstelling';
+      $('#tricksterDetail').textContent=trick.data.directionConflict
+        ? `${trick.data.summary} M24 ziet verschil tussen het marktverhaal en de meting. Dat zegt niets over de bedoeling van marktpartijen.`
+        : `${trick.data.summary} Blijven volgen; er is nu geen harde tegenstelling tussen verhaal en meting.`;
+    }
   }
 
   function renderCross(){
@@ -144,7 +233,7 @@ globalThis.M24 = (() => {
     const world=$('#worldLayerStatus');if(world){world.textContent='SNAPSHOT';world.dataset.state='SNAPSHOT';}
     const exec=$('#executionLayerStatus');if(exec){exec.textContent='PAPER';exec.dataset.state='PAPER';}
   }
-  function renderAll(){renderChart();renderMeaning();renderCross();renderForecast();renderHistory();renderTransactions();renderObservations();renderBreadcrumb();renderMode();renderLens();renderDataStatus()}
+  function renderAll(){renderChart();renderMeaning();renderCross();renderForecast();renderHistory();renderTransactions();renderObservations();renderBreadcrumb();renderMode();renderLens();renderDataStatus();renderCompetence()}
 
   async function refresh(){
     snapshot=await runtime.snapshot(state.asset,{window:state.level,resolution:state.resolution,lens:state.lens,mode:state.mode});
@@ -161,7 +250,14 @@ globalThis.M24 = (() => {
   function wire(){
     $('#assetSelect').addEventListener('change',e=>{state.asset=e.target.value;refresh()});
     $('#resolutionSelect').addEventListener('change',e=>{state.resolution=e.target.value;refresh()});
-    $$('.lens').forEach(b=>b.addEventListener('click',()=>{state.lens=b.dataset.lens;refresh()}));
+    $('#competenceSelect').addEventListener('change',e=>{
+      state.competence=e.target.value;
+      if(globalThis.CompetenceProjection) globalThis.CompetenceProjection.setStage('investing',state.competence,localStorage);
+      if(state.competence==='guided'&&state.mode!=='story') state.mode='story';
+      if(state.competence==='learning'&&state.mode==='lab') state.mode='analysis';
+      refresh();
+    });
+    $('.lens').forEach(b=>b.addEventListener('click',()=>{state.lens=b.dataset.lens;refresh()}));
     $$('.mode').forEach(b=>b.addEventListener('click',()=>{state.mode=b.dataset.mode;if(state.mode==='lab'&&state.asset==='BTC'){state.resolution='W';$('#resolutionSelect').value='W'}refresh()}));
     $$('.breadcrumb button').forEach(b=>b.addEventListener('click',()=>{state.level=b.dataset.level;refresh()}));
     $$('[data-overlay]').forEach(i=>i.addEventListener('change',()=>{state.overlays[i.dataset.overlay]=i.checked;renderAll()}));
@@ -169,7 +265,12 @@ globalThis.M24 = (() => {
   }
 
   async function boot(){
-    try{await initRuntime();wire();await refresh()}
+    try{
+      await initRuntime();
+      if(globalThis.CompetenceProjection) state.competence=globalThis.CompetenceProjection.getStage('investing',localStorage);
+      wire();
+      await refresh()
+    }
     catch(err){console.error(err);$('#storyTitle').textContent='M24 runtime fout';$('#storyBody').innerHTML=`<p>${err.message}</p>`}
   }
   boot();

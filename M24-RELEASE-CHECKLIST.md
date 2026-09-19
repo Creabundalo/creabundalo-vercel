@@ -209,3 +209,18 @@ Current replay calibration remains below the n=30 display threshold in every cov
 - [x] Live data does not enable live order execution
 - [ ] M24 Release Gate green on release/m24-d0-11-11-live-vercel
 - [ ] Vercel preview visually reviewed
+
+
+## D0.11.12 Competence Projection
+- [x] One semantic truth remains underneath every view level
+- [x] Four competence stages map to guided / learning / analysis / expert projection
+- [x] Domain profile is stored separately for investing
+- [x] Changing projection does not change market data, M24 logic or safety mode
+- [x] Guided view translates evidence/action codes into ordinary language
+- [x] Learning view keeps market terminology and adds short explanations
+- [x] Analysis view retains mechanism/evidence terminology
+- [x] Expert view exposes raw mechanism/source trace
+- [x] Live Vercel market + cross-asset API wiring from D0.11.11 is preserved
+- [x] Competence Projection has a deterministic contract test
+- [ ] GitHub M24 Release Gate green on release/m24-d0-11-12-competence
+- [ ] Vercel preview visually reviewed
