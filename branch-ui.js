@@ -36,6 +36,8 @@ const recoveryBox = $('recoveryBox');
 const vaultRecoveryOutput = $('vaultRecoveryOutput');
 const vaultImportInput = $('vaultImportInput');
 const scalewaySyncToken = $('scalewaySyncToken');
+const overlayExtensionId = $('overlayExtensionId');
+const overlayBridgeStatus = $('overlayBridgeStatus');
 
 function uid(prefix='n'){
   return globalThis.crypto?.randomUUID ? prefix+'_'+crypto.randomUUID() : prefix+'_'+Date.now()+'_'+Math.random().toString(16).slice(2);
@@ -384,6 +386,188 @@ async function applyRetention(){
   }
 }
 
+
+function validateOverlayEvent(event){
+  if(!event || event.schema!=='creabundalo.semantic-event.v1') return false;
+  if(typeof event.eventId!=='string' || typeof event.sessionId!=='string') return false;
+  return ['BRANCH_CREATED','NODE_FOCUSED','NODE_PROJECT_PROMOTED','NODE_REPARENTED'].includes(event.type);
+}
+function ensureOverlayState(){
+  state.integrations ||= {};
+  state.integrations.overlay ||= {sessions:{}};
+  state.integrations.overlay.sessions ||= {};
+  return state.integrations.overlay;
+}
+function overlaySession(event){
+  const overlay=ensureOverlayState();
+  let session=overlay.sessions[event.sessionId];
+  if(session) return session;
+
+  const parent=current();
+  const sessionNodeId=uid('overlay');
+  const adapter=event.source?.adapter || 'AI';
+  const host=event.source?.host || '';
+  const title='Overlay · '+adapter+(host?' · '+host:'');
+  const node={
+    id:sessionNodeId,
+    title,
+    parentId:parent.id,
+    edgeLabel:'Semantic Overlay sessie',
+    kind:'session',
+    scope:parent.scope || 'work',
+    status:'active',
+    createdAt:Date.now(),
+    source:'semantic-overlay',
+    provenance:{
+      source:'browser-extension',
+      sessionId:event.sessionId,
+      adapter,
+      host,
+      firstEventAt:event.occurredAt
+    }
+  };
+  state.nodes.push(node);
+  session={
+    sessionId:event.sessionId,
+    rootNodeId:sessionNodeId,
+    nodes:{root:sessionNodeId},
+    adapter,
+    host,
+    importedAt:new Date().toISOString()
+  };
+  overlay.sessions[event.sessionId]=session;
+  return session;
+}
+function mappedOverlayNode(session,externalId){
+  return session.nodes?.[externalId] ? byId(session.nodes[externalId]) : null;
+}
+function safeOverlayText(value,max=5000){
+  return String(value||'').replace(/\s+/g,' ').trim().slice(0,max);
+}
+function applyOverlayEvent(event){
+  const session=overlaySession(event);
+  const p=event.payload||{};
+
+  if(event.type==='BRANCH_CREATED'){
+    const ext=p.node||{};
+    if(typeof ext.id!=='string') return;
+    if(mappedOverlayNode(session,ext.id)) return;
+
+    const parentNode=mappedOverlayNode(session,ext.parentId) || byId(session.rootNodeId);
+    const webId=uid('ov');
+    const node={
+      id:webId,
+      title:safeOverlayText(ext.title,500) || 'Overlay branch',
+      parentId:parentNode?.id || session.rootNodeId,
+      edgeLabel:safeOverlayText(ext.edgeLabel,1000) || 'Overlay branch',
+      kind:['branch','project','action'].includes(ext.kind)?ext.kind:'branch',
+      scope:parentNode?.scope || 'work',
+      status:ext.status==='paused'?'paused':'active',
+      createdAt:Number(ext.createdAt)||Date.now(),
+      source:'semantic-overlay',
+      externalRef:'overlay:'+event.sessionId+':'+ext.id,
+      provenance:{
+        source:'browser-extension',
+        eventId:event.eventId,
+        sessionId:event.sessionId,
+        adapter:event.source?.adapter||session.adapter,
+        host:event.source?.host||session.host,
+        occurredAt:event.occurredAt
+      }
+    };
+    state.nodes.push(node);
+    session.nodes[ext.id]=webId;
+    session.lastEventAt=event.occurredAt;
+    return;
+  }
+
+  const target=mappedOverlayNode(session,p.nodeId);
+  if(event.type==='NODE_FOCUSED'){
+    if(target) session.lastFocusedNodeId=target.id;
+    session.lastEventAt=event.occurredAt;
+    return;
+  }
+  if(event.type==='NODE_PROJECT_PROMOTED'){
+    if(target){target.kind='project';target.status='active';}
+    session.lastEventAt=event.occurredAt;
+    return;
+  }
+  if(event.type==='NODE_REPARENTED'){
+    if(target){
+      const newParent=mappedOverlayNode(session,p.parentId) || byId(session.rootNodeId);
+      if(newParent && newParent.id!==target.id) target.parentId=newParent.id;
+    }
+    session.lastEventAt=event.occurredAt;
+  }
+}
+async function connectOverlayBridge(){
+  try{
+    const id=overlayExtensionId.value.trim();
+    window.CreaOverlayBridge.configure({id,remember:true});
+    const status=await window.CreaOverlayBridge.status();
+    overlayBridgeStatus.textContent='Gekoppeld · sessie '+status.sessionId.slice(0,8)+' · '+status.pending+' pending event(s).';
+    $('overlayImportButton').disabled=status.pending===0;
+    vaultMessage('Semantic Overlay gekoppeld. Context blijft pending totdat je hem importeert in de Vault.');
+  }catch(err){
+    overlayBridgeStatus.textContent='Koppelen mislukt: '+err.message;
+    vaultMessage('Overlay Bridge koppelen mislukt: '+err.message,true);
+  }
+}
+async function refreshOverlayBridgeStatus(){
+  const stored=window.CreaOverlayBridge?.getId?.()||'';
+  if(stored && !overlayExtensionId.value) overlayExtensionId.value=stored;
+  if(!stored){
+    overlayBridgeStatus.textContent='Nog niet gekoppeld. Importeren vereist een ontgrendelde Vault.';
+    $('overlayImportButton').disabled=true;
+    return;
+  }
+  try{
+    const status=await window.CreaOverlayBridge.status();
+    overlayBridgeStatus.textContent='Gekoppeld · sessie '+status.sessionId.slice(0,8)+' · '+status.pending+' pending event(s).';
+    $('overlayImportButton').disabled=status.pending===0;
+  }catch(err){
+    overlayBridgeStatus.textContent='Extension niet bereikbaar: '+err.message;
+    $('overlayImportButton').disabled=true;
+  }
+}
+async function importOverlayContext(){
+  const vault=window.CreaVault.status();
+  if(!vault.initialized || !vault.unlocked){
+    vaultMessage('Ontgrendel eerst de Vault. Overlay-events worden pas daarna geïmporteerd.',true);
+    return;
+  }
+  let pulled;
+  try{
+    pulled=await window.CreaOverlayBridge.pull();
+  }catch(err){
+    vaultMessage('Overlay-events ophalen mislukt: '+err.message,true);
+    return;
+  }
+  const events=(pulled.events||[]).filter(validateOverlayEvent);
+  if(!events.length){
+    overlayBridgeStatus.textContent='Geen pending context.';
+    return;
+  }
+
+  try{
+    for(const event of events) applyOverlayEvent(event);
+    const overlay=ensureOverlayState();
+    const lastSession=overlay.sessions[events.at(-1).sessionId];
+    if(lastSession?.lastFocusedNodeId && byId(lastSession.lastFocusedNodeId)){
+      state.currentId=lastSession.lastFocusedNodeId;
+    }
+    await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
+    await window.CreaVaultHealth?.success?.('local');
+    await window.CreaOverlayBridge.ack(events.map(e=>e.eventId));
+    render();
+    centerCurrent();
+    await refreshOverlayBridgeStatus();
+    vaultMessage(events.length+' Semantic Overlay event(s) encrypted in de Creabundalo Vault en daarna ge-ACKed.');
+  }catch(err){
+    vaultMessage('Overlay import mislukt; events blijven pending: '+err.message,true);
+  }
+}
+
 function vaultMessage(message,isError=false){
   vaultStatusText.textContent=message;
   vaultStatusText.dataset.error=isError?'1':'0';
@@ -421,6 +605,7 @@ function updateVaultUi(){
   if(status.mode==='UNINITIALIZED') vaultMessage('Nog geen kluis. Tot setup gebruikt deze v0 alleen lokale prototype-opslag.');
   if(status.mode==='LOCKED') vaultMessage('Kluis bestaat en is vergrendeld. Er wordt geen plaintext state naar localStorage geschreven.');
   if(status.mode==='UNLOCKED') vaultMessage('Kluis ontgrendeld. Branch-state wordt encrypted in IndexedDB opgeslagen.');
+  refreshOverlayBridgeStatus().catch(()=>{});
 }
 async function initVaultUI(){
   try{
@@ -651,6 +836,8 @@ $('backupFolderButton').onclick=chooseBackupFolder;
 $('backupAuthorizeButton').onclick=authorizeBackupFolder;
 $('backupNowButton').onclick=backupNowIndependent;
 $('backupRestoreButton').onclick=restoreLatestIndependent;
+$('overlayConnectButton').onclick=connectOverlayBridge;
+$('overlayImportButton').onclick=importOverlayContext;
 $('verifyContinuityButton').onclick=verifyContinuity;
 $('analyzeRetentionButton').onclick=analyzeRetention;
 $('applyRetentionButton').onclick=applyRetention;
@@ -689,4 +876,5 @@ viewport.addEventListener('pointercancel',()=>{dragging=false;dragStart=null});
 render();
 requestAnimationFrame(centerCurrent);
 initVaultUI();
+refreshOverlayBridgeStatus().catch(()=>{});
 window.CreaVaultPolicy?.start?.();
