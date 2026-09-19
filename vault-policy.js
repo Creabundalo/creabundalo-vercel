@@ -112,16 +112,16 @@
     }
   }
 
-  function continuityWarnings(health){
+  function continuityWarnings(health,{syncEnabled=false,backupEnabled=false}={}){
     const out=[];
-    if(ageMs(health.scaleway?.lastSuccess)>POLICY.syncWarnMs) out.push('Scaleway sync ouder dan 24 uur');
-    if(ageMs(health.independent?.lastSuccess)>POLICY.backupWarnMs) out.push('Onafhankelijke backup ouder dan 7 dagen');
+    if(syncEnabled && ageMs(health.scaleway?.lastSuccess)>POLICY.syncWarnMs) out.push('Scaleway sync ouder dan 24 uur');
+    if(backupEnabled && ageMs(health.independent?.lastSuccess)>POLICY.backupWarnMs) out.push('Onafhankelijke backup ouder dan 7 dagen');
     if(
-      health.scaleway?.lastSuccess &&
+      syncEnabled && health.scaleway?.lastSuccess &&
       ageMs(health.scaleway?.lastVerified)>POLICY.verifyWarnMs
     ) out.push('Scaleway herstelbaarheid langer dan 7 dagen niet geverifieerd');
     if(
-      health.independent?.lastSuccess &&
+      backupEnabled && health.independent?.lastSuccess &&
       ageMs(health.independent?.lastVerified)>POLICY.verifyWarnMs
     ) out.push('Backup herstelbaarheid langer dan 7 dagen niet geverifieerd');
     return out;
