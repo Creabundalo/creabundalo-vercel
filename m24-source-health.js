@@ -48,6 +48,25 @@
     };
   }
 
+  function derivativesRow(snapshot){
+    const d=snapshot?.derivatives||{};
+    const status=String(d.sourceStatus||'NOT_AVAILABLE');
+    const applicable=!['NOT_AVAILABLE','NOT_APPLICABLE'].includes(status);
+    return {
+      id:'DERIVATIVES',
+      label:'Derivaten',
+      source:d.provenance?.[0]?.sourceId||(!applicable?'N/A':'BINANCE USD-M'),
+      api:status==='OK'?'OK':status==='SOURCE_GAP'?'GAP':status==='NOT_APPLICABLE'?'N/A':'N/A',
+      normalize:status==='OK'?'OK':status==='SOURCE_GAP'?'GAP':'N/A',
+      qubus:snapshot?.derivativesRec?'STORED':status==='NOT_APPLICABLE'?'N/A':'GAP',
+      m24:status==='OK'?'ACTIVE':status==='NOT_APPLICABLE'?'N/A':'GAP',
+      freshness:d.freshness||'N/A',
+      asOf:d.asOf||null,
+      quality:d.quality||'N/A',
+      overall:status==='OK'?'LIVE':status==='NOT_APPLICABLE'?'N/A':status==='SOURCE_GAP'?'SOURCE_GAP':'N/A'
+    };
+  }
+
   function meaningRow(snapshot){
     const meaning=snapshot?.meaning||{};
     return {
@@ -98,8 +117,8 @@
   }
 
   function build(snapshot){
-    return [marketRow(snapshot),crossRow(snapshot),meaningRow(snapshot),worldRow(),executionRow()];
+    return [marketRow(snapshot),derivativesRow(snapshot),crossRow(snapshot),meaningRow(snapshot),worldRow(),executionRow()];
   }
 
-  return {build,marketRow,crossRow,meaningRow,worldRow,executionRow};
+  return {build,marketRow,derivativesRow,crossRow,meaningRow,worldRow,executionRow};
 });
