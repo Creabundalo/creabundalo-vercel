@@ -1,0 +1,173 @@
+{
+  "schema": "m24.current_world.v0.1",
+  "generatedAt": "2026-09-19",
+  "safety": "RESEARCH_ONLY_NO_PROBABILITY",
+  "worlds": [
+    {
+      "worldId": "NL_HOUSING_CURRENT",
+      "asOf": "2026-07-31",
+      "publicationDate": "2026-08-21",
+      "recencyClass": "CURRENT_D30",
+      "mechanisms": [
+        "BORROWING_CAPACITY"
+      ],
+      "observations": [
+        {
+          "sensor": "HOUSE_PRICE_INDEX",
+          "value": 156.7,
+          "unit": "index_2020_100",
+          "yoyPct": 3.9,
+          "momPct": 0.5,
+          "authority": "PRIMARY_OFFICIAL",
+          "source": "https://www.cbs.nl/nl-nl/nieuws/2026/34/koopwoningen-in-juli-bijna-4-procent-duurder-dan-jaar-eerder"
+        },
+        {
+          "sensor": "EXISTING_HOME_TRANSACTIONS",
+          "value": 22241,
+          "unit": "transactions_month",
+          "yoyPct": 5,
+          "authority": "PRIMARY_OFFICIAL",
+          "source": "https://www.cbs.nl/nl-nl/nieuws/2026/34/koopwoningen-in-juli-bijna-4-procent-duurder-dan-jaar-eerder"
+        },
+        {
+          "sensor": "BORROWING_CAPACITY_CONTEXT",
+          "value": "mortgage rates higher; wage growth partly offsets; affordability not improving",
+          "unit": "qualitative_source_backed",
+          "authority": "PRIMARY_OFFICIAL",
+          "source": "https://www.dnb.nl/actuele-economische-vraagstukken/woningmarkt/"
+        }
+      ],
+      "negativeEvidence": [
+        "FORCED_ACTION_NOT_EVIDENCED",
+        "SYSTEMIC_COLLATERAL_STRESS_NOT_EVIDENCED"
+      ]
+    },
+    {
+      "worldId": "EU_ELECTRIFICATION_GRID_CURRENT",
+      "asOf": "2026-07-17",
+      "publicationDate": "2026-07-17",
+      "recencyClass": "RECENT_D90",
+      "mechanisms": [
+        "PHYSICAL_CONSTRAINT",
+        "RULE_CHANGE"
+      ],
+      "observations": [
+        {
+          "sensor": "ELECTRICITY_SHARE_FINAL_ENERGY",
+          "value": 23,
+          "unit": "pct",
+          "reference2030Pct": 32,
+          "authority": "PRIMARY_OFFICIAL",
+          "source": "https://energy.ec.europa.eu/topics/eus-energy-system/electrification_en"
+        },
+        {
+          "sensor": "GRID_CONNECTION_QUEUES",
+          "value": 16,
+          "unit": "eu_countries_with_queues_minimum",
+          "authority": "PRIMARY_OFFICIAL",
+          "source": "https://energy.ec.europa.eu/topics/infrastructure/european-grids_en"
+        },
+        {
+          "sensor": "RENEWABLE_CAPACITY_AT_DELAY_RISK",
+          "value": 120,
+          "unit": "GW_mature_projects",
+          "authority": "PRIMARY_OFFICIAL",
+          "source": "https://energy.ec.europa.eu/topics/infrastructure/european-grids_en"
+        }
+      ],
+      "negativeEvidence": [
+        "EXPIRY_CONTRACT_NOT_APPLICABLE"
+      ]
+    },
+    {
+      "worldId": "EU_DEFENCE_EXPANSION_CURRENT",
+      "asOf": "2026-08-06",
+      "publicationDate": "2026-08-06",
+      "recencyClass": "RECENT_D90",
+      "mechanisms": [
+        "RULE_CHANGE",
+        "DEMAND_EXPANSION",
+        "CAPACITY_EXPANSION"
+      ],
+      "observations": [
+        {
+          "sensor": "EU_DEFENCE_SPENDING_2025",
+          "value": 418,
+          "unit": "EUR_bn",
+          "authority": "PRIMARY_OFFICIAL",
+          "source": "https://eda.europa.eu/news-and-events/news/2026/07/16/eu-defence-spending---418-billion-in-2025--projected-to--454-billion-in-2026"
+        },
+        {
+          "sensor": "EU_DEFENCE_SPENDING_2026_PROJECTED",
+          "value": 454,
+          "unit": "EUR_bn",
+          "authority": "PRIMARY_OFFICIAL",
+          "source": "https://eda.europa.eu/news-and-events/news/2026/07/16/eu-defence-spending---418-billion-in-2025--projected-to--454-billion-in-2026"
+        },
+        {
+          "sensor": "EU_DEFENCE_EQUIPMENT_PROCUREMENT_2025",
+          "value": 115,
+          "unit": "EUR_bn",
+          "authority": "PRIMARY_OFFICIAL",
+          "source": "https://eda.europa.eu/news-and-events/news/2026/07/16/eu-defence-spending---418-billion-in-2025--projected-to--454-billion-in-2026"
+        },
+        {
+          "sensor": "RHEINMETALL_BACKLOG_H1_2026",
+          "value": 80.5,
+          "unit": "EUR_bn",
+          "authority": "PRIMARY_COMPANY_DISCLOSURE",
+          "source": "https://www.rheinmetall.com/en/media/news-watch/news/2026/08/2026-08-06-rheinmetall-news-half-yearly-financial-report-h1"
+        }
+      ],
+      "negativeEvidence": [
+        "FORCED_ACTION_NOT_EVIDENCED"
+      ]
+    },
+    {
+      "worldId": "US_STABLECOIN_CURRENT",
+      "asOf": "2026-04-19",
+      "publicationDate": "2026-05-08",
+      "recencyClass": "STRUCTURAL_D180",
+      "mechanisms": [
+        "RULE_CHANGE",
+        "POLICY_EXPECTATION"
+      ],
+      "observations": [
+        {
+          "sensor": "STABLECOIN_MARKET_CAP",
+          "value": 320,
+          "unit": "USD_bn",
+          "authority": "OFFICIAL_ANALYSIS_WITH_SECONDARY_MARKET_INPUT",
+          "source": "https://www.federalreserve.gov/publications/2026-may-financial-stability-report-funding-risks.htm"
+        },
+        {
+          "sensor": "GENIUS_IMPLEMENTATION",
+          "value": "rulemaking_active",
+          "unit": "policy_stage",
+          "authority": "PRIMARY_OFFICIAL",
+          "source": "https://www.federalreserve.gov/publications/2026-may-financial-stability-report-funding-risks.htm"
+        }
+      ],
+      "negativeEvidence": []
+    },
+    {
+      "worldId": "GLOBAL_FUNDING_REFERENCE",
+      "asOf": "2026-05-08",
+      "publicationDate": "2026-05-08",
+      "recencyClass": "STALE_FAST_MARKET",
+      "mechanisms": [],
+      "observations": [
+        {
+          "sensor": "FUNDING_RISK_ASSESSMENT",
+          "value": "roughly_in_line_with_historical_norms",
+          "unit": "Fed_FSR_assessment",
+          "authority": "PRIMARY_OFFICIAL",
+          "source": "https://www.federalreserve.gov/publications/2026-may-financial-stability-report-funding-risks.htm"
+        }
+      ],
+      "negativeEvidence": [
+        "NO_CURRENT_FUNDING_STRESS_INFERENCE_ALLOWED_DUE_RECENCY"
+      ]
+    }
+  ]
+}
