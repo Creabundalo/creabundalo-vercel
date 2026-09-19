@@ -37,5 +37,6 @@ m24-trickster-lab.js
 m24-trickster-ui.js
 vercel.json
 m24-vercel-live.js
+competence-projection.js
 api/m24/market.js
 api/m24/cross.js
