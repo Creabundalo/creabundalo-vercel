@@ -83,6 +83,20 @@ jobs:
 
       - name: Historical runtime smoke test
         run: node m24-smoke-test.js
+      - name: Strategic current-world contract test
+        run: |
+          test -f m24-world.js
+          test -f m24-world-test.js
+          test -f m24-world-snapshot.json
+          grep -q 'm24-world.js' m24.html
+          grep -q 'NO PROBABILITY' m24.html
+          node m24-world-test.js
+      - name: Vercel static asset contract
+        run: |
+          test -f m24.html
+          test -f m24.css
+          test -f m24.js
+          node -e "const v=require('./vercel.json'); if(v.builds) throw new Error('vercel.json must not restrict static deployment to index.html'); const r=(v.rewrites||[]).find(x=>x.source==='/'); if(!r || r.destination!=='/m24.html') throw new Error('root must rewrite to /m24.html');"
       - name: Cross-resolution Lab contract test
         run: node m24-resolution-test.js
       - name: Coinbase adapter contract test
@@ -199,3 +213,30 @@ jobs:
           grep -q 'Laad historische case-batch' m24-cohort-ui.js
           grep -q 'm24-enrichment-ui.js' m24-lab-ui.js
           grep -q "LAB_RESULT" m24.js
+
+      - name: Package clean M24-only Vercel bundle
+        if: success()
+        run: |
+          rm -rf dist-m24-vercel
+          mkdir -p dist-m24-vercel
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            test -f "$file"
+            cp "$file" dist-m24-vercel/
+          done < M24-VERCEL-RUNTIME.txt
+          if find dist-m24-vercel -maxdepth 1 -type f \( -name 'M99-*' -o -name 'actio*' -o -name 'watch*' -o -name 'dashboard.html' \) | grep -q .; then
+            echo "Non-M24 file leaked into deployment bundle" >&2
+            exit 1
+          fi
+          grep -q 'm24.css' dist-m24-vercel/m24.html
+          grep -q 'm24-world.js' dist-m24-vercel/m24.html
+          (cd dist-m24-vercel && zip -r ../Creabundalo_M24_D0.11.10_VERCEL_TESTED.zip .)
+
+      - name: Upload tested Vercel bundle
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m24-d0-11-10-vercel-tested
+          path: Creabundalo_M24_D0.11.10_VERCEL_TESTED.zip
+          if-no-files-found: error
+          retention-days: 14
