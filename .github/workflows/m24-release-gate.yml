@@ -118,6 +118,15 @@ jobs:
           grep -q 'competence-projection.js' m24.html
           grep -q 'data-competence' m24.html
           node competence-projection-test.js
+      - name: Selector collection contract
+        run: |
+          grep -Fq "$('.lens').forEach" m24.js
+          grep -Fq "$('.mode').forEach" m24.js
+          grep -Fq "$('.breadcrumb button').forEach" m24.js
+          if grep -Fq "$('.lens').forEach" m24.js; then
+            echo "Single-element selector used as a collection" >&2
+            exit 1
+          fi
       - name: Cross-resolution Lab contract test
         run: node m24-resolution-test.js
       - name: Coinbase adapter contract test
@@ -257,13 +266,13 @@ jobs:
           test -f dist-m24-vercel/competence-projection.js
           test -f dist-m24-vercel/api/m24/market.js
           test -f dist-m24-vercel/api/m24/cross.js
-          (cd dist-m24-vercel && zip -r ../Creabundalo_M24_D0.11.12_COMPETENCE_LIVE_VERCEL_TESTED.zip .)
+          (cd dist-m24-vercel && zip -r ../Creabundalo_M24_D0.11.13_COMPETENCE_LIVE_VERCEL_TESTED.zip .)
 
       - name: Upload tested Vercel bundle
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: m24-d0-11-12-competence-live-vercel-tested
-          path: Creabundalo_M24_D0.11.12_COMPETENCE_LIVE_VERCEL_TESTED.zip
+          name: m24-d0-11-13-competence-live-vercel-tested
+          path: Creabundalo_M24_D0.11.13_COMPETENCE_LIVE_VERCEL_TESTED.zip
           if-no-files-found: error
           retention-days: 14
