@@ -236,3 +236,17 @@ Current replay calibration remains below the n=30 display threshold in every cov
 - [x] Source-chain contract test added
 - [ ] GitHub M24 Release Gate green on release/m24-d0-11-14-live-chain
 - [ ] Visual browser review
+
+
+## D0.11.15 Derivatives Live Chain
+- [x] Binance USD-M funding exposed through Vercel API
+- [x] Binance USD-M recent open-interest exposed through Vercel API
+- [x] Supported assets: BTC / ETH / SOL
+- [x] Unsupported assets remain explicit N/A; no synthetic derivatives data
+- [x] DERIVATIVES_STATE stored in Qubus with provenance
+- [x] Visible derivatives meaning block added
+- [x] Live wiring matrix includes derivatives API → normalisation → Qubus → M24 → freshness
+- [x] Funding/open interest are treated as leverage context, not proof of intent/manipulation
+- [x] Deterministic live-derivatives contract test added
+- [ ] GitHub M24 Release Gate green on release/m24-d0-11-15-derivatives-live
+- [ ] Visual browser review
