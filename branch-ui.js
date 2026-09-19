@@ -185,7 +185,9 @@ function render(){
   $('currentMeta').textContent=`CURRENT: ${c.title} · ${c.kind.toUpperCase()} · ${c.status.toUpperCase()}`;
   document.querySelectorAll('.lens').forEach(b=>b.classList.toggle('active',b.dataset.lens===state.lens));
   $('continuityPanel').classList.toggle('hidden',state.lens!=='continuity');
+  $('auditPanel').classList.toggle('hidden',state.lens!=='audit');
   if(state.lens==='continuity') refreshContinuityHealth();
+  if(state.lens==='audit') renderAudit();
   applyTransform();
   save();
 }
@@ -273,6 +275,39 @@ function handleCommand(raw){
 }
 
 
+
+
+function renderAudit(){
+  const list=$('auditList');
+  if(!list) return;
+  const events=window.CreaSemanticCore.audit(state,{limit:120}).slice().reverse();
+  list.innerHTML='';
+  if(!events.length){
+    const empty=document.createElement('div');
+    empty.className='audit-empty';
+    empty.textContent='Nog geen Semantic Core-events in deze state.';
+    list.appendChild(empty);
+    return;
+  }
+  for(const event of events){
+    const row=document.createElement('article');
+    row.className='audit-row';
+    const left=document.createElement('div');
+    const mid=document.createElement('div');
+    const right=document.createElement('div');
+    const time=new Date(event.occurredAt);
+    left.innerHTML='<strong></strong><small></small>';
+    left.querySelector('strong').textContent=event.type;
+    left.querySelector('small').textContent=Number.isNaN(time.getTime())?event.occurredAt:time.toLocaleString('nl-NL');
+    mid.innerHTML='<code></code><small></small>';
+    mid.querySelector('code').textContent=event.eventId;
+    mid.querySelector('small').textContent=(event.source?.surface||'')+(event.source?.adapter?' · '+event.source.adapter:'');
+    right.innerHTML='<code></code>';
+    right.querySelector('code').textContent=JSON.stringify(event.payload);
+    row.append(left,mid,right);
+    list.appendChild(row);
+  }
+}
 
 function healthClass(status){
   if(status==='OK') return 'ok';
@@ -657,7 +692,7 @@ async function unlockVault(){
   try{
     await window.CreaVault.unlock(vaultPassphrase.value);
     const restored=await window.CreaVault.loadJSON(KEY);
-    if(restored) state=restored;
+    if(restored) state=window.CreaSemanticCore.ensureState(restored);
     else await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
     vaultPassphrase.value='';
     updateVaultUi();
@@ -671,7 +706,7 @@ async function recoverVault(){
   try{
     await window.CreaVault.recover(vaultRecoveryInput.value);
     const restored=await window.CreaVault.loadJSON(KEY);
-    if(restored) state=restored;
+    if(restored) state=window.CreaSemanticCore.ensureState(restored);
     vaultRecoveryInput.value='';
     updateVaultUi();
     render();
@@ -857,6 +892,7 @@ $('overlayImportButton').onclick=importOverlayContext;
 $('verifyContinuityButton').onclick=verifyContinuity;
 $('analyzeRetentionButton').onclick=analyzeRetention;
 $('applyRetentionButton').onclick=applyRetention;
+$('refreshAuditButton').onclick=renderAudit;
 $('vaultImportButton').onclick=()=>vaultImportInput.click();
 vaultImportInput.onchange=()=>importVaultSnapshot(vaultImportInput.files?.[0]);
 $('copyRecoveryButton').onclick=async()=>{
