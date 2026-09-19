@@ -37,7 +37,7 @@ jobs:
             m24-enrichment.js m24-enrichment-test.js m24-enrichment-ui.js \
             m24-replay.js m24-replay-test.js m24-replay-e2e-test.js m24-verified-btc-2019.json m24-verified-btc-2021.json \
             m24-cohort.js m24-cohort-test.js m24-cohort-ui.js \
-            m24-case-btc-2021.json m24-vercel-live.js m24-vercel-live-test.js competence-projection.js competence-projection-test.js api/m24/market.js api/m24/cross.js M24-VERCEL-RUNTIME.txt M24-REQUIREMENTS.md M24-TECHNICAL-DESIGN.md M24-SOURCE-COMPARISON.md M24-DERIVATIVES.md M24-MACRO-CROSS-ASSET.md M24-MEANING-WORLD.md M24-BACKTEST.md M24-RELEASE-CHECKLIST.md; do test -f "$f"; done
+            m24-case-btc-2021.json m24-vercel-live.js m24-vercel-live-test.js competence-projection.js competence-projection-test.js m24-selector-test.js api/m24/market.js api/m24/cross.js M24-VERCEL-RUNTIME.txt M24-REQUIREMENTS.md M24-TECHNICAL-DESIGN.md M24-SOURCE-COMPARISON.md M24-DERIVATIVES.md M24-MACRO-CROSS-ASSET.md M24-MEANING-WORLD.md M24-BACKTEST.md M24-RELEASE-CHECKLIST.md; do test -f "$f"; done
 
       - name: JavaScript syntax
         run: |
@@ -118,6 +118,8 @@ jobs:
           grep -q 'competence-projection.js' m24.html
           grep -q 'data-competence' m24.html
           node competence-projection-test.js
+      - name: Selector collection contract
+        run: node m24-selector-test.js
       - name: Cross-resolution Lab contract test
         run: node m24-resolution-test.js
       - name: Coinbase adapter contract test
@@ -257,13 +259,13 @@ jobs:
           test -f dist-m24-vercel/competence-projection.js
           test -f dist-m24-vercel/api/m24/market.js
           test -f dist-m24-vercel/api/m24/cross.js
-          (cd dist-m24-vercel && zip -r ../Creabundalo_M24_D0.11.12_COMPETENCE_LIVE_VERCEL_TESTED.zip .)
+          (cd dist-m24-vercel && zip -r ../Creabundalo_M24_D0.11.13_COMPETENCE_LIVE_VERCEL_TESTED.zip .)
 
       - name: Upload tested Vercel bundle
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: m24-d0-11-12-competence-live-vercel-tested
-          path: Creabundalo_M24_D0.11.12_COMPETENCE_LIVE_VERCEL_TESTED.zip
+          name: m24-d0-11-13-competence-live-vercel-tested
+          path: Creabundalo_M24_D0.11.13_COMPETENCE_LIVE_VERCEL_TESTED.zip
           if-no-files-found: error
           retention-days: 14
