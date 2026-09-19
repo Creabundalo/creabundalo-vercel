@@ -155,6 +155,33 @@
     return provider.mode;
   }
 
+
+  async function listIndependentBackups(){
+    if(!independentBackupHandle) independentBackupHandle=await loadBackupHandle();
+    if(!independentBackupHandle) throw new Error('BACKUP_FOLDER_NOT_CONFIGURED');
+    if(!(await ensureDirectoryPermission(independentBackupHandle,{request:false}))) throw new Error('PROVIDER_AUTH_REQUIRED');
+    const items=[];
+    for await (const [name,entry] of independentBackupHandle.entries()){
+      if(entry.kind!=='file' || !/^creabundalo-vault-.*\.enc\.json$/.test(name)) continue;
+      const file=await entry.getFile();
+      items.push({name,lastModified:file.lastModified,size:file.size});
+    }
+    items.sort((a,b)=>b.lastModified-a.lastModified);
+    return items;
+  }
+  async function deleteIndependentBackups(names=[]){
+    if(!independentBackupHandle) independentBackupHandle=await loadBackupHandle();
+    if(!independentBackupHandle) throw new Error('BACKUP_FOLDER_NOT_CONFIGURED');
+    if(!(await ensureDirectoryPermission(independentBackupHandle,{request:false}))) throw new Error('PROVIDER_AUTH_REQUIRED');
+    let deleted=0;
+    for(const name of names){
+      if(!/^creabundalo-vault-.*\.enc\.json$/.test(name)) continue;
+      await independentBackupHandle.removeEntry(name);
+      deleted++;
+    }
+    return {deleted};
+  }
+
   async function syncApi(action){
     if(!scalewayToken) throw new Error('PROVIDER_AUTH_REQUIRED');
     const response=await fetch('/api/vault-sync',{
@@ -239,6 +266,7 @@
 
   window.CreaVaultStorage={
     PRIVACY,register,get,list,write,read,configureScaleway,
-    configureIndependentBackup,authorizeIndependentBackup
+    configureIndependentBackup,authorizeIndependentBackup,
+    listIndependentBackups,deleteIndependentBackups
   };
 })();
