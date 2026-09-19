@@ -52,16 +52,15 @@
     if(provider) provider.mode=scalewayToken ? 'AVAILABLE' : 'NEEDS_AUTH';
     return provider?.mode;
   }
-  async function syncApi(action,vaultId){
+  async function syncApi(action){
     if(!scalewayToken) throw new Error('PROVIDER_AUTH_REQUIRED');
-    if(!/^[A-Za-z0-9_-]{16,100}$/.test(vaultId||'')) throw new Error('INVALID_VAULT_ID');
     const response=await fetch('/api/vault-sync',{
       method:'POST',
       headers:{
         'Content-Type':'application/json',
         'Authorization':'Bearer '+scalewayToken
       },
-      body:JSON.stringify({action,vaultId})
+      body:JSON.stringify({action})
     });
     let body={};
     try{body=await response.json()}catch{}
@@ -93,7 +92,7 @@
     mode:'NEEDS_AUTH',
     allowedPrivacyClasses:['STANDARD','PRIVATE','VAULT_HIGH'],
     async writeSnapshot(snapshotText,{metadata={}}={}){
-      const signed=await syncApi('presign-put',metadata.vaultId);
+      const signed=await syncApi('presign-put');
       const upload=await fetch(signed.url,{
         method:'PUT',
         headers:{'Content-Type':'application/json'},
@@ -103,7 +102,7 @@
       return {provider:'SCALEWAY_SYNC',status:'WRITTEN',expiresIn:signed.expiresIn};
     },
     async readSnapshot({metadata={}}={}){
-      const signed=await syncApi('presign-get',metadata.vaultId);
+      const signed=await syncApi('presign-get');
       const response=await fetch(signed.url,{method:'GET',cache:'no-store'});
       if(response.status===404) return null;
       if(!response.ok) throw new Error('SCALEWAY_GET_'+response.status);
