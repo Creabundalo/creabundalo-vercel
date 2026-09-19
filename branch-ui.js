@@ -14,7 +14,7 @@ const seed = {
   ]
 };
 
-let state = load();
+let state = window.CreaSemanticCore.ensureState(load());
 let zoom = 1;
 let pan = {x: 120, y: 80};
 let dragging = false;
@@ -40,7 +40,12 @@ const overlayExtensionId = $('overlayExtensionId');
 const overlayBridgeStatus = $('overlayBridgeStatus');
 
 function uid(prefix='n'){
-  return globalThis.crypto?.randomUUID ? prefix+'_'+crypto.randomUUID() : prefix+'_'+Date.now()+'_'+Math.random().toString(16).slice(2);
+  return window.CreaSemanticCore.uid(prefix);
+}
+function coreDispatch(type,payload={},source={surface:'creabundalo-ui'}){
+  const result=window.CreaSemanticCore.dispatch(state,type,payload,source);
+  state=result.state;
+  return result;
 }
 function load(){
   try{
@@ -180,7 +185,9 @@ function render(){
   $('currentMeta').textContent=`CURRENT: ${c.title} · ${c.kind.toUpperCase()} · ${c.status.toUpperCase()}`;
   document.querySelectorAll('.lens').forEach(b=>b.classList.toggle('active',b.dataset.lens===state.lens));
   $('continuityPanel').classList.toggle('hidden',state.lens!=='continuity');
+  $('auditPanel').classList.toggle('hidden',state.lens!=='audit');
   if(state.lens==='continuity') refreshContinuityHealth();
+  if(state.lens==='audit') renderAudit();
   applyTransform();
   save();
 }
@@ -190,8 +197,8 @@ function applyTransform(){
 }
 function focusNode(id){
   if(!byId(id)) return;
-  state.currentId=id;
-  state.lens='all';
+  coreDispatch('NODE_FOCUSED',{nodeId:id});
+  coreDispatch('LENS_SET',{lens:'all'});
   render();
   centerCurrent();
 }
@@ -214,20 +221,19 @@ function goRoot(){
 function promote(){
   const c=current();
   if(!c) return;
-  c.kind='project';
-  c.status='active';
+  coreDispatch('NODE_KIND_SET',{nodeId:c.id,kind:'project'});
+  coreDispatch('NODE_STATUS_SET',{nodeId:c.id,status:'active'});
   render();
 }
 function park(){
   const c=current();
   if(!c) return;
-  c.status='paused';
-  const p=c.parentId;
+  coreDispatch('NODE_PARKED',{nodeId:c.id,focusParent:true});
   render();
-  if(p) focusNode(p);
+  centerCurrent();
 }
 function setLens(lens){
-  state.lens=lens;
+  coreDispatch('LENS_SET',{lens});
   render();
 }
 function titleFrom(text){
@@ -237,7 +243,7 @@ function titleFrom(text){
 function addQuestion(text){
   const parent=current();
   const node={
-    id:uid(),
+    id:uid('node'),
     title:titleFrom(text),
     parentId:parent.id,
     edgeLabel:text,
@@ -246,9 +252,8 @@ function addQuestion(text){
     status:'active',
     createdAt:Date.now()
   };
-  state.nodes.push(node);
-  state.currentId=node.id;
-  state.lens='all';
+  coreDispatch('NODE_CREATED',{node,focus:true});
+  coreDispatch('LENS_SET',{lens:'all'});
   render();
   centerCurrent();
 }
@@ -270,6 +275,39 @@ function handleCommand(raw){
 }
 
 
+
+
+function renderAudit(){
+  const list=$('auditList');
+  if(!list) return;
+  const events=window.CreaSemanticCore.audit(state,{limit:120}).slice().reverse();
+  list.innerHTML='';
+  if(!events.length){
+    const empty=document.createElement('div');
+    empty.className='audit-empty';
+    empty.textContent='Nog geen Semantic Core-events in deze state.';
+    list.appendChild(empty);
+    return;
+  }
+  for(const event of events){
+    const row=document.createElement('article');
+    row.className='audit-row';
+    const left=document.createElement('div');
+    const mid=document.createElement('div');
+    const right=document.createElement('div');
+    const time=new Date(event.occurredAt);
+    left.innerHTML='<strong></strong><small></small>';
+    left.querySelector('strong').textContent=event.type;
+    left.querySelector('small').textContent=Number.isNaN(time.getTime())?event.occurredAt:time.toLocaleString('nl-NL');
+    mid.innerHTML='<code></code><small></small>';
+    mid.querySelector('code').textContent=event.eventId;
+    mid.querySelector('small').textContent=(event.source?.surface||'')+(event.source?.adapter?' · '+event.source.adapter:'');
+    right.innerHTML='<code></code>';
+    right.querySelector('code').textContent=JSON.stringify(event.payload);
+    row.append(left,mid,right);
+    list.appendChild(row);
+  }
+}
 
 function healthClass(status){
   if(status==='OK') return 'ok';
@@ -426,7 +464,11 @@ function overlaySession(event){
       firstEventAt:event.occurredAt
     }
   };
-  state.nodes.push(node);
+  coreDispatch('NODE_CREATED',{node,focus:false},{
+    surface:'browser-extension',
+    adapter,
+    host
+  });
   session={
     sessionId:event.sessionId,
     rootNodeId:sessionNodeId,
@@ -475,7 +517,11 @@ function applyOverlayEvent(event){
         occurredAt:event.occurredAt
       }
     };
-    state.nodes.push(node);
+    coreDispatch('NODE_CREATED',{node,focus:false},{
+      surface:'browser-extension',
+      adapter:event.source?.adapter||session.adapter,
+      host:event.source?.host||session.host
+    });
     session.nodes[ext.id]=webId;
     session.lastEventAt=event.occurredAt;
     return;
@@ -488,14 +534,19 @@ function applyOverlayEvent(event){
     return;
   }
   if(event.type==='NODE_PROJECT_PROMOTED'){
-    if(target){target.kind='project';target.status='active';}
+    if(target){
+      coreDispatch('NODE_KIND_SET',{nodeId:target.id,kind:'project'},{surface:'browser-extension',adapter:session.adapter,host:session.host});
+      coreDispatch('NODE_STATUS_SET',{nodeId:target.id,status:'active'},{surface:'browser-extension',adapter:session.adapter,host:session.host});
+    }
     session.lastEventAt=event.occurredAt;
     return;
   }
   if(event.type==='NODE_REPARENTED'){
     if(target){
       const newParent=mappedOverlayNode(session,p.parentId) || byId(session.rootNodeId);
-      if(newParent && newParent.id!==target.id) target.parentId=newParent.id;
+      if(newParent && newParent.id!==target.id){
+        coreDispatch('NODE_REPARENTED',{nodeId:target.id,parentId:newParent.id},{surface:'browser-extension',adapter:session.adapter,host:session.host});
+      }
     }
     session.lastEventAt=event.occurredAt;
   }
@@ -554,7 +605,7 @@ async function importOverlayContext(){
     const overlay=ensureOverlayState();
     const lastSession=overlay.sessions[events.at(-1).sessionId];
     if(lastSession?.lastFocusedNodeId && byId(lastSession.lastFocusedNodeId)){
-      state.currentId=lastSession.lastFocusedNodeId;
+      coreDispatch('NODE_FOCUSED',{nodeId:lastSession.lastFocusedNodeId},{surface:'browser-extension',adapter:lastSession.adapter,host:lastSession.host});
     }
     await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
     await window.CreaVaultHealth?.success?.('local');
@@ -641,7 +692,7 @@ async function unlockVault(){
   try{
     await window.CreaVault.unlock(vaultPassphrase.value);
     const restored=await window.CreaVault.loadJSON(KEY);
-    if(restored) state=restored;
+    if(restored) state=window.CreaSemanticCore.ensureState(restored);
     else await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
     vaultPassphrase.value='';
     updateVaultUi();
@@ -655,7 +706,7 @@ async function recoverVault(){
   try{
     await window.CreaVault.recover(vaultRecoveryInput.value);
     const restored=await window.CreaVault.loadJSON(KEY);
-    if(restored) state=restored;
+    if(restored) state=window.CreaSemanticCore.ensureState(restored);
     vaultRecoveryInput.value='';
     updateVaultUi();
     render();
@@ -841,6 +892,7 @@ $('overlayImportButton').onclick=importOverlayContext;
 $('verifyContinuityButton').onclick=verifyContinuity;
 $('analyzeRetentionButton').onclick=analyzeRetention;
 $('applyRetentionButton').onclick=applyRetention;
+$('refreshAuditButton').onclick=renderAudit;
 $('vaultImportButton').onclick=()=>vaultImportInput.click();
 vaultImportInput.onchange=()=>importVaultSnapshot(vaultImportInput.files?.[0]);
 $('copyRecoveryButton').onclick=async()=>{
