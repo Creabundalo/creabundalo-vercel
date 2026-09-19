@@ -31,6 +31,7 @@
       <button class="lens" data-lens="time">Tijd</button>
       <button class="lens" data-lens="work">Werk</button>
       <button class="lens" data-lens="private">Privé</button>
+      <button class="lens" data-lens="continuity">Continuïteit</button>
     </section>
 
     <section class="contextbar">
@@ -54,6 +55,35 @@
         <strong>Niets in deze lens.</strong>
         <span>Schakel naar Alles of voeg een node toe.</span>
       </div>
+
+      <section id="continuityPanel" class="continuity-panel hidden" aria-label="Continuïteitsmonitor">
+        <div class="continuity-head">
+          <div>
+            <div class="label">CONTINUÏTEITSLENS</div>
+            <h2>Vault Health</h2>
+          </div>
+          <button id="verifyContinuityButton" class="ghost" type="button">Controleer nu</button>
+        </div>
+        <div class="continuity-grid">
+          <article class="continuity-card">
+            <span class="continuity-dot" id="healthLocalDot"></span>
+            <div><strong>Lokale Vault</strong><small id="healthLocalText">laden…</small></div>
+          </article>
+          <article class="continuity-card">
+            <span class="continuity-dot" id="healthScalewayDot"></span>
+            <div><strong>Scaleway sync</strong><small id="healthScalewayText">laden…</small></div>
+          </article>
+          <article class="continuity-card">
+            <span class="continuity-dot" id="healthBackupDot"></span>
+            <div><strong>Onafhankelijke backup</strong><small id="healthBackupText">laden…</small></div>
+          </article>
+          <article class="continuity-card">
+            <span class="continuity-dot" id="healthRestoreDot"></span>
+            <div><strong>Restore</strong><small id="healthRestoreText">laden…</small></div>
+          </article>
+        </div>
+        <p id="healthPolicyText" class="continuity-policy">Privacy degradation is nooit een geldige fallback.</p>
+      </section>
       <div class="zoom">
         <button id="zoomOut" type="button">−</button>
         <button id="zoomReset" type="button">100%</button>
@@ -139,6 +169,7 @@
 
   <script src="vault-core.js"></script>
   <script src="vault-storage.js"></script>
+  <script src="vault-health.js"></script>
   <script src="branch-ui.js"></script>
 </body>
 </html>
