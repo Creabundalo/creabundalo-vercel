@@ -44,6 +44,9 @@ const overlayExtensionId = $('overlayExtensionId');
 const overlayBridgeStatus = $('overlayBridgeStatus');
 const deviceBundleInput = $('deviceBundleInput');
 let multiDeviceConflicts = [];
+let semanticCloudSyncPromise = null;
+let lastSemanticCloudSyncAt = 0;
+const AUTO_SEMANTIC_SYNC_MS = 2*60*1000;
 
 function uid(prefix='n'){
   return window.CreaSemanticCore.uid(prefix);
@@ -96,6 +99,7 @@ function queueSemanticCommit(){
       }
       await window.CreaVaultHealth?.success?.('local');
       window.CreaVaultPolicy?.maybeAutoContinuity?.().catch(()=>{});
+      maybeAutoSemanticCloudSync().catch(()=>{});
       return {ok:true,events:totalEvents,revision:semanticCommittedRevision};
     }catch(err){
       console.error('Semantic commit failed',err);
@@ -321,6 +325,80 @@ function handleCommand(raw){
 
 
 
+
+async function runSemanticCloudSync({manual=false}={}){
+  if(semanticCloudSyncPromise) return semanticCloudSyncPromise;
+
+  semanticCloudSyncPromise=(async()=>{
+    try{
+      const vault=window.CreaVault.status();
+      const provider=window.CreaVaultStorage.get('SCALEWAY_SYNC');
+      if(!vault.initialized||!vault.unlocked) throw new Error('VAULT_UNLOCK_REQUIRED');
+      if(provider?.mode!=='AVAILABLE') throw new Error('SCALEWAY_SYNC_NOT_ACTIVE');
+      if(multiDeviceConflicts.length){
+        if(manual) vaultMessage('Los eerst de bestaande multi-device conflicten op.',true);
+        return {skipped:'CONFLICTS_PENDING'};
+      }
+
+      await commitSemanticNow();
+      const result=await window.CreaSemanticCloudSync.sync(state);
+      state=window.CreaSemanticCore.ensureState(result.state||state);
+      semanticOutbox=[];
+      semanticRevision=0;
+      semanticCommittedRevision=0;
+      multiDeviceConflicts=result.conflicts||[];
+      lastSemanticCloudSyncAt=Date.now();
+
+      await window.CreaVaultHealth.success('semanticSync',{
+        remoteObjects:result.remoteObjects,
+        uploaded:result.uploaded,
+        downloaded:result.downloaded,
+        merged:result.merged,
+        conflicts:result.conflicts.length
+      });
+
+      render();
+      centerCurrent();
+      renderConflicts();
+      updateDeviceUi();
+      await refreshContinuityHealth();
+
+      const text=
+        'Event sync: '+result.uploaded+' upload · '+result.downloaded+' download · '+
+        result.merged+' merged · '+result.conflicts.length+' conflict(en).';
+      $('multiDeviceStatus').textContent=text;
+
+      if(result.remoteTruncated){
+        vaultMessage('Event sync bereikte de huidige pilotlimiet. Verder pagineren volgt in een volgende schaalstap.',true);
+      }else if(result.conflicts.length){
+        vaultMessage(text+' Kies per conflict lokaal of remote.',true);
+      }else if(manual){
+        vaultMessage(text);
+      }
+      return result;
+    }catch(err){
+      await window.CreaVaultHealth?.error?.('semanticSync',err);
+      if(manual) vaultMessage('Semantic event sync mislukt: '+err.message,true);
+      throw err;
+    }finally{
+      semanticCloudSyncPromise=null;
+    }
+  })();
+
+  return semanticCloudSyncPromise;
+}
+
+async function maybeAutoSemanticCloudSync({force=false}={}){
+  if(semanticCloudSyncPromise) return {skipped:'BUSY'};
+  const vault=window.CreaVault?.status?.();
+  const provider=window.CreaVaultStorage?.get?.('SCALEWAY_SYNC');
+  if(!vault?.initialized||!vault.unlocked) return {skipped:'VAULT_LOCKED'};
+  if(provider?.mode!=='AVAILABLE') return {skipped:'SYNC_INACTIVE'};
+  if(multiDeviceConflicts.length) return {skipped:'CONFLICTS_PENDING'};
+  if(!force && Date.now()-lastSemanticCloudSyncAt<AUTO_SEMANTIC_SYNC_MS) return {skipped:'TOO_SOON'};
+  return runSemanticCloudSync({manual:false});
+}
+
 function updateDeviceUi(){
   const d=window.CreaSemanticDevice?.status?.()||{};
   const identity=$('deviceIdentityText');
@@ -455,6 +533,7 @@ async function resolveMultiDeviceConflict(conflictId,choice){
     $('multiDeviceStatus').textContent=multiDeviceConflicts.length
       ? multiDeviceConflicts.length+' conflict(en) wachten nog op keuze.'
       : 'Alle multi-device conflicten opgelost en als causal resolution-events vastgelegd.';
+    if(!multiDeviceConflicts.length) maybeAutoSemanticCloudSync({force:true}).catch(()=>{});
   }catch(err){
     vaultMessage('Conflict oplossen mislukt: '+err.message,true);
   }
@@ -592,7 +671,10 @@ async function refreshContinuityHealth(){
   $('healthLocalText').textContent=(localStatus.initialized?'Vault aanwezig':'nog niet ingericht')+' · laatste save '+h.labels.local;
 
   $('healthScalewayDot').className='continuity-dot '+healthClass(h.scaleway.status);
-  $('healthScalewayText').textContent=(syncProvider?.mode||'onbekend')+' · sync '+h.labels.scaleway+' · verificatie '+h.labels.scalewayVerified;
+  $('healthScalewayText').textContent=(syncProvider?.mode||'onbekend')+' · snapshot '+h.labels.scaleway+' · verificatie '+h.labels.scalewayVerified;
+
+  $('healthSemanticSyncDot').className='continuity-dot '+healthClass(h.semanticSync?.status||'UNKNOWN');
+  $('healthSemanticSyncText').textContent=(syncProvider?.mode||'onbekend')+' · events '+(h.labels.semanticSync||'nog nooit');
 
   $('healthBackupDot').className='continuity-dot '+healthClass(h.independent.status);
   $('healthBackupText').textContent=(backupProvider?.mode||'onbekend')+' · backup '+h.labels.independent+' · verificatie '+h.labels.independentVerified;
@@ -908,6 +990,7 @@ function updateVaultUi(){
   const syncMode=window.CreaVaultStorage?.get?.('SCALEWAY_SYNC')?.mode || 'DISABLED';
   $('scalewaySyncButton').disabled=!status.initialized || syncMode!=='AVAILABLE';
   $('scalewayRestoreButton').disabled=syncMode!=='AVAILABLE';
+  $('semanticSyncNowButton').disabled=!status.unlocked || syncMode!=='AVAILABLE';
 
   const backupProvider=window.CreaVaultStorage?.get?.('INDEPENDENT_BACKUP');
   const backupMode=backupProvider?.mode || 'DISABLED';
@@ -1029,7 +1112,8 @@ function connectScaleway(){
   window.CreaVaultStorage.configureScaleway({token});
   scalewaySyncToken.value='';
   updateVaultUi();
-  vaultMessage('Scaleway sync geactiveerd voor deze sessie. Het token is niet lokaal opgeslagen.');
+  maybeAutoSemanticCloudSync({force:true}).catch(()=>{});
+  vaultMessage('Scaleway geactiveerd voor deze sessie. Event-sync en snapshot-backup gebruiken dezelfde veilige transportlaag.');
 }
 async function syncToScaleway(){
   try{
@@ -1172,6 +1256,7 @@ $('backupRestoreButton').onclick=restoreLatestIndependent;
 $('overlayConnectButton').onclick=connectOverlayBridge;
 $('overlayImportButton').onclick=importOverlayContext;
 $('verifyContinuityButton').onclick=verifyContinuity;
+$('semanticSyncNowButton').onclick=()=>runSemanticCloudSync({manual:true});
 $('analyzeRetentionButton').onclick=analyzeRetention;
 $('applyRetentionButton').onclick=applyRetention;
 $('refreshAuditButton').onclick=renderAudit;
@@ -1220,6 +1305,10 @@ viewport.addEventListener('pointercancel',()=>{dragging=false;dragStart=null});
   requestAnimationFrame(centerCurrent);
   refreshOverlayBridgeStatus().catch(()=>{});
   window.CreaVaultPolicy?.start?.();
+  window.addEventListener('focus',()=>maybeAutoSemanticCloudSync().catch(()=>{}));
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible') maybeAutoSemanticCloudSync().catch(()=>{});
+  });
 })().catch(err=>{
   console.error('Creabundalo startup failed',err);
 });
