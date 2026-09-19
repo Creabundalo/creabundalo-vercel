@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#f7f6f2" />
+  <title>Creabundalo · Branch UI v0</title>
+  <link rel="stylesheet" href="branch-ui.css" />
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <span class="dot"></span>
+        <strong>CREABUNDALO</strong>
+        <span class="muted">Branch UI · v0</span>
+      </div>
+      <div class="where">
+        <span id="depthBadge" class="badge">DEPTH 0</span>
+        <button id="backButton" class="ghost" type="button">← terug</button>
+        <button id="rootButton" class="ghost" type="button">⌂ root</button>
+      </div>
+    </header>
+
+    <section class="lensbar" aria-label="Lenzen">
+      <button class="lens active" data-lens="all">Alles</button>
+      <button class="lens" data-lens="action">Acties</button>
+      <button class="lens" data-lens="mail">Mail</button>
+      <button class="lens" data-lens="project">Projecten</button>
+      <button class="lens" data-lens="time">Tijd</button>
+      <button class="lens" data-lens="work">Werk</button>
+      <button class="lens" data-lens="private">Privé</button>
+    </section>
+
+    <section class="contextbar">
+      <div>
+        <div class="label">ROOT → CURRENT</div>
+        <div id="breadcrumb" class="breadcrumb"></div>
+      </div>
+      <div class="context-actions">
+        <button id="promoteButton" class="ghost" type="button">Maak project</button>
+        <button id="parkButton" class="ghost" type="button">Parkeer branch</button>
+      </div>
+    </section>
+
+    <section id="viewport" class="viewport" aria-label="Branch map">
+      <div id="stage" class="stage">
+        <svg id="edgeSvg" class="edge-svg" aria-hidden="true"></svg>
+        <div id="edgeLabels" class="edge-labels"></div>
+        <div id="nodes" class="nodes"></div>
+      </div>
+      <div id="emptyState" class="empty-state hidden">
+        <strong>Niets in deze lens.</strong>
+        <span>Schakel naar Alles of voeg een node toe.</span>
+      </div>
+      <div class="zoom">
+        <button id="zoomOut" type="button">−</button>
+        <button id="zoomReset" type="button">100%</button>
+        <button id="zoomIn" type="button">+</button>
+      </div>
+    </section>
+
+    <section class="composer-wrap">
+      <div id="currentMeta" class="current-meta"></div>
+      <form id="composer" class="composer">
+        <textarea id="commandInput" rows="2" placeholder="Stel een vraag of geef een commando…"></textarea>
+        <button class="send" type="submit">↵</button>
+      </form>
+      <div class="hints">
+        <span>actielijst</span><span>mail</span><span>projecten</span><span>terug</span><span>root</span><span>maak project</span><span>parkeer</span>
+      </div>
+    </section>
+  </main>
+
+  <script src="branch-ui.js"></script>
+</body>
+</html>
