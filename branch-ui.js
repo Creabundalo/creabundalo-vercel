@@ -1022,8 +1022,12 @@ viewport.addEventListener('pointermove',e=>{
 viewport.addEventListener('pointerup',()=>{dragging=false;dragStart=null});
 viewport.addEventListener('pointercancel',()=>{dragging=false;dragStart=null});
 
-render();
-requestAnimationFrame(centerCurrent);
-initVaultUI();
-refreshOverlayBridgeStatus().catch(()=>{});
-window.CreaVaultPolicy?.start?.();
+(async function startCreabundalo(){
+  await initVaultUI();
+  render();
+  requestAnimationFrame(centerCurrent);
+  refreshOverlayBridgeStatus().catch(()=>{});
+  window.CreaVaultPolicy?.start?.();
+})().catch(err=>{
+  console.error('Creabundalo startup failed',err);
+});
