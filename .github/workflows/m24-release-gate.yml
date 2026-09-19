@@ -10,6 +10,7 @@ on:
       - 'm24-*.json'
       - 'api/m24/**'
       - 'M24-*.md'
+      - 'M24-VERCEL-RUNTIME.txt'
       - '.github/workflows/m24-release-gate.yml'
   workflow_dispatch:
 
@@ -234,9 +235,10 @@ jobs:
           while IFS= read -r file; do
             [ -z "$file" ] && continue
             test -f "$file"
-            cp "$file" dist-m24-vercel/
+            mkdir -p "dist-m24-vercel/$(dirname "$file")"
+            cp "$file" "dist-m24-vercel/$file"
           done < M24-VERCEL-RUNTIME.txt
-          if find dist-m24-vercel -maxdepth 1 -type f \( -name 'M99-*' -o -name 'actio*' -o -name 'watch*' -o -name 'dashboard.html' \) | grep -q .; then
+          if find dist-m24-vercel -type f \( -name 'M99-*' -o -name 'actio*' -o -name 'watch*' -o -name 'dashboard.html' \) | grep -q .; then
             echo "Non-M24 file leaked into deployment bundle" >&2
             exit 1
           fi
@@ -252,6 +254,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: m24-d0-11-11-live-vercel-tested
-          path: Creabundalo_M24_D0.11.10_VERCEL_TESTED.zip
+          path: Creabundalo_M24_D0.11.11_LIVE_VERCEL_TESTED.zip
           if-no-files-found: error
           retention-days: 14
