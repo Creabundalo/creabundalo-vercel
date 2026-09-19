@@ -186,24 +186,29 @@
     return events.filter(e=>(e.causal?.scope||window.CreaSemanticCore.eventScope(e.type))==='shared');
   }
 
-  function bundleFromEvents(events){
+  function bundleFromEvents(events,{vaultId=null}={}){
     const device=window.CreaSemanticDevice?.status?.()||{};
     return {
       type:'CREABUNDALO_SEMANTIC_EVENT_BUNDLE',
       version:1,
       createdAt:new Date().toISOString(),
+      vaultId,
       sourceDeviceId:device.deviceId||null,
       events:sharedEvents(events)
     };
   }
 
   async function exportSharedBundle(){
-    return bundleFromEvents(await listEvents());
+    return bundleFromEvents(await listEvents(),{vaultId:window.CreaVault.status().vaultId||null});
   }
 
   function validateBundle(bundle){
     if(bundle?.type!=='CREABUNDALO_SEMANTIC_EVENT_BUNDLE'||bundle?.version!==1||!Array.isArray(bundle.events)){
       throw new Error('INVALID_SEMANTIC_BUNDLE');
+    }
+    const localVaultId=window.CreaVault.status().vaultId||null;
+    if(!bundle.vaultId || !localVaultId || bundle.vaultId!==localVaultId){
+      throw new Error('VAULT_LINEAGE_MISMATCH');
     }
     for(const event of bundle.events){
       if(!window.CreaSemanticCore.validateEvent(event)) throw new Error('INVALID_BUNDLE_EVENT');
