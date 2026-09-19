@@ -168,6 +168,16 @@
     </section>
 
     <section class="vault-section">
+      <label for="overlayExtensionId">Semantic Overlay Bridge</label>
+      <input id="overlayExtensionId" type="text" autocomplete="off" placeholder="Chrome extension ID · 32 tekens" />
+      <div class="vault-actions">
+        <button id="overlayConnectButton" class="ghost" type="button">Koppel extension</button>
+        <button id="overlayImportButton" class="ghost" type="button">Importeer pending context</button>
+      </div>
+      <small id="overlayBridgeStatus">Nog niet gekoppeld. Importeren vereist een ontgrendelde Vault.</small>
+    </section>
+
+    <section class="vault-section">
       <div class="vault-actions">
         <button id="vaultBackupButton" class="ghost" type="button">Exporteer encrypted snapshot</button>
         <button id="vaultImportButton" class="ghost" type="button">Herstel uit snapshot</button>
@@ -182,6 +192,7 @@
   <script src="vault-storage.js"></script>
   <script src="vault-health.js"></script>
   <script src="vault-policy.js"></script>
+  <script src="extension-bridge.js"></script>
   <script src="branch-ui.js"></script>
 </body>
 </html>
