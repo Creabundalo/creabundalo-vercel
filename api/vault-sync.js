@@ -105,10 +105,8 @@ module.exports = async function handler(req,res){
 
   const body=req.body && typeof req.body==='object' ? req.body : {};
   const action=body.action;
-  const vaultId=String(body.vaultId||'');
-  if(!/^[A-Za-z0-9_-]{16,100}$/.test(vaultId)) return json(res,400,{error:'INVALID_VAULT_ID'});
 
-  const objectKey='creabundalo/v1/'+ownerId+'/'+vaultId+'/latest.enc.json';
+  const objectKey='creabundalo/v1/'+ownerId+'/primary/latest.enc.json';
   const expires=90;
 
   if(action==='presign-put'){
