@@ -7,7 +7,7 @@
   <title>M24 — Augmented Market Viewer</title>
   <link rel="stylesheet" href="m24.css">
 </head>
-<body>
+<body data-competence="analysis">
   <main class="m24-shell">
     <header class="topbar">
       <div>
@@ -17,19 +17,21 @@
       <div class="status-block">
         <span class="status-pill live-data">LIVE DATA</span>
         <span class="status-pill safety">SIMULATED_ONLY</span>
-        <span class="status-pill">v0.2 · D0.11.11 LIVE VERCEL</span>
+        <span class="status-pill">v0.3 · D0.11.12 COMPETENCE</span>
       </div>
     </header>
 
     <section class="control-row panel compact">
       <label><span>Asset</span><select id="assetSelect"><option value="BTC">Bitcoin</option><option value="ETH">Ethereum</option><option value="TSLA">Tesla</option><option value="OIL">WTI Oil</option><option value="SOL">Solana</option></select></label>
       <label><span>Resolutie</span><select id="resolutionSelect"><option value="W">Week</option><option value="D" selected>Dag</option><option value="4H">4 uur</option><option value="1H">1 uur</option></select></label>
+      <label><span>Weergave</span><select id="competenceSelect"><option value="guided">Begeleid</option><option value="learning">Leren</option><option value="analysis" selected>Analyse</option><option value="expert">Expert</option></select></label>
       <div class="button-group lens-group" aria-label="Interpretatielens">
         <button class="chip lens" data-lens="legacy">Legacy</button>
         <button class="chip lens active" data-lens="m24">M24</button>
         <button class="chip lens" data-lens="ai">AI-native</button>
       </div>
     </section>
+    <p id="competenceHint" class="competence-hint">Analyse — vaktaal, mechanismen en bronstatus. De data en M24-logica veranderen niet.</p>
 
     <section class="data-status panel compact" aria-label="Datastatus">
       <span>PRIJS <strong id="livePriceStatus" class="source-state">LOADING</strong></span>
@@ -61,8 +63,8 @@
           </svg>
           <div class="timeline-labels"><span id="windowStart">2019</span><span id="windowLabel">selected window</span><span id="windowEnd">2026</span></div>
         </div>
-        <div class="mode-tabs" role="tablist"><button class="mode active" data-mode="story">Story</button><button class="mode" data-mode="analysis">Analysis</button><button class="mode" data-mode="lab">Lab</button></div>
-        <div class="overlay-strip" id="overlayStrip">
+        <div class="mode-tabs" role="tablist"><button class="mode active" data-mode="story">Story</button><button class="mode competence-learning" data-mode="analysis">Analysis</button><button class="mode competence-analysis" data-mode="lab">Lab</button></div>
+        <div class="overlay-strip competence-analysis" id="overlayStrip">
           <label><input type="checkbox" data-overlay="momentum" checked> Momentum</label>
           <label><input type="checkbox" data-overlay="fibonacci" checked> Fibonacci</label>
           <label><input type="checkbox" data-overlay="trickster" checked> Trickster</label>
@@ -72,18 +74,20 @@
       </article>
 
       <aside class="panel explanation-panel">
-        <div class="panel-head"><div><p class="eyebrow">WHAT / WHY / MEANING</p><h2 id="storyTitle">Selecteer een vlag</h2></div><span id="evidenceBadge" class="evidence">MECHANISM_VISIBLE</span></div>
+        <div class="panel-head"><div><p class="eyebrow">WHAT / WHY / MEANING</p><h2 id="storyTitle">Selecteer een vlag</h2></div><span id="evidenceBadge" class="evidence" data-raw="MECHANISM_VISIBLE">MECHANISM_VISIBLE</span></div>
         <div id="storyBody" class="story-body">
           <p><strong>Wat zie je?</strong> De prijs vormt een tweede piek, terwijl momentum verzwakt.</p>
           <p><strong>Wat speelt eronder?</strong> Flow, leverage en cross-asset bevestiging worden per bronlaag beoordeeld.</p>
           <p><strong>Betekeniswereld:</strong> Het zichtbare verhaal blijft bullish, maar de onderliggende kracht neemt af.</p>
           <p><strong>M24-lezing:</strong> Geen trade-signaal op zichzelf. Wachten op bevestiging.</p>
         </div>
-        <div class="action-readout"><span>Mogelijke actie</span><strong id="actionCandidate">WAIT</strong></div>
+        <p id="competenceGlossary" class="competence-glossary competence-learning">Bekende marktterm en M24-betekenis worden naast elkaar gehouden.</p>
+        <div id="expertDetail" class="competence-expert expert-detail"><span class="mini-label">EXPERT TRACE</span><pre id="expertTrace">Selecteer een vlag voor evidence, mechanismen en provenance.</pre></div>
+        <div class="action-readout"><span>Mogelijke actie</span><strong id="actionCandidate" data-raw="WAIT">WAIT</strong></div>
       </aside>
     </section>
 
-    <section id="crossAssetPanel" class="panel cross-panel">
+    <section id="crossAssetPanel" class="panel cross-panel competence-learning">
       <div class="panel-head"><div><p class="eyebrow">CROSS-ASSET</p><h2>Marktcontext</h2></div><span class="muted">Vercel API · daily context</span></div>
       <div class="cross-grid" id="crossGrid"></div>
     </section>
@@ -94,14 +98,14 @@
         <div class="meaning-grid"><div><span class="mini-label">Zichtbaar verhaal</span><p id="narrativeText">“Dip kopen; macrotrend blijft omhoog.”</p></div><div><span class="mini-label">Onderliggende meting</span><p id="mechanismText">Momentum zwakker, tweede top kwetsbaar, bevestiging nog onvolledig.</p></div></div>
         <div class="trickster-card"><span class="mini-label">Trickster-machine</span><strong id="tricksterResult">DISCREPANTIE GEVONDEN — intentie onbekend</strong><p id="tricksterDetail">Prijsverhaal en gemeten kracht lopen uiteen. Eerst bevestiging zoeken; geen actor toeschrijven.</p></div>
       </article>
-      <article class="panel forecast-panel">
+      <article class="panel forecast-panel competence-learning">
         <div class="panel-head"><div><p class="eyebrow">M24 WEATHER</p><h2>Forecast horizons</h2></div><span class="muted">onzekerheid groeit →</span></div>
         <div id="forecastGrid" class="forecast-grid"></div>
         <p class="footnote">Forecasts zijn scenario-instances. v0.1 doet geen echte koersvoorspelling en plaatst geen orders.</p>
       </article>
     </section>
 
-    <section class="panel transactions-panel">
+    <section class="panel transactions-panel competence-analysis">
       <div class="panel-head">
         <div><p class="eyebrow">TRANSACTIONS</p><h2>Mijn transacties</h2></div>
         <span class="status-pill">PAPER</span>
@@ -111,7 +115,7 @@
       <div id="transactionDetail" class="transaction-detail hidden"></div>
     </section>
 
-    <section id="labPanel" class="panel lab-panel hidden">
+    <section id="labPanel" class="panel lab-panel competence-analysis hidden">
       <div class="panel-head"><div><p class="eyebrow">LAB MODE</p><h2>Historische matches</h2></div></div>
       <div id="historyList" class="history-list"></div>
       <div class="observation-input">
@@ -122,25 +126,26 @@
     </section>
 
 
-    <section class="panel lab-panel">
+    <section class="panel lab-panel competence-analysis">
       <div class="panel-head"><div><p class="eyebrow">STRATEGIC WORLD / ψ</p><h2>Actuele wereldstaat</h2></div><span class="status-pill">NO PROBABILITY</span></div>
       <p class="footnote">Brongebonden huidige toestanden worden op mechanismen vergeleken met historische cases. Een ontbrekende analogie blijft expliciet COHORT_GAP; stale fast-market data mag geen actuele toestand activeren.</p>
       <div id="m24WorldState" class="history-list">Strategic World laden…</div>
     </section>
 
-    <section class="panel observation-panel">
+    <section class="panel observation-panel competence-learning">
       <div class="panel-head"><div><p class="eyebrow">USER OBSERVATION</p><h2>Plaats je eigen vlag</h2></div></div>
       <div class="observation-input"><input id="observationInput" type="text" placeholder="bijv. volgens mij tweede top / momentum zwakker"><button id="addObservation" class="primary">+ vlag</button></div>
       <div id="observationLog" class="observation-log"></div>
     </section>
 
-    <footer class="footerline"><span>M24 v0.2 · D0.11.11 LIVE VERCEL · live market / daily cross-asset · no broker execution</span><a href="M24-REQUIREMENTS.md">Requirements</a></footer>
+    <footer class="footerline"><span>M24 v0.3 · D0.11.12 · live market + Competence Projection · no broker execution</span><a href="M24-REQUIREMENTS.md">Requirements</a></footer>
   </main>
   <script src="m24-cases.js"></script>
   <script src="m24-coinbase.js"></script>
   <script src="m24-primary-lab.js"></script>
   <script src="m24-world.js"></script>
   <script src="m24-vercel-live.js"></script>
+  <script src="competence-projection.js"></script>
   <script src="m24.js"></script>
   <script src="m24-lab-ui.js"></script>
 </body>
