@@ -67,3 +67,20 @@ textarea{resize:none;border:0;outline:0;background:transparent;color:var(--ink);
   .breadcrumb{max-width:92vw}
   .node{width:168px}
 }
+
+.vault-pill{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:999px;padding:7px 11px;font-size:11px;font-weight:700;letter-spacing:.06em}
+.vault-pill.unlocked{background:var(--ink);color:#fff;border-color:var(--ink)}
+.vault-dialog{width:min(560px,calc(100vw - 28px));border:1px solid var(--line);border-radius:22px;padding:0;background:var(--paper);color:var(--ink);box-shadow:0 30px 90px rgba(20,20,15,.22)}
+.vault-dialog::backdrop{background:rgba(20,20,15,.28);backdrop-filter:blur(3px)}
+.vault-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding:20px 20px 14px;border-bottom:1px solid var(--line)}
+.vault-head h2{margin:2px 0 0;font-size:22px}
+.vault-status{margin:0;padding:12px 20px;background:var(--soft);font-size:12px;color:#55534d}
+.vault-section{display:grid;gap:9px;padding:16px 20px;border-top:1px solid var(--line)}
+.vault-section label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.vault-section input,.vault-section textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);padding:11px 12px;outline:none}
+.vault-section input:focus,.vault-section textarea:focus{border-color:#8e8b82}
+.vault-actions{display:flex;gap:8px;flex-wrap:wrap}
+.primary-small{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:999px;padding:8px 12px;font-size:12px}
+.recovery-box{background:#fbfaf4}
+.vault-section small{color:var(--muted);line-height:1.4}
+@media(max-width:760px){.vault-pill{max-width:104px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
