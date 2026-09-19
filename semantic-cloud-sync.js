@@ -66,9 +66,13 @@
         );
         const response=await fetch(target.url,{
           method:'PUT',
-          headers:{'Content-Type':'application/json'},
+          headers:{'Content-Type':'application/json',...(target.headers||{})},
           body:JSON.stringify(portable)
         });
+        if(response.status===412){
+          uploaded++;
+          continue;
+        }
         if(!response.ok) throw new Error('EVENT_PUT_'+response.status);
         uploaded++;
       }
