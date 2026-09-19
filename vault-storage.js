@@ -8,6 +8,10 @@
 
   const providers=new Map();
   let scalewayToken=null;
+  let independentBackupHandle=null;
+  const BACKUP_HANDLE_DB='creabundalo-backup-handle-v0';
+  const BACKUP_HANDLE_STORE='handles';
+  const BACKUP_HANDLE_ID='independent-backup-directory';
 
   function assertClass(name){
     if(!(name in PRIVACY)) throw new Error('UNKNOWN_PRIVACY_CLASS');
@@ -52,6 +56,105 @@
     if(provider) provider.mode=scalewayToken ? 'AVAILABLE' : 'NEEDS_AUTH';
     return provider?.mode;
   }
+
+  function openBackupHandleDb(){
+    return new Promise((resolve,reject)=>{
+      const req=indexedDB.open(BACKUP_HANDLE_DB,1);
+      req.onupgradeneeded=()=>{
+        const d=req.result;
+        if(!d.objectStoreNames.contains(BACKUP_HANDLE_STORE)) d.createObjectStore(BACKUP_HANDLE_STORE,{keyPath:'id'});
+      };
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+  }
+  async function saveBackupHandle(handle){
+    const db=await openBackupHandleDb();
+    await new Promise((resolve,reject)=>{
+      const t=db.transaction(BACKUP_HANDLE_STORE,'readwrite');
+      t.objectStore(BACKUP_HANDLE_STORE).put({id:BACKUP_HANDLE_ID,handle});
+      t.oncomplete=()=>resolve();
+      t.onerror=()=>reject(t.error);
+    });
+    db.close();
+  }
+  async function loadBackupHandle(){
+    const db=await openBackupHandleDb();
+    const result=await new Promise((resolve,reject)=>{
+      const t=db.transaction(BACKUP_HANDLE_STORE,'readonly');
+      const req=t.objectStore(BACKUP_HANDLE_STORE).get(BACKUP_HANDLE_ID);
+      req.onsuccess=()=>resolve(req.result?.handle||null);
+      req.onerror=()=>reject(req.error);
+    });
+    db.close();
+    return result;
+  }
+  async function ensureDirectoryPermission(handle,{request=false}={}){
+    if(!handle) return false;
+    const options={mode:'readwrite'};
+    if(typeof handle.queryPermission==='function'){
+      const state=await handle.queryPermission(options);
+      if(state==='granted') return true;
+      if(state==='denied' && !request) return false;
+    }
+    if(request && typeof handle.requestPermission==='function'){
+      return (await handle.requestPermission(options))==='granted';
+    }
+    return false;
+  }
+  function backupFilename(date=new Date()){
+    return 'creabundalo-vault-'+date.toISOString().replace(/[:.]/g,'-')+'.enc.json';
+  }
+  async function writeFileToDirectory(handle,name,text){
+    const file=await handle.getFileHandle(name,{create:true});
+    const writable=await file.createWritable();
+    try{
+      await writable.write(text);
+      await writable.close();
+    }catch(err){
+      try{await writable.abort()}catch{}
+      throw err;
+    }
+  }
+  async function readLatestBackupFromDirectory(handle){
+    const names=[];
+    for await (const [name,entry] of handle.entries()){
+      if(entry.kind==='file' && /^creabundalo-vault-\d{4}-\d{2}-\d{2}T.*\.enc\.json$/.test(name)) names.push(name);
+    }
+    names.sort();
+    const latest=names.at(-1);
+    if(!latest) return null;
+    const fileHandle=await handle.getFileHandle(latest);
+    const file=await fileHandle.getFile();
+    return {name:latest,text:await file.text(),lastModified:file.lastModified,size:file.size};
+  }
+  async function configureIndependentBackup({prompt=true}={}){
+    if(!('showDirectoryPicker' in window)) throw new Error('DIRECTORY_PICKER_UNSUPPORTED');
+    if(prompt){
+      independentBackupHandle=await window.showDirectoryPicker({id:'creabundalo-vault-backup',mode:'readwrite',startIn:'documents'});
+      await saveBackupHandle(independentBackupHandle);
+    }else if(!independentBackupHandle){
+      independentBackupHandle=await loadBackupHandle();
+    }
+    const provider=get('INDEPENDENT_BACKUP');
+    if(!independentBackupHandle){
+      if(provider) provider.mode='NEEDS_FOLDER';
+      return 'NEEDS_FOLDER';
+    }
+    const allowed=await ensureDirectoryPermission(independentBackupHandle,{request:false});
+    if(provider) provider.mode=allowed?'AVAILABLE':'NEEDS_AUTH';
+    return provider?.mode;
+  }
+  async function authorizeIndependentBackup(){
+    if(!independentBackupHandle) independentBackupHandle=await loadBackupHandle();
+    if(!independentBackupHandle) throw new Error('BACKUP_FOLDER_NOT_CONFIGURED');
+    const allowed=await ensureDirectoryPermission(independentBackupHandle,{request:true});
+    const provider=get('INDEPENDENT_BACKUP');
+    if(provider) provider.mode=allowed?'AVAILABLE':'NEEDS_AUTH';
+    if(!allowed) throw new Error('BACKUP_FOLDER_PERMISSION_DENIED');
+    return provider.mode;
+  }
+
   async function syncApi(action){
     if(!scalewayToken) throw new Error('PROVIDER_AUTH_REQUIRED');
     const response=await fetch('/api/vault-sync',{
@@ -112,13 +215,30 @@
 
   register({
     id:'INDEPENDENT_BACKUP',
-    label:'Onafhankelijke backup (Proton/NAS)',
-    mode:'DISABLED',
+    label:'Onafhankelijke backupmap (Proton/NAS)',
+    mode:('showDirectoryPicker' in window)?'NEEDS_FOLDER':'DISABLED',
     allowedPrivacyClasses:['STANDARD','PRIVATE','VAULT_HIGH','ENTERPRISE_RESTRICTED'],
-    async writeSnapshot(){
-      throw new Error('BACKUP_ADAPTER_NOT_CONFIGURED');
+    async writeSnapshot(snapshotText){
+      if(!independentBackupHandle) independentBackupHandle=await loadBackupHandle();
+      if(!independentBackupHandle) throw new Error('BACKUP_FOLDER_NOT_CONFIGURED');
+      if(!(await ensureDirectoryPermission(independentBackupHandle,{request:false}))) throw new Error('PROVIDER_AUTH_REQUIRED');
+      const name=backupFilename();
+      await writeFileToDirectory(independentBackupHandle,name,snapshotText);
+      return {provider:'INDEPENDENT_BACKUP',status:'WRITTEN',filename:name,folder:independentBackupHandle.name};
+    },
+    async readSnapshot(){
+      if(!independentBackupHandle) independentBackupHandle=await loadBackupHandle();
+      if(!independentBackupHandle) throw new Error('BACKUP_FOLDER_NOT_CONFIGURED');
+      if(!(await ensureDirectoryPermission(independentBackupHandle,{request:false}))) throw new Error('PROVIDER_AUTH_REQUIRED');
+      const latest=await readLatestBackupFromDirectory(independentBackupHandle);
+      return latest?.text||null;
     }
   });
 
-  window.CreaVaultStorage={PRIVACY,register,get,list,write,read,configureScaleway};
+  configureIndependentBackup({prompt:false}).catch(()=>{});
+
+  window.CreaVaultStorage={
+    PRIVACY,register,get,list,write,read,configureScaleway,
+    configureIndependentBackup,authorizeIndependentBackup
+  };
 })();
