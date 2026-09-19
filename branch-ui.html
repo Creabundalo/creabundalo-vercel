@@ -116,13 +116,24 @@
     </section>
 
     <section class="vault-section">
+      <label>Onafhankelijke backupmap · Proton/NAS</label>
+      <div class="vault-actions">
+        <button id="backupFolderButton" class="ghost" type="button">Kies backupmap</button>
+        <button id="backupAuthorizeButton" class="ghost" type="button">Geef toegang</button>
+        <button id="backupNowButton" class="ghost" type="button">Backup nu</button>
+        <button id="backupRestoreButton" class="ghost" type="button">Herstel laatste backup</button>
+      </div>
+      <small id="backupFolderStatus">Nog geen backupmap gekozen. Kies bij voorkeur een map die Proton Drive of je NAS al synchroniseert.</small>
+    </section>
+
+    <section class="vault-section">
       <div class="vault-actions">
         <button id="vaultBackupButton" class="ghost" type="button">Exporteer encrypted snapshot</button>
         <button id="vaultImportButton" class="ghost" type="button">Herstel uit snapshot</button>
         <input id="vaultImportInput" class="hidden" type="file" accept=".json,application/json" />
         <button id="vaultLockButton" class="ghost" type="button">Vergrendel</button>
       </div>
-      <small>Proton/NAS blijft een aparte onafhankelijke backup-adapter en zit niet in de runtime-keten.</small>
+      <small>De backupmap schrijft versies met tijdstempel; syncsoftware staat volledig buiten de Creabundalo-runtime.</small>
     </section>
   </dialog>
 
