@@ -120,6 +120,14 @@
       const record=await get('records',id);
       return record?decryptRecord(record):null;
     },
+    async listRecordMetadata(prefix=''){
+      if(!db)await api.init();
+      const records=await getAll('records');
+      return records
+        .filter(r=>!prefix||r.id.startsWith(prefix))
+        .map(r=>({id:r.id,privacyClass:r.privacyClass,updatedAt:r.updatedAt}))
+        .sort((a,b)=>a.id.localeCompare(b.id));
+    },
     async listJSON(prefix=''){
       if(!db)await api.init();
       const records=await getAll('records');
