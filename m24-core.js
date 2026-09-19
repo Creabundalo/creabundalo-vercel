@@ -121,8 +121,16 @@ const M24Core = (() => {
       const cross = await this.provider.getCrossAssetState(asset, context);
       const marketRec = this.store.add(record('MARKET_STATE', market, {subjectId:asset,window:context.window,resolution:context.resolution,evidenceStatus:EVIDENCE.MECHANISM_VISIBLE,confidence:.95,provenance:market.provenance || []}));
       const meaningRec = this.store.add(record('MEANING_STATE', meaning, {subjectId:asset,window:context.window,resolution:context.resolution,evidenceStatus:EVIDENCE.PLAUSIBLE_INTERPRETATION,confidence:meaning.confidence ?? .6,provenance:meaning.provenance || []}));
-      const trick = this.store.add(this.trickster.assess({subjectId:asset,narrativeScore:meaning.score,mechanismScore:market.mechanismScore,mechanisms:market.mechanisms || [],supportingIds:[marketRec.id,meaningRec.id]}));
-      return {market,meaning,cross,trick,marketRec,meaningRec};
+      const crossRecs = (Array.isArray(cross)?cross:[]).map((item,index)=>this.store.add(record('CROSS_ASSET_STATE', item, {
+        subjectId:item.key || item.name || `CROSS_${index}`,
+        window:context.window,
+        resolution:context.resolution,
+        evidenceStatus:item.status==='OK'?EVIDENCE.MECHANISM_VISIBLE:EVIDENCE.PLAUSIBLE_INTERPRETATION,
+        confidence:item.status==='OK'?.9:.35,
+        provenance:item.provenance || []
+      })));
+      const trick = this.store.add(this.trickster.assess({subjectId:asset,narrativeScore:meaning.score,mechanismScore:market.mechanismScore,mechanisms:market.mechanisms || [],supportingIds:[marketRec.id,meaningRec.id,...crossRecs.map(r=>r.id)]}));
+      return {market,meaning,cross,trick,marketRec,meaningRec,crossRecs};
     }
   }
 

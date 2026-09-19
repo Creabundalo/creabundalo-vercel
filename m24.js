@@ -233,7 +233,37 @@ globalThis.M24 = (() => {
     const world=$('#worldLayerStatus');if(world){world.textContent='SNAPSHOT';world.dataset.state='SNAPSHOT';}
     const exec=$('#executionLayerStatus');if(exec){exec.textContent='PAPER';exec.dataset.state='PAPER';}
   }
-  function renderAll(){renderChart();renderMeaning();renderCross();renderForecast();renderHistory();renderTransactions();renderObservations();renderBreadcrumb();renderMode();renderLens();renderDataStatus();renderCompetence()}
+
+  function sourceStateClass(value){
+    const v=String(value||'').toUpperCase();
+    if(['OK','STORED','ACTIVE','LIVE','DAILY'].includes(v)) return 'ok';
+    if(['DELAYED','PARTIAL','MODEL','SNAPSHOT','PAPER','AUDIT','SEPARATE','SIMULATED_ONLY','NO_BROKER','N/A'].includes(v)) return 'warn';
+    if(['GAP','SOURCE_GAP','FALLBACK'].includes(v)) return 'gap';
+    return 'neutral';
+  }
+  function sourceCell(value){
+    const text=String(value??'—');
+    return `<span class="source-health-state ${sourceStateClass(text)}">${text}</span>`;
+  }
+  function renderSourceHealth(){
+    const g=$('#sourceHealthGrid');
+    if(!g||!globalThis.M24SourceHealth||!snapshot) return;
+    const rows=globalThis.M24SourceHealth.build(snapshot);
+    g.innerHTML=rows.map(row=>`
+      <div class="source-health-row source-health-grid" data-source-layer="${row.id}">
+        <strong>${row.label}</strong>
+        <span title="${row.quality||''}">${row.source}</span>
+        ${sourceCell(row.api)}
+        ${sourceCell(row.normalize)}
+        ${sourceCell(row.qubus)}
+        ${sourceCell(row.m24)}
+        <span class="source-health-freshness">${row.freshness}${row.asOf?' · '+row.asOf:''}</span>
+        ${sourceCell(row.overall)}
+      </div>
+    `).join('');
+  }
+
+  function renderAll(){renderChart();renderMeaning();renderCross();renderForecast();renderHistory();renderTransactions();renderObservations();renderBreadcrumb();renderMode();renderLens();renderDataStatus();renderSourceHealth();renderCompetence()}
 
   async function refresh(){
     snapshot=await runtime.snapshot(state.asset,{window:state.level,resolution:state.resolution,lens:state.lens,mode:state.mode});

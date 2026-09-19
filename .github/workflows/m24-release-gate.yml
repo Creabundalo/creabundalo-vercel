@@ -37,7 +37,7 @@ jobs:
             m24-enrichment.js m24-enrichment-test.js m24-enrichment-ui.js \
             m24-replay.js m24-replay-test.js m24-replay-e2e-test.js m24-verified-btc-2019.json m24-verified-btc-2021.json \
             m24-cohort.js m24-cohort-test.js m24-cohort-ui.js \
-            m24-case-btc-2021.json m24-vercel-live.js m24-vercel-live-test.js competence-projection.js competence-projection-test.js m24-selector-test.js api/m24/market.js api/m24/cross.js M24-VERCEL-RUNTIME.txt M24-REQUIREMENTS.md M24-TECHNICAL-DESIGN.md M24-SOURCE-COMPARISON.md M24-DERIVATIVES.md M24-MACRO-CROSS-ASSET.md M24-MEANING-WORLD.md M24-BACKTEST.md M24-RELEASE-CHECKLIST.md; do test -f "$f"; done
+            m24-case-btc-2021.json m24-vercel-live.js m24-vercel-live-test.js competence-projection.js competence-projection-test.js m24-selector-test.js m24-source-health.js m24-source-health-test.js api/m24/market.js api/m24/cross.js M24-VERCEL-RUNTIME.txt M24-REQUIREMENTS.md M24-TECHNICAL-DESIGN.md M24-SOURCE-COMPARISON.md M24-DERIVATIVES.md M24-MACRO-CROSS-ASSET.md M24-MEANING-WORLD.md M24-BACKTEST.md M24-RELEASE-CHECKLIST.md; do test -f "$f"; done
 
       - name: JavaScript syntax
         run: |
@@ -82,6 +82,7 @@ jobs:
           grep -q 'HISTORICAL_REPLAY_RESULT' m24-replay.js
           grep -q 'VERIFIED_SOURCE_SNAPSHOT' m24-verified-btc-2021.json
           grep -q 'new M24Core.Runtime' m24.js
+          grep -q "record('CROSS_ASSET_STATE'" m24-core.js
 
       - name: Historical runtime smoke test
         run: node m24-smoke-test.js
@@ -120,6 +121,14 @@ jobs:
           node competence-projection-test.js
       - name: Selector collection contract
         run: node m24-selector-test.js
+      - name: Source chain contract test
+        run: |
+          test -f m24-source-health.js
+          test -f m24-source-health-test.js
+          grep -q 'sourceHealthGrid' m24.html
+          grep -q 'm24-source-health.js' m24.html
+          grep -q 'renderSourceHealth' m24.js
+          node m24-source-health-test.js
       - name: Cross-resolution Lab contract test
         run: node m24-resolution-test.js
       - name: Coinbase adapter contract test
@@ -256,16 +265,18 @@ jobs:
           grep -q 'm24-world.js' dist-m24-vercel/m24.html
           grep -q 'm24-vercel-live.js' dist-m24-vercel/m24.html
           grep -q 'competence-projection.js' dist-m24-vercel/m24.html
+          grep -q 'm24-source-health.js' dist-m24-vercel/m24.html
           test -f dist-m24-vercel/competence-projection.js
+          test -f dist-m24-vercel/m24-source-health.js
           test -f dist-m24-vercel/api/m24/market.js
           test -f dist-m24-vercel/api/m24/cross.js
-          (cd dist-m24-vercel && zip -r ../Creabundalo_M24_D0.11.13_COMPETENCE_LIVE_VERCEL_TESTED.zip .)
+          (cd dist-m24-vercel && zip -r ../Creabundalo_M24_D0.11.14_LIVE_CHAIN_VERCEL_TESTED.zip .)
 
       - name: Upload tested Vercel bundle
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: m24-d0-11-13-competence-live-vercel-tested
-          path: Creabundalo_M24_D0.11.13_COMPETENCE_LIVE_VERCEL_TESTED.zip
+          name: m24-d0-11-14-live-chain-vercel-tested
+          path: Creabundalo_M24_D0.11.14_LIVE_CHAIN_VERCEL_TESTED.zip
           if-no-files-found: error
           retention-days: 14
