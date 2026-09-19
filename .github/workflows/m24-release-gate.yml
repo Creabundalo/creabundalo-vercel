@@ -91,6 +91,12 @@ jobs:
           grep -q 'm24-world.js' m24.html
           grep -q 'NO PROBABILITY' m24.html
           node m24-world-test.js
+      - name: Vercel static asset contract
+        run: |
+          test -f m24.html
+          test -f m24.css
+          test -f m24.js
+          node -e "const v=require('./vercel.json'); if(v.builds) throw new Error('vercel.json must not restrict static deployment to index.html'); const r=(v.rewrites||[]).find(x=>x.source==='/'); if(!r || r.destination!=='/m24.html') throw new Error('root must rewrite to /m24.html');"
       - name: Cross-resolution Lab contract test
         run: node m24-resolution-test.js
       - name: Coinbase adapter contract test
