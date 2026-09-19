@@ -231,6 +231,62 @@ globalThis.M24 = (() => {
     if(meaning) meaning.textContent=derivativesReadingText(reading)+' Dit is positioneringscontext, geen zelfstandig trade-signaal.';
   }
 
+  function optionPct(value){
+    return Number.isFinite(Number(value))?`${Number(value).toFixed(2)}%`:'—';
+  }
+  function optionsMeaningText(o){
+    const i=o?.interpretation||{};
+    const parts=[];
+    if(i.skew==='PUT_IV_RICH') parts.push('puts zijn rond ATM duurder in implied volatility dan calls');
+    else if(i.skew==='CALL_IV_RICH') parts.push('calls zijn rond ATM duurder in implied volatility dan puts');
+    else if(i.skew==='ATM_SKEW_BALANCED') parts.push('ATM put/call IV is ongeveer in balans');
+
+    if(i.termStructure==='FRONT_IV_HIGHER') parts.push('korte looptijd-IV ligt hoger dan verder weg: voorste expiratie draagt extra onzekerheid');
+    else if(i.termStructure==='BACK_IV_HIGHER') parts.push('langere looptijd-IV ligt hoger dan de voorste expiratie');
+    else if(i.termStructure==='IV_CURVE_FLAT') parts.push('de gemeten IV-term structure is vrij vlak');
+
+    if(i.positioning==='PUT_OI_HEAVY') parts.push('put open interest is zwaarder dan call open interest');
+    else if(i.positioning==='CALL_OI_HEAVY') parts.push('call open interest is zwaarder dan put open interest');
+    else if(i.positioning==='PUT_CALL_OI_BALANCED') parts.push('put/call open interest is ongeveer in balans');
+
+    return parts.length?parts.join('. ')+'.':'Nog onvoldoende optiedata voor een volledige betekenislezing.';
+  }
+  function renderOptions(){
+    const o=snapshot.options||{};
+    const grid=$('#optionsGrid');
+    const status=$('#liveOptionsStatus');
+    const badge=$('#optionsSourceBadge');
+    const meaning=$('#optionsMeaning');
+
+    if(o.sourceStatus==='NOT_APPLICABLE'||o.sourceStatus==='NOT_AVAILABLE'){
+      if(grid) grid.innerHTML=`<div class="options-na"><strong>Niet van toepassing</strong><span>Voor ${state.asset} is in deze bronset nog geen ondersteunde live-optiebron aangesloten.</span></div>`;
+      if(status){status.textContent='N/A';status.dataset.state='MODEL';}
+      if(badge){badge.textContent='N/A';badge.dataset.state='FALLBACK';}
+      if(meaning) meaning.textContent='M24 vult ontbrekende optiedata niet synthetisch in.';
+      return;
+    }
+
+    if(o.sourceStatus!=='OK'){
+      if(grid) grid.innerHTML=`<div class="options-na"><strong>Source gap</strong><span>${o.error||'Optiebron tijdelijk niet beschikbaar.'}</span></div>`;
+      if(status){status.textContent='SOURCE GAP';status.dataset.state='PARTIAL';}
+      if(badge){badge.textContent='SOURCE GAP';badge.dataset.state='FALLBACK';}
+      if(meaning) meaning.textContent='Geen optiebetekenis gebruikt zolang de live bron niet aantoonbaar beschikbaar is.';
+      return;
+    }
+
+    const f=o.front||{},b=o.back||{},i=o.interpretation||{};
+    if(grid){
+      grid.innerHTML=`
+        <div class="option-card"><span>ATM IV</span><strong>${optionPct(f.atmIv)}</strong><small>${f.expiryDate||'—'} · strike ${f.atmStrike??'—'}</small></div>
+        <div class="option-card"><span>ATM put-call IV skew</span><strong>${Number.isFinite(Number(f.atmPutCallIvSkew))?(Number(f.atmPutCallIvSkew)>=0?'+':'')+Number(f.atmPutCallIvSkew).toFixed(2)+' vol':'—'}</strong><small>put IV − call IV · geen 25-delta skew</small></div>
+        <div class="option-card"><span>Put / Call OI</span><strong>${Number.isFinite(Number(f.putCallOiRatio))?Number(f.putCallOiRatio).toFixed(2):'—'}</strong><small>front expiry · totaal OI ${f.totalOpenInterest??'—'}</small></div>
+        <div class="option-card"><span>Term structure</span><strong>${i.termSpreadVolPoints==null?'—':(i.termSpreadVolPoints>=0?'+':'')+Number(i.termSpreadVolPoints).toFixed(2)+' vol'}</strong><small>${f.expiryDate||'front'} → ${b.expiryDate||'geen back expiry'}</small></div>`;
+    }
+    if(status){status.textContent='LIVE';status.dataset.state='LIVE';}
+    if(badge){badge.textContent='DERIBIT · LIVE';badge.dataset.state='LIVE';}
+    if(meaning) meaning.textContent=optionsMeaningText(o)+' Context, geen zelfstandig trade-signaal.';
+  }
+
   function renderCross(){
     const g=$('#crossGrid');g.innerHTML=snapshot.cross.map(x=>`<div class="cross-card"><span>${x.name}</span><strong class="${x.className}">${x.direction}</strong><small>${x.state}${x.asOf?' · '+x.asOf:''}</small></div>`).join('');
     const live=$('#liveCrossStatus');
@@ -311,7 +367,7 @@ globalThis.M24 = (() => {
     `).join('');
   }
 
-  function renderAll(){renderChart();renderMeaning();renderDerivatives();renderCross();renderForecast();renderHistory();renderTransactions();renderObservations();renderBreadcrumb();renderMode();renderLens();renderDataStatus();renderSourceHealth();renderCompetence()}
+  function renderAll(){renderChart();renderMeaning();renderDerivatives();renderOptions();renderCross();renderForecast();renderHistory();renderTransactions();renderObservations();renderBreadcrumb();renderMode();renderLens();renderDataStatus();renderSourceHealth();renderCompetence()}
 
   async function refresh(){
     snapshot=await runtime.snapshot(state.asset,{window:state.level,resolution:state.resolution,lens:state.lens,mode:state.mode});
