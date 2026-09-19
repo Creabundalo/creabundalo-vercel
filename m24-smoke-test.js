@@ -13,6 +13,8 @@ const test=`
   const runtime=new M24Core.Runtime({provider});
   const snapshot=await runtime.snapshot('BTC',{mode:'lab',window:'episode',resolution:'W'});
   check(snapshot.market.bars.length>=70,'historical bars missing');
+  check(Array.isArray(snapshot.crossRecs)&&snapshot.crossRecs.length===snapshot.cross.length,'cross-asset states must be stored in Qubus');
+  check(runtime.store.list('CROSS_ASSET_STATE').length===snapshot.cross.length,'Qubus cross-asset record count mismatch');
   check(snapshot.market.provenance[0].sourceType==='PUBLIC_REPRODUCIBLE_FIXTURE','provenance missing');
   const historicalCase=await provider.getHistoricalCase('BTC-2021-2022-TOP-MARKDOWN');
   const caseSchema=M24Cases.get('BTC-2021-2022-TOP-MARKDOWN');
