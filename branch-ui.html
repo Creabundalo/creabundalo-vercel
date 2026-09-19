@@ -107,6 +107,8 @@
     <section class="vault-section">
       <div class="vault-actions">
         <button id="vaultBackupButton" class="ghost" type="button">Exporteer encrypted snapshot</button>
+        <button id="vaultImportButton" class="ghost" type="button">Herstel uit snapshot</button>
+        <input id="vaultImportInput" class="hidden" type="file" accept=".json,application/json" />
         <button id="vaultLockButton" class="ghost" type="button">Vergrendel</button>
       </div>
       <small>v0: lokale encryptie. Scaleway-sync en onafhankelijke backup volgen als adapters.</small>
@@ -114,6 +116,7 @@
   </dialog>
 
   <script src="vault-core.js"></script>
+  <script src="vault-storage.js"></script>
   <script src="branch-ui.js"></script>
 </body>
 </html>
