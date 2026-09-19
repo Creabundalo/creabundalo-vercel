@@ -17,7 +17,7 @@
       <div class="status-block">
         <span class="status-pill live-data">LIVE DATA</span>
         <span class="status-pill safety">SIMULATED_ONLY</span>
-        <span class="status-pill">v0.3 · D0.11.13 LIVE VERCEL · COMPETENCE HOTFIX</span>
+        <span class="status-pill">v0.3 · D0.11.14 LIVE VERCEL · LIVE CHAIN</span>
       </div>
     </header>
 
@@ -39,6 +39,18 @@
       <span>BETEKENIS <strong id="meaningLayerStatus" class="source-state">MODEL</strong></span>
       <span>WORLD <strong id="worldLayerStatus" class="source-state">SNAPSHOT</strong></span>
       <span>UITVOERING <strong id="executionLayerStatus" class="source-state">PAPER</strong></span>
+    </section>
+
+    <section id="sourceHealthPanel" class="panel source-health-panel competence-analysis">
+      <div class="panel-head">
+        <div><p class="eyebrow">LIVE WIRING</p><h2>Bronketen</h2></div>
+        <span class="muted">API → normalisatie → Qubus → M24 → freshness</span>
+      </div>
+      <div class="source-health-head source-health-grid" aria-hidden="true">
+        <span>Laag</span><span>Bron</span><span>API</span><span>Norm.</span><span>Qubus</span><span>M24</span><span>Freshness</span><span>Status</span>
+      </div>
+      <div id="sourceHealthGrid" class="source-health-list"></div>
+      <p class="footnote">Een groene status betekent pas dat de keten zichtbaar doorloopt. Adapter aanwezig zonder zichtbare data krijgt geen LIVE-vink.</p>
     </section>
 
     <nav class="breadcrumb panel compact" aria-label="Tijdnavigatie">
@@ -138,7 +150,7 @@
       <div id="observationLog" class="observation-log"></div>
     </section>
 
-    <footer class="footerline"><span>M24 v0.3 · D0.11.13 LIVE VERCEL · Competence Projection · no broker execution</span><a href="M24-REQUIREMENTS.md">Requirements</a></footer>
+    <footer class="footerline"><span>M24 v0.3 · D0.11.14 LIVE VERCEL · Live Wiring · no broker execution</span><a href="M24-REQUIREMENTS.md">Requirements</a></footer>
   </main>
   <script src="m24-cases.js"></script>
   <script src="m24-coinbase.js"></script>
@@ -146,6 +158,7 @@
   <script src="m24-world.js"></script>
   <script src="m24-vercel-live.js"></script>
   <script src="competence-projection.js"></script>
+  <script src="m24-source-health.js"></script>
   <script src="m24.js"></script>
   <script src="m24-lab-ui.js"></script>
 </body>
