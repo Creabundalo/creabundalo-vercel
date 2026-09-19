@@ -429,7 +429,11 @@ function overlaySession(event){
       firstEventAt:event.occurredAt
     }
   };
-  state.nodes.push(node);
+  coreDispatch('NODE_CREATED',{node,focus:false},{
+    surface:'browser-extension',
+    adapter,
+    host
+  });
   session={
     sessionId:event.sessionId,
     rootNodeId:sessionNodeId,
@@ -478,7 +482,11 @@ function applyOverlayEvent(event){
         occurredAt:event.occurredAt
       }
     };
-    state.nodes.push(node);
+    coreDispatch('NODE_CREATED',{node,focus:false},{
+      surface:'browser-extension',
+      adapter:event.source?.adapter||session.adapter,
+      host:event.source?.host||session.host
+    });
     session.nodes[ext.id]=webId;
     session.lastEventAt=event.occurredAt;
     return;
@@ -491,14 +499,19 @@ function applyOverlayEvent(event){
     return;
   }
   if(event.type==='NODE_PROJECT_PROMOTED'){
-    if(target){target.kind='project';target.status='active';}
+    if(target){
+      coreDispatch('NODE_KIND_SET',{nodeId:target.id,kind:'project'},{surface:'browser-extension',adapter:session.adapter,host:session.host});
+      coreDispatch('NODE_STATUS_SET',{nodeId:target.id,status:'active'},{surface:'browser-extension',adapter:session.adapter,host:session.host});
+    }
     session.lastEventAt=event.occurredAt;
     return;
   }
   if(event.type==='NODE_REPARENTED'){
     if(target){
       const newParent=mappedOverlayNode(session,p.parentId) || byId(session.rootNodeId);
-      if(newParent && newParent.id!==target.id) target.parentId=newParent.id;
+      if(newParent && newParent.id!==target.id){
+        coreDispatch('NODE_REPARENTED',{nodeId:target.id,parentId:newParent.id},{surface:'browser-extension',adapter:session.adapter,host:session.host});
+      }
     }
     session.lastEventAt=event.occurredAt;
   }
@@ -557,7 +570,7 @@ async function importOverlayContext(){
     const overlay=ensureOverlayState();
     const lastSession=overlay.sessions[events.at(-1).sessionId];
     if(lastSession?.lastFocusedNodeId && byId(lastSession.lastFocusedNodeId)){
-      state.currentId=lastSession.lastFocusedNodeId;
+      coreDispatch('NODE_FOCUSED',{nodeId:lastSession.lastFocusedNodeId},{surface:'browser-extension',adapter:lastSession.adapter,host:lastSession.host});
     }
     await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
     await window.CreaVaultHealth?.success?.('local');
