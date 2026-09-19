@@ -27,6 +27,13 @@ const edgeSvg = $('edgeSvg');
 const edgeLabels = $('edgeLabels');
 const nodeLayer = $('nodes');
 const input = $('commandInput');
+const vaultButton = $('vaultButton');
+const vaultDialog = $('vaultDialog');
+const vaultStatusText = $('vaultStatusText');
+const vaultPassphrase = $('vaultPassphrase');
+const vaultRecoveryInput = $('vaultRecoveryInput');
+const recoveryBox = $('recoveryBox');
+const vaultRecoveryOutput = $('vaultRecoveryOutput');
 
 function uid(prefix='n'){
   return globalThis.crypto?.randomUUID ? prefix+'_'+crypto.randomUUID() : prefix+'_'+Date.now()+'_'+Math.random().toString(16).slice(2);
@@ -39,6 +46,13 @@ function load(){
   return structuredClone(seed);
 }
 function save(){
+  const status = window.CreaVault?.status?.();
+  if(status?.initialized){
+    if(status.unlocked){
+      window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'}).catch(err=>console.error('Vault save failed',err));
+    }
+    return;
+  }
   localStorage.setItem(KEY, JSON.stringify(state));
 }
 function current(){
@@ -244,6 +258,99 @@ function handleCommand(raw){
   addQuestion(text);
 }
 
+
+function vaultMessage(message,isError=false){
+  vaultStatusText.textContent=message;
+  vaultStatusText.dataset.error=isError?'1':'0';
+}
+function updateVaultUi(){
+  const status=window.CreaVault?.status?.() || {mode:'UNAVAILABLE',initialized:false,unlocked:false};
+  const labels={
+    UNINITIALIZED:'VAULT · UIT',
+    LOCKED:'VAULT · OP SLOT',
+    UNLOCKED:'VAULT · OPEN',
+    UNAVAILABLE:'VAULT · N/A'
+  };
+  vaultButton.textContent=labels[status.mode] || 'VAULT';
+  vaultButton.classList.toggle('unlocked',!!status.unlocked);
+  $('vaultSetupButton').disabled=!!status.initialized;
+  $('vaultUnlockButton').disabled=!status.initialized || !!status.unlocked;
+  $('vaultRecoverButton').disabled=!status.initialized || !!status.unlocked;
+  $('vaultBackupButton').disabled=!status.initialized;
+  $('vaultLockButton').disabled=!status.unlocked;
+  if(status.mode==='UNINITIALIZED') vaultMessage('Nog geen kluis. Tot setup gebruikt deze v0 alleen lokale prototype-opslag.');
+  if(status.mode==='LOCKED') vaultMessage('Kluis bestaat en is vergrendeld. Er wordt geen plaintext state naar localStorage geschreven.');
+  if(status.mode==='UNLOCKED') vaultMessage('Kluis ontgrendeld. Branch-state wordt encrypted in IndexedDB opgeslagen.');
+}
+async function initVaultUI(){
+  try{
+    const status=await window.CreaVault.init();
+    if(status.initialized && !status.unlocked){
+      localStorage.removeItem(KEY);
+      state=structuredClone(seed);
+      render();
+    }
+    updateVaultUi();
+  }catch(err){
+    vaultMessage('Vault niet beschikbaar in deze browser: '+err.message,true);
+    vaultButton.textContent='VAULT · N/A';
+  }
+}
+async function setupVault(){
+  const pass=vaultPassphrase.value;
+  try{
+    const result=await window.CreaVault.setup(pass);
+    await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
+    localStorage.removeItem(KEY);
+    vaultRecoveryOutput.value=result.recoveryKey;
+    recoveryBox.classList.remove('hidden');
+    vaultPassphrase.value='';
+    updateVaultUi();
+    vaultMessage('Kluis aangemaakt. Bewaar de recovery key nu op een tweede veilige plek.');
+  }catch(err){
+    const msg=err.message==='PASSPHRASE_TOO_SHORT'?'Gebruik een wachtzin van minimaal 12 tekens.':err.message;
+    vaultMessage('Setup mislukt: '+msg,true);
+  }
+}
+async function unlockVault(){
+  try{
+    await window.CreaVault.unlock(vaultPassphrase.value);
+    const restored=await window.CreaVault.loadJSON(KEY);
+    if(restored) state=restored;
+    else await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
+    vaultPassphrase.value='';
+    updateVaultUi();
+    render();
+    requestAnimationFrame(centerCurrent);
+  }catch(err){
+    vaultMessage('Ontgrendelen mislukt. Controleer de wachtzin.',true);
+  }
+}
+async function recoverVault(){
+  try{
+    await window.CreaVault.recover(vaultRecoveryInput.value);
+    const restored=await window.CreaVault.loadJSON(KEY);
+    if(restored) state=restored;
+    vaultRecoveryInput.value='';
+    updateVaultUi();
+    render();
+    requestAnimationFrame(centerCurrent);
+    vaultMessage('Toegang hersteld met recovery key. Stel in een volgende versie een nieuwe wachtzin in.');
+  }catch(err){
+    vaultMessage('Recovery key ongeldig.',true);
+  }
+}
+async function lockVault(){
+  try{
+    await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
+  }catch{}
+  window.CreaVault.lock();
+  state=structuredClone(seed);
+  updateVaultUi();
+  render();
+  requestAnimationFrame(centerCurrent);
+}
+
 $('composer').addEventListener('submit',e=>{
   e.preventDefault();
   const text=input.value;
@@ -260,6 +367,19 @@ $('backButton').onclick=goBack;
 $('rootButton').onclick=goRoot;
 $('promoteButton').onclick=promote;
 $('parkButton').onclick=park;
+vaultButton.onclick=()=>{updateVaultUi();vaultDialog.showModal()};
+$('vaultCloseButton').onclick=()=>vaultDialog.close();
+$('vaultSetupButton').onclick=setupVault;
+$('vaultUnlockButton').onclick=unlockVault;
+$('vaultRecoverButton').onclick=recoverVault;
+$('vaultLockButton').onclick=lockVault;
+$('vaultBackupButton').onclick=()=>window.CreaVault.downloadEncryptedSnapshot().catch(err=>vaultMessage('Snapshot mislukt: '+err.message,true));
+$('copyRecoveryButton').onclick=async()=>{
+  if(vaultRecoveryOutput.value){
+    await navigator.clipboard.writeText(vaultRecoveryOutput.value);
+    vaultMessage('Recovery key gekopieerd. Bewaar hem buiten deze browser.');
+  }
+};
 document.querySelectorAll('.lens').forEach(b=>b.onclick=()=>setLens(b.dataset.lens));
 $('zoomIn').onclick=()=>{zoom=Math.min(1.7,zoom+.1);applyTransform()};
 $('zoomOut').onclick=()=>{zoom=Math.max(.45,zoom-.1);applyTransform()};
@@ -286,3 +406,4 @@ viewport.addEventListener('pointercancel',()=>{dragging=false;dragStart=null});
 
 render();
 requestAnimationFrame(centerCurrent);
+initVaultUI();
