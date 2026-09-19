@@ -25,20 +25,31 @@ function signingKey(secret,dateStamp,region){
   const kService=hmac(kRegion,'s3');
   return hmac(kService,'aws4_request');
 }
-function presign({method,accessKey,secretKey,region,bucket,key,expires=90}){
+function presign({method,accessKey,secretKey,region,bucket,key,expires=90,headers={}}){
   const endpoint='s3.'+region+'.scw.cloud';
   const canonicalUri='/' + [bucket,...key.split('/')].map(encodeRfc3986).join('/');
   const {amzDate,dateStamp}=isoParts();
   const scope=dateStamp+'/'+region+'/s3/aws4_request';
+
+  const headerMap={host:endpoint};
+  for(const [name,value] of Object.entries(headers||{})){
+    const lower=String(name).trim().toLowerCase();
+    if(!lower||lower==='host') continue;
+    headerMap[lower]=String(value).trim().replace(/\s+/g,' ');
+  }
+  const headerNames=Object.keys(headerMap).sort();
+  const signedHeaders=headerNames.join(';');
+  const canonicalHeaders=headerNames.map(name=>name+':'+headerMap[name]+'\n').join('');
+
   const query=[
     ['X-Amz-Algorithm','AWS4-HMAC-SHA256'],
     ['X-Amz-Credential',accessKey+'/'+scope],
     ['X-Amz-Date',amzDate],
     ['X-Amz-Expires',String(expires)],
-    ['X-Amz-SignedHeaders','host']
+    ['X-Amz-SignedHeaders',signedHeaders]
   ].map(([k,v])=>encodeRfc3986(k)+'='+encodeRfc3986(v)).sort().join('&');
-  const canonicalHeaders='host:'+endpoint+'\n';
-  const canonicalRequest=[method,canonicalUri,query,canonicalHeaders,'host','UNSIGNED-PAYLOAD'].join('\n');
+
+  const canonicalRequest=[method,canonicalUri,query,canonicalHeaders,signedHeaders,'UNSIGNED-PAYLOAD'].join('\n');
   const stringToSign=[
     'AWS4-HMAC-SHA256',
     amzDate,
@@ -260,7 +271,8 @@ module.exports = async function handler(req,res){
           deviceId:String(segment.deviceId),
           seq:Number(segment.seq),
           eventId:String(segment.eventId),
-          url:presign({method:'PUT',...cfg,key,expires})
+          url:presign({method:'PUT',...cfg,key,expires,headers:{'if-none-match':'*'}}),
+          headers:{'If-None-Match':'*'}
         };
       });
       return json(res,200,{action,vaultId,uploads,expiresIn:expires});
