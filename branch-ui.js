@@ -16,7 +16,9 @@ const seed = {
 
 let state = window.CreaSemanticCore.ensureState(load());
 let semanticOutbox = [];
-let semanticCommitChain = Promise.resolve();
+let semanticCommitPromise = null;
+let semanticRevision = 0;
+let semanticCommittedRevision = 0;
 let zoom = 1;
 let pan = {x: 120, y: 80};
 let dragging = false;
@@ -60,36 +62,53 @@ function load(){
 function save(){
   const status = window.CreaVault?.status?.();
   if(status?.initialized){
-    if(status.unlocked) queueSemanticCommit();
+    if(status.unlocked){
+      semanticRevision++;
+      queueSemanticCommit();
+    }
     return;
   }
   localStorage.setItem(KEY, JSON.stringify(state));
 }
 
 function queueSemanticCommit(){
-  const batch=semanticOutbox.splice(0);
-  const snapshot=structuredClone(state);
-  semanticCommitChain=semanticCommitChain.then(async()=>{
+  if(semanticCommitPromise) return semanticCommitPromise;
+
+  semanticCommitPromise=(async()=>{
+    let totalEvents=0;
     try{
-      await window.CreaSemanticEventStore.commit(snapshot,batch);
+      while(semanticCommittedRevision<semanticRevision || semanticOutbox.length){
+        const targetRevision=semanticRevision;
+        const batch=semanticOutbox.splice(0);
+        const snapshot=structuredClone(state);
+
+        try{
+          const result=await window.CreaSemanticEventStore.commit(snapshot,batch);
+          totalEvents+=result.appended||0;
+          semanticCommittedRevision=targetRevision;
+        }catch(err){
+          semanticOutbox=[...batch,...semanticOutbox];
+          await window.CreaVaultHealth?.error?.('local',err);
+          throw err;
+        }
+      }
       await window.CreaVaultHealth?.success?.('local');
       window.CreaVaultPolicy?.maybeAutoContinuity?.().catch(()=>{});
-      return {ok:true,events:batch.length};
+      return {ok:true,events:totalEvents,revision:semanticCommittedRevision};
     }catch(err){
-      semanticOutbox=[...batch,...semanticOutbox];
-      await window.CreaVaultHealth?.error?.('local',err);
       console.error('Semantic commit failed',err);
-      return {ok:false,error:err};
+      throw err;
+    }finally{
+      semanticCommitPromise=null;
     }
-  });
-  return semanticCommitChain;
+  })();
+
+  return semanticCommitPromise;
 }
 
 async function commitSemanticNow(){
-  queueSemanticCommit();
-  const result=await semanticCommitChain;
-  if(!result?.ok) throw result?.error || new Error('SEMANTIC_COMMIT_FAILED');
-  return result;
+  semanticRevision++;
+  return queueSemanticCommit();
 }
 function current(){
   return state.nodes.find(n => n.id === state.currentId) || state.nodes[0];
