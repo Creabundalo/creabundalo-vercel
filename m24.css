@@ -21,3 +21,5 @@ button,select,input{font:inherit}button{cursor:pointer}.hidden{display:none!impo
 .source-state[data-state="PARTIAL"]{color:var(--warn);border-color:#65542e}
 .source-state[data-state="MODEL"],.source-state[data-state="SNAPSHOT"],.source-state[data-state="PAPER"],.source-badge[data-state="FALLBACK"]{color:var(--warn)}
 .price-box small{margin-top:5px}
+
+.status-pill.live-data{color:var(--accent);border-color:#607536;background:rgba(215,255,100,.06)}
