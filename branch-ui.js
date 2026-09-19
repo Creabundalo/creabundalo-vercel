@@ -1310,6 +1310,7 @@ viewport.addEventListener('pointercancel',()=>{dragging=false;dragStart=null});
   document.addEventListener('visibilitychange',()=>{
     if(document.visibilityState==='visible') maybeAutoSemanticCloudSync().catch(()=>{});
   });
+  setInterval(()=>maybeAutoSemanticCloudSync().catch(()=>{}),AUTO_SEMANTIC_SYNC_MS);
 })().catch(err=>{
   console.error('Creabundalo startup failed',err);
 });
