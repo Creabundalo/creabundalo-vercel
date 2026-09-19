@@ -15,6 +15,8 @@ const seed = {
 };
 
 let state = window.CreaSemanticCore.ensureState(load());
+let semanticOutbox = [];
+let semanticCommitChain = Promise.resolve();
 let zoom = 1;
 let pan = {x: 120, y: 80};
 let dragging = false;
@@ -45,6 +47,7 @@ function uid(prefix='n'){
 function coreDispatch(type,payload={},source={surface:'creabundalo-ui'}){
   const result=window.CreaSemanticCore.dispatch(state,type,payload,source);
   state=result.state;
+  if(result.event) semanticOutbox.push(result.event);
   return result;
 }
 function load(){
@@ -57,17 +60,36 @@ function load(){
 function save(){
   const status = window.CreaVault?.status?.();
   if(status?.initialized){
-    if(status.unlocked){
-      window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'})
-        .then(async()=>{
-          await window.CreaVaultHealth?.success?.('local');
-          window.CreaVaultPolicy?.maybeAutoContinuity?.().catch(()=>{});
-        })
-        .catch(err=>{window.CreaVaultHealth?.error?.('local',err);console.error('Vault save failed',err)});
-    }
+    if(status.unlocked) queueSemanticCommit();
     return;
   }
   localStorage.setItem(KEY, JSON.stringify(state));
+}
+
+function queueSemanticCommit(){
+  const batch=semanticOutbox.splice(0);
+  const snapshot=structuredClone(state);
+  semanticCommitChain=semanticCommitChain.then(async()=>{
+    try{
+      await window.CreaSemanticEventStore.commit(snapshot,batch);
+      await window.CreaVaultHealth?.success?.('local');
+      window.CreaVaultPolicy?.maybeAutoContinuity?.().catch(()=>{});
+      return {ok:true,events:batch.length};
+    }catch(err){
+      semanticOutbox=[...batch,...semanticOutbox];
+      await window.CreaVaultHealth?.error?.('local',err);
+      console.error('Semantic commit failed',err);
+      return {ok:false,error:err};
+    }
+  });
+  return semanticCommitChain;
+}
+
+async function commitSemanticNow(){
+  queueSemanticCommit();
+  const result=await semanticCommitChain;
+  if(!result?.ok) throw result?.error || new Error('SEMANTIC_COMMIT_FAILED');
+  return result;
 }
 function current(){
   return state.nodes.find(n => n.id === state.currentId) || state.nodes[0];
