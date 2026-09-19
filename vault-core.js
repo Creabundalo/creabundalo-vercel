@@ -120,6 +120,37 @@
       const record=await get('records',id);
       return record?decryptRecord(record):null;
     },
+    async sealJSON(label,value){
+      if(!dataKey)throw new Error('VAULT_LOCKED');
+      const iv=randomBytes(12);
+      const aad=enc.encode('creabundalo:portable:v1:'+String(label||'bundle'));
+      const plaintext=enc.encode(JSON.stringify(value));
+      const ciphertext=await crypto.subtle.encrypt({name:'AES-GCM',iv,additionalData:aad},dataKey,plaintext);
+      return {
+        type:'CREABUNDALO_ENCRYPTED_PORTABLE',
+        version:1,
+        label:String(label||'bundle'),
+        algorithm:'AES-GCM-256',
+        iv:bytesToB64(iv),
+        ciphertext:bytesToB64(ciphertext)
+      };
+    },
+    async openJSON(label,envelope){
+      if(!dataKey)throw new Error('VAULT_LOCKED');
+      if(envelope?.type!=='CREABUNDALO_ENCRYPTED_PORTABLE'||envelope?.version!==1)throw new Error('INVALID_PORTABLE_ENVELOPE');
+      if(String(envelope.label)!==String(label||'bundle'))throw new Error('PORTABLE_LABEL_MISMATCH');
+      const aad=enc.encode('creabundalo:portable:v1:'+String(label||'bundle'));
+      try{
+        const plaintext=await crypto.subtle.decrypt(
+          {name:'AES-GCM',iv:b64ToBytes(envelope.iv),additionalData:aad},
+          dataKey,
+          b64ToBytes(envelope.ciphertext)
+        );
+        return JSON.parse(dec.decode(plaintext));
+      }catch{
+        throw new Error('PORTABLE_DECRYPT_FAILED');
+      }
+    },
     async listRecordMetadata(prefix=''){
       if(!db)await api.init();
       const records=await getAll('records');
