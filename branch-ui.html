@@ -63,9 +63,13 @@
             <div class="label">SEMANTIC CORE</div>
             <h2>Audit trail</h2>
           </div>
-          <button id="refreshAuditButton" class="ghost" type="button">Vernieuw</button>
+          <div class="vault-actions">
+            <button id="refreshAuditButton" class="ghost" type="button">Vernieuw</button>
+            <button id="verifyReplayButton" class="ghost" type="button">Replay check</button>
+          </div>
         </div>
         <div id="auditList" class="audit-list"></div>
+        <p id="replayStatus" class="continuity-policy">Replay nog niet gecontroleerd.</p>
         <p class="continuity-policy">Zelfde eventlogica voor eigen UI, overlay en toekomstige connectors.</p>
       </section>
 
