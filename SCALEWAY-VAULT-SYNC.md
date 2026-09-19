@@ -1,6 +1,6 @@
 # Scaleway Vault Sync · pilot setup
 
-Deze pilot synchroniseert uitsluitend de **encrypted Vault snapshot**. De browser krijgt nooit de Scaleway access key of secret key.
+Deze pilot gebruikt Scaleway voor twee gescheiden rollen: **encrypted semantic event sync** voor multi-device werking en een **encrypted Vault snapshot** voor disaster recovery. De browser krijgt nooit de Scaleway access key of secret key.
 
 ## 1. Maak een private Object Storage bucket
 Aanbevolen regio: `nl-ams` (Amsterdam).
@@ -13,7 +13,7 @@ creabundalo-vault-pilot
 Gebruik een **private** bucket.
 
 ## 2. Maak een beperkte Scaleway API key
-Gebruik een aparte IAM identity/key voor deze pilot en geef alleen de minimale Object Storage-rechten op de betreffende bucket.
+Gebruik een aparte IAM identity/key voor deze pilot en geef alleen de minimale Object Storage-rechten op de betreffende bucket: `s3:ListBucket` plus `s3:GetObject`/`s3:PutObject` op de Creabundalo-prefix. Event-sync heeft geen delete-recht nodig.
 
 Zet de waarden als Vercel environment variables:
 ```
@@ -105,3 +105,18 @@ Browser → /api/vault-sync → presigned GET → ciphertext → local import �
 - Cloud ontvangt de encrypted Vault snapshot, niet de decryptiesleutel.
 - Voor productie: account/passkey-auth vervangt pilot-token.
 - Voor productie: onafhankelijke securityreview, key rotation, device revocation en uitgebreide audit zijn verplicht.
+
+
+## 7. Semantic event sync v0.8
+
+De live multi-device laag gebruikt append-only encrypted eventsegmenten onder:
+
+```
+creabundalo/v2/<owner>/<vaultId>/events/<deviceId>/<seq>_<eventId>.enc.json
+```
+
+Event PUTs gebruiken `If-None-Match: *`, zodat een bestaand eventobject niet stil kan worden overschreven.
+
+De volledige snapshot onder `creabundalo/v1/.../latest.enc.json` blijft alleen de herstelkopie.
+
+Zie `SEMANTIC-CLOUD-SYNC.md` voor merge-, privacy- en schaalregels.

@@ -28,6 +28,7 @@
         updatedAt:null,
         local:{status:'UNKNOWN',lastSuccess:null,lastError:null},
         scaleway:{status:'UNKNOWN',lastSuccess:null,lastVerified:null,lastError:null},
+        semanticSync:{status:'UNKNOWN',lastSuccess:null,lastVerified:null,lastError:null},
         independent:{status:'UNKNOWN',lastSuccess:null,lastVerified:null,lastError:null},
         restore:{lastSuccess:null,lastSource:null,lastError:null}
       });
@@ -89,6 +90,8 @@
         local:fmt(s.local?.lastSuccess),
         scaleway:fmt(s.scaleway?.lastSuccess),
         scalewayVerified:fmt(s.scaleway?.lastVerified),
+        semanticSync:fmt(s.semanticSync?.lastSuccess),
+        semanticSyncVerified:fmt(s.semanticSync?.lastVerified),
         independent:fmt(s.independent?.lastSuccess),
         independentVerified:fmt(s.independent?.lastVerified),
         restore:fmt(s.restore?.lastSuccess)

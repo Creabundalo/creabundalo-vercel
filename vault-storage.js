@@ -182,7 +182,7 @@
     return {deleted};
   }
 
-  async function syncApi(action){
+  async function syncControl(action,payload={}){
     if(!scalewayToken) throw new Error('PROVIDER_AUTH_REQUIRED');
     const response=await fetch('/api/vault-sync',{
       method:'POST',
@@ -190,11 +190,17 @@
         'Content-Type':'application/json',
         'Authorization':'Bearer '+scalewayToken
       },
-      body:JSON.stringify({action})
+      body:JSON.stringify({action,...payload})
     });
     let body={};
     try{body=await response.json()}catch{}
     if(!response.ok) throw new Error(body.error||('SYNC_API_'+response.status));
+    return body;
+  }
+
+  async function syncApi(action){
+    if(!scalewayToken) throw new Error('PROVIDER_AUTH_REQUIRED');
+    const body=await syncControl(action);
     if(!body.url) throw new Error('SYNC_URL_MISSING');
     return body;
   }
@@ -267,6 +273,6 @@
   window.CreaVaultStorage={
     PRIVACY,register,get,list,write,read,configureScaleway,
     configureIndependentBackup,authorizeIndependentBackup,
-    listIndependentBackups,deleteIndependentBackups
+    listIndependentBackups,deleteIndependentBackups,syncControl
   };
 })();
