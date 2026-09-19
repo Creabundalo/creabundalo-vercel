@@ -629,7 +629,7 @@ async function importOverlayContext(){
     if(lastSession?.lastFocusedNodeId && byId(lastSession.lastFocusedNodeId)){
       coreDispatch('NODE_FOCUSED',{nodeId:lastSession.lastFocusedNodeId},{surface:'browser-extension',adapter:lastSession.adapter,host:lastSession.host});
     }
-    await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
+    await commitSemanticNow();
     await window.CreaVaultHealth?.success?.('local');
     await window.CreaOverlayBridge.ack(events.map(e=>e.eventId));
     render();
@@ -694,11 +694,29 @@ async function initVaultUI(){
     vaultButton.textContent='VAULT · N/A';
   }
 }
+
+async function restoreSemanticStateFromVault(){
+  const eventState=await window.CreaSemanticEventStore.restore();
+  if(eventState){
+    semanticOutbox=[];
+    return window.CreaSemanticCore.ensureState(eventState);
+  }
+
+  const legacy=await window.CreaVault.loadJSON(KEY);
+  const base=window.CreaSemanticCore.ensureState(legacy||state);
+  const migrated=await window.CreaSemanticEventStore.ensureMigrated(base);
+  semanticOutbox=[];
+  return window.CreaSemanticCore.ensureState(migrated.state);
+}
+
 async function setupVault(){
   const pass=vaultPassphrase.value;
   try{
     const result=await window.CreaVault.setup(pass);
     await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
+    const migrated=await window.CreaSemanticEventStore.ensureMigrated(state);
+    state=window.CreaSemanticCore.ensureState(migrated.state);
+    semanticOutbox=[];
     localStorage.removeItem(KEY);
     vaultRecoveryOutput.value=result.recoveryKey;
     recoveryBox.classList.remove('hidden');
@@ -713,9 +731,7 @@ async function setupVault(){
 async function unlockVault(){
   try{
     await window.CreaVault.unlock(vaultPassphrase.value);
-    const restored=await window.CreaVault.loadJSON(KEY);
-    if(restored) state=window.CreaSemanticCore.ensureState(restored);
-    else await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
+    state=await restoreSemanticStateFromVault();
     vaultPassphrase.value='';
     updateVaultUi();
     render();
@@ -727,8 +743,7 @@ async function unlockVault(){
 async function recoverVault(){
   try{
     await window.CreaVault.recover(vaultRecoveryInput.value);
-    const restored=await window.CreaVault.loadJSON(KEY);
-    if(restored) state=window.CreaSemanticCore.ensureState(restored);
+    state=await restoreSemanticStateFromVault();
     vaultRecoveryInput.value='';
     updateVaultUi();
     render();
@@ -740,7 +755,7 @@ async function recoverVault(){
 }
 async function lockVault(){
   try{
-    await window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'});
+    await commitSemanticNow();
   }catch{}
   window.CreaVault.lock();
   state=structuredClone(seed);
