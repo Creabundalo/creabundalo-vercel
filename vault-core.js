@@ -67,7 +67,7 @@
       meta=await get('meta',META_KEY);
       return api.status();
     },
-    status(){return {initialized:!!meta,unlocked:!!dataKey,mode:meta?(dataKey?'UNLOCKED':'LOCKED'):'UNINITIALIZED',version:meta?.version||1,createdAt:meta?.createdAt||null}},
+    status(){return {initialized:!!meta,unlocked:!!dataKey,mode:meta?(dataKey?'UNLOCKED':'LOCKED'):'UNINITIALIZED',version:meta?.version||1,createdAt:meta?.createdAt||null,vaultId:meta?.vaultId||null}},
     async setup(passphrase){
       if(!db)await api.init();
       if(meta)throw new Error('VAULT_ALREADY_EXISTS');
@@ -77,7 +77,7 @@
       const recoverySecret=bytesToB64Url(randomBytes(32));
       const recoveryKey=await importRecoveryKey(recoverySecret);
       meta={
-        id:META_KEY,version:1,algorithm:'AES-GCM-256',kdf:'PBKDF2-SHA256',iterations:ITERATIONS,salt:bytesToB64(salt),
+        id:META_KEY,vaultId:'vault_'+bytesToB64Url(randomBytes(18)),version:1,algorithm:'AES-GCM-256',kdf:'PBKDF2-SHA256',iterations:ITERATIONS,salt:bytesToB64(salt),
         wrappedByPassphrase:await wrapRawKey(rawDataKey,passKey,'passphrase'),
         wrappedByRecovery:await wrapRawKey(rawDataKey,recoveryKey,'recovery'),
         createdAt:new Date().toISOString()
@@ -131,6 +131,7 @@
       try{snapshot=typeof snapshotText==='string'?JSON.parse(snapshotText):snapshotText}catch{throw new Error('INVALID_SNAPSHOT_JSON')}
       if(snapshot?.type!=='CREABUNDALO_ENCRYPTED_VAULT_SNAPSHOT'||snapshot?.version!==1)throw new Error('INVALID_SNAPSHOT_FORMAT');
       if(!snapshot.meta||snapshot.meta.id!==META_KEY||!Array.isArray(snapshot.records))throw new Error('INVALID_SNAPSHOT_CONTENT');
+      if(!snapshot.meta.vaultId) snapshot.meta.vaultId='vault_'+bytesToB64Url(randomBytes(18));
       if(meta&&!overwrite)throw new Error('VAULT_ALREADY_EXISTS');
       const ids=new Set();
       for(const r of snapshot.records){
