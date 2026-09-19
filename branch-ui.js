@@ -51,7 +51,9 @@ function save(){
   const status = window.CreaVault?.status?.();
   if(status?.initialized){
     if(status.unlocked){
-      window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'}).catch(err=>console.error('Vault save failed',err));
+      window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'})
+        .then(()=>window.CreaVaultHealth?.success?.('local'))
+        .catch(err=>{window.CreaVaultHealth?.error?.('local',err);console.error('Vault save failed',err)});
     }
     return;
   }
@@ -172,6 +174,8 @@ function render(){
   const c=current();
   $('currentMeta').textContent=`CURRENT: ${c.title} · ${c.kind.toUpperCase()} · ${c.status.toUpperCase()}`;
   document.querySelectorAll('.lens').forEach(b=>b.classList.toggle('active',b.dataset.lens===state.lens));
+  $('continuityPanel').classList.toggle('hidden',state.lens!=='continuity');
+  if(state.lens==='continuity') refreshContinuityHealth();
   applyTransform();
   save();
 }
@@ -260,6 +264,71 @@ function handleCommand(raw){
   addQuestion(text);
 }
 
+
+
+function healthClass(status){
+  if(status==='OK') return 'ok';
+  if(status==='ERROR') return 'error';
+  return 'warn';
+}
+async function refreshContinuityHealth(){
+  if(!window.CreaVaultHealth) return;
+  const h=await window.CreaVaultHealth.summary();
+  const localStatus=window.CreaVault.status();
+  const syncProvider=window.CreaVaultStorage.get('SCALEWAY_SYNC');
+  const backupProvider=window.CreaVaultStorage.get('INDEPENDENT_BACKUP');
+
+  $('healthLocalDot').className='continuity-dot '+healthClass(h.local.status);
+  $('healthLocalText').textContent=(localStatus.initialized?'Vault aanwezig':'nog niet ingericht')+' · laatste save '+h.labels.local;
+
+  $('healthScalewayDot').className='continuity-dot '+healthClass(h.scaleway.status);
+  $('healthScalewayText').textContent=(syncProvider?.mode||'onbekend')+' · sync '+h.labels.scaleway+' · verificatie '+h.labels.scalewayVerified;
+
+  $('healthBackupDot').className='continuity-dot '+healthClass(h.independent.status);
+  $('healthBackupText').textContent=(backupProvider?.mode||'onbekend')+' · backup '+h.labels.independent+' · verificatie '+h.labels.independentVerified;
+
+  $('healthRestoreDot').className='continuity-dot '+healthClass(h.restore.lastError?'ERROR':(h.restore.lastSuccess?'OK':'UNKNOWN'));
+  $('healthRestoreText').textContent='laatste herstel '+h.labels.restore+(h.restore.lastSource?' · '+h.restore.lastSource:'');
+}
+async function sha256Text(text){
+  const bytes=new TextEncoder().encode(text);
+  const digest=await crypto.subtle.digest('SHA-256',bytes);
+  return [...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function verifyContinuity(){
+  const expected=await window.CreaVault.exportEncryptedSnapshot();
+  const expectedHash=await sha256Text(expected);
+  const results=[];
+
+  try{
+    if(window.CreaVaultStorage.get('SCALEWAY_SYNC')?.mode==='AVAILABLE'){
+      const cloud=await window.CreaVaultStorage.read('SCALEWAY_SYNC',{privacyClass:'VAULT_HIGH'});
+      if(!cloud) throw new Error('NO_SCALEWAY_SNAPSHOT');
+      if(await sha256Text(cloud)!==expectedHash) throw new Error('SCALEWAY_HASH_MISMATCH');
+      await window.CreaVaultHealth.verified('scaleway');
+      results.push('Scaleway OK');
+    }
+  }catch(err){
+    await window.CreaVaultHealth.error('scaleway',err);
+    results.push('Scaleway fout');
+  }
+
+  try{
+    if(window.CreaVaultStorage.get('INDEPENDENT_BACKUP')?.mode==='AVAILABLE'){
+      const backup=await window.CreaVaultStorage.read('INDEPENDENT_BACKUP',{privacyClass:'VAULT_HIGH'});
+      if(!backup) throw new Error('NO_INDEPENDENT_BACKUP');
+      if(await sha256Text(backup)!==expectedHash) throw new Error('BACKUP_HASH_MISMATCH');
+      await window.CreaVaultHealth.verified('independent');
+      results.push('Backup OK');
+    }
+  }catch(err){
+    await window.CreaVaultHealth.error('independent',err);
+    results.push('Backup fout');
+  }
+
+  await refreshContinuityHealth();
+  vaultMessage(results.length?results.join(' · '):'Geen actieve externe provider om te controleren.');
+}
 
 function vaultMessage(message,isError=false){
   vaultStatusText.textContent=message;
@@ -396,8 +465,10 @@ async function syncToScaleway(){
     if(!status.initialized) throw new Error('VAULT_NOT_INITIALIZED');
     const snapshot=await window.CreaVault.exportEncryptedSnapshot();
     await window.CreaVaultStorage.write('SCALEWAY_SYNC',snapshot,{privacyClass:'VAULT_HIGH'});
+    await window.CreaVaultHealth?.success?.('scaleway');
     vaultMessage('Encrypted Vault naar Scaleway gesynchroniseerd. Alleen ciphertext is geüpload.');
   }catch(err){
+    await window.CreaVaultHealth?.error?.('scaleway',err);
     vaultMessage('Scaleway sync mislukt: '+err.message,true);
   }
 }
@@ -416,8 +487,10 @@ async function restoreFromScaleway(){
     updateVaultUi();
     render();
     requestAnimationFrame(centerCurrent);
+    await window.CreaVaultHealth?.restored?.('SCALEWAY_SYNC');
     vaultMessage('Scaleway-snapshot hersteld ('+result.importedRecords+' encrypted record(s)). Ontgrendel met de oorspronkelijke wachtzin of recovery key.');
   }catch(err){
+    await window.CreaVaultHealth?.restoreError?.('SCALEWAY_SYNC',err);
     vaultMessage('Cloudherstel mislukt: '+err.message,true);
   }
 }
@@ -444,8 +517,10 @@ async function backupNowIndependent(){
   try{
     const snapshot=await window.CreaVault.exportEncryptedSnapshot();
     const result=await window.CreaVaultStorage.write('INDEPENDENT_BACKUP',snapshot,{privacyClass:'VAULT_HIGH'});
+    await window.CreaVaultHealth?.success?.('independent');
     vaultMessage('Onafhankelijke encrypted backup geschreven: '+result.filename);
   }catch(err){
+    await window.CreaVaultHealth?.error?.('independent',err);
     vaultMessage('Onafhankelijke backup mislukt: '+err.message,true);
   }
 }
@@ -464,8 +539,10 @@ async function restoreLatestIndependent(){
     updateVaultUi();
     render();
     requestAnimationFrame(centerCurrent);
+    await window.CreaVaultHealth?.restored?.('INDEPENDENT_BACKUP');
     vaultMessage('Laatste onafhankelijke backup hersteld ('+result.importedRecords+' encrypted record(s)). Ontgrendel daarna de Vault.');
   }catch(err){
+    await window.CreaVaultHealth?.restoreError?.('INDEPENDENT_BACKUP',err);
     vaultMessage('Backupherstel mislukt: '+err.message,true);
   }
 }
@@ -520,6 +597,7 @@ $('backupFolderButton').onclick=chooseBackupFolder;
 $('backupAuthorizeButton').onclick=authorizeBackupFolder;
 $('backupNowButton').onclick=backupNowIndependent;
 $('backupRestoreButton').onclick=restoreLatestIndependent;
+$('verifyContinuityButton').onclick=verifyContinuity;
 $('vaultImportButton').onclick=()=>vaultImportInput.click();
 vaultImportInput.onchange=()=>importVaultSnapshot(vaultImportInput.files?.[0]);
 $('copyRecoveryButton').onclick=async()=>{
