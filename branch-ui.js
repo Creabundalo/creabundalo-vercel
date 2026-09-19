@@ -684,6 +684,7 @@ async function refreshContinuityHealth(){
 
   const warnings=window.CreaVaultPolicy?.continuityWarnings?.(h,{
     syncEnabled:syncProvider?.mode==='AVAILABLE',
+    semanticSyncEnabled:syncProvider?.mode==='AVAILABLE',
     backupEnabled:backupProvider?.mode==='AVAILABLE'
   }) || [];
   const policyText=$('healthPolicyText');
