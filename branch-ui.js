@@ -283,6 +283,18 @@ function updateVaultUi(){
   const syncMode=window.CreaVaultStorage?.get?.('SCALEWAY_SYNC')?.mode || 'DISABLED';
   $('scalewaySyncButton').disabled=!status.initialized || syncMode!=='AVAILABLE';
   $('scalewayRestoreButton').disabled=syncMode!=='AVAILABLE';
+
+  const backupProvider=window.CreaVaultStorage?.get?.('INDEPENDENT_BACKUP');
+  const backupMode=backupProvider?.mode || 'DISABLED';
+  $('backupFolderButton').disabled=backupMode==='DISABLED';
+  $('backupAuthorizeButton').disabled=!['NEEDS_AUTH'].includes(backupMode);
+  $('backupNowButton').disabled=!status.initialized || backupMode!=='AVAILABLE';
+  $('backupRestoreButton').disabled=backupMode!=='AVAILABLE';
+  const backupStatus=$('backupFolderStatus');
+  if(backupMode==='DISABLED') backupStatus.textContent='Deze browser ondersteunt geen directe backupmap. Gebruik encrypted snapshot export.';
+  if(backupMode==='NEEDS_FOLDER') backupStatus.textContent='Nog geen backupmap gekozen. Kies bij voorkeur een Proton Drive- of NAS-synced map.';
+  if(backupMode==='NEEDS_AUTH') backupStatus.textContent='Backupmap '+(backupProvider?.folderName||'')+' is bekend, maar heeft opnieuw toestemming nodig.';
+  if(backupMode==='AVAILABLE') backupStatus.textContent='Backupmap actief: '+(backupProvider?.folderName||'gekozen map')+'. Nieuwe backups krijgen een eigen tijdstempel.';
   if(status.mode==='UNINITIALIZED') vaultMessage('Nog geen kluis. Tot setup gebruikt deze v0 alleen lokale prototype-opslag.');
   if(status.mode==='LOCKED') vaultMessage('Kluis bestaat en is vergrendeld. Er wordt geen plaintext state naar localStorage geschreven.');
   if(status.mode==='UNLOCKED') vaultMessage('Kluis ontgrendeld. Branch-state wordt encrypted in IndexedDB opgeslagen.');
@@ -409,6 +421,54 @@ async function restoreFromScaleway(){
     vaultMessage('Cloudherstel mislukt: '+err.message,true);
   }
 }
+async function chooseBackupFolder(){
+  try{
+    await window.CreaVaultStorage.configureIndependentBackup({prompt:true});
+    updateVaultUi();
+    vaultMessage('Onafhankelijke backupmap gekoppeld. Creabundalo schrijft hier alleen encrypted snapshots.');
+  }catch(err){
+    if(err.name==='AbortError') return;
+    vaultMessage('Backupmap kiezen mislukt: '+err.message,true);
+  }
+}
+async function authorizeBackupFolder(){
+  try{
+    await window.CreaVaultStorage.authorizeIndependentBackup();
+    updateVaultUi();
+    vaultMessage('Toegang tot de backupmap bevestigd.');
+  }catch(err){
+    vaultMessage('Geen toegang tot backupmap: '+err.message,true);
+  }
+}
+async function backupNowIndependent(){
+  try{
+    const snapshot=await window.CreaVault.exportEncryptedSnapshot();
+    const result=await window.CreaVaultStorage.write('INDEPENDENT_BACKUP',snapshot,{privacyClass:'VAULT_HIGH'});
+    vaultMessage('Onafhankelijke encrypted backup geschreven: '+result.filename);
+  }catch(err){
+    vaultMessage('Onafhankelijke backup mislukt: '+err.message,true);
+  }
+}
+async function restoreLatestIndependent(){
+  try{
+    const snapshot=await window.CreaVaultStorage.read('INDEPENDENT_BACKUP',{privacyClass:'VAULT_HIGH'});
+    if(!snapshot){
+      vaultMessage('Geen versioned backup gevonden in deze map.',true);
+      return;
+    }
+    const status=window.CreaVault.status();
+    if(status.initialized && !confirm('De laatste backup vervangt de lokale Vault. Doorgaan?')) return;
+    const result=await window.CreaVault.importEncryptedSnapshot(snapshot,{overwrite:true});
+    localStorage.removeItem(KEY);
+    state=structuredClone(seed);
+    updateVaultUi();
+    render();
+    requestAnimationFrame(centerCurrent);
+    vaultMessage('Laatste onafhankelijke backup hersteld ('+result.importedRecords+' encrypted record(s)). Ontgrendel daarna de Vault.');
+  }catch(err){
+    vaultMessage('Backupherstel mislukt: '+err.message,true);
+  }
+}
 async function importVaultSnapshot(file){
   if(!file) return;
   const text=await file.text();
@@ -456,6 +516,10 @@ $('vaultBackupButton').onclick=exportVaultSnapshot;
 $('scalewayConnectButton').onclick=connectScaleway;
 $('scalewaySyncButton').onclick=syncToScaleway;
 $('scalewayRestoreButton').onclick=restoreFromScaleway;
+$('backupFolderButton').onclick=chooseBackupFolder;
+$('backupAuthorizeButton').onclick=authorizeBackupFolder;
+$('backupNowButton').onclick=backupNowIndependent;
+$('backupRestoreButton').onclick=restoreLatestIndependent;
 $('vaultImportButton').onclick=()=>vaultImportInput.click();
 vaultImportInput.onchange=()=>importVaultSnapshot(vaultImportInput.files?.[0]);
 $('copyRecoveryButton').onclick=async()=>{
