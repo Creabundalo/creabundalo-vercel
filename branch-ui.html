@@ -66,8 +66,23 @@
           <div class="vault-actions">
             <button id="refreshAuditButton" class="ghost" type="button">Vernieuw</button>
             <button id="verifyReplayButton" class="ghost" type="button">Replay check</button>
+            <button id="exportDeviceBundleButton" class="ghost" type="button">Export device bundle</button>
+            <button id="importDeviceBundleButton" class="ghost" type="button">Import device bundle</button>
+            <input id="deviceBundleInput" class="hidden" type="file" accept=".json,application/json" />
           </div>
         </div>
+        <section class="continuity-retention">
+          <div>
+            <div class="label">APPARAAT</div>
+            <strong id="deviceIdentityText">laden…</strong>
+            <small id="deviceClockText"></small>
+          </div>
+          <div class="vault-actions">
+            <button id="renameDeviceButton" class="ghost" type="button">Naam apparaat</button>
+          </div>
+        </section>
+        <div id="multiDeviceStatus" class="continuity-policy">Nog geen multi-device merge uitgevoerd.</div>
+        <div id="conflictList" class="audit-list"></div>
         <div id="auditList" class="audit-list"></div>
         <p id="replayStatus" class="continuity-policy">Replay nog niet gecontroleerd.</p>
         <p class="continuity-policy">Zelfde eventlogica voor eigen UI, overlay en toekomstige connectors.</p>
