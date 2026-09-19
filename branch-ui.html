@@ -16,6 +16,7 @@
         <span class="muted">Branch UI · v0</span>
       </div>
       <div class="where">
+        <button id="vaultButton" class="vault-pill" type="button">VAULT · UIT</button>
         <span id="depthBadge" class="badge">DEPTH 0</span>
         <button id="backButton" class="ghost" type="button">← terug</button>
         <button id="rootButton" class="ghost" type="button">⌂ root</button>
@@ -72,6 +73,47 @@
     </section>
   </main>
 
+  <dialog id="vaultDialog" class="vault-dialog">
+    <div class="vault-head">
+      <div>
+        <div class="label">CREABUNDALO VAULT</div>
+        <h2>Privacykluis</h2>
+      </div>
+      <button id="vaultCloseButton" class="ghost" type="button">Sluiten</button>
+    </div>
+    <p id="vaultStatusText" class="vault-status">Status laden…</p>
+
+    <section class="vault-section">
+      <label for="vaultPassphrase">Wachtzin</label>
+      <input id="vaultPassphrase" type="password" autocomplete="current-password" placeholder="Minimaal 12 tekens" />
+      <div class="vault-actions">
+        <button id="vaultSetupButton" class="primary-small" type="button">Maak lokale kluis</button>
+        <button id="vaultUnlockButton" class="ghost" type="button">Ontgrendel</button>
+      </div>
+    </section>
+
+    <section class="vault-section">
+      <label for="vaultRecoveryInput">Recovery key</label>
+      <input id="vaultRecoveryInput" type="text" autocomplete="off" placeholder="Gebruik alleen voor herstel" />
+      <button id="vaultRecoverButton" class="ghost" type="button">Herstel toegang</button>
+    </section>
+
+    <section id="recoveryBox" class="vault-section recovery-box hidden">
+      <strong>Bewaar deze recovery key buiten Creabundalo.</strong>
+      <textarea id="vaultRecoveryOutput" rows="3" readonly></textarea>
+      <button id="copyRecoveryButton" class="ghost" type="button">Kopieer recovery key</button>
+    </section>
+
+    <section class="vault-section">
+      <div class="vault-actions">
+        <button id="vaultBackupButton" class="ghost" type="button">Exporteer encrypted snapshot</button>
+        <button id="vaultLockButton" class="ghost" type="button">Vergrendel</button>
+      </div>
+      <small>v0: lokale encryptie. Scaleway-sync en onafhankelijke backup volgen als adapters.</small>
+    </section>
+  </dialog>
+
+  <script src="vault-core.js"></script>
   <script src="branch-ui.js"></script>
 </body>
 </html>
