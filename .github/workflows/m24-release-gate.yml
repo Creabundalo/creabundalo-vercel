@@ -8,6 +8,7 @@ on:
       - 'm24.js'
       - 'm24-*.js'
       - 'm24-*.json'
+      - 'api/m24/**'
       - 'M24-*.md'
       - '.github/workflows/m24-release-gate.yml'
   workflow_dispatch:
@@ -35,7 +36,7 @@ jobs:
             m24-enrichment.js m24-enrichment-test.js m24-enrichment-ui.js \
             m24-replay.js m24-replay-test.js m24-replay-e2e-test.js m24-verified-btc-2019.json m24-verified-btc-2021.json \
             m24-cohort.js m24-cohort-test.js m24-cohort-ui.js \
-            m24-case-btc-2021.json M24-REQUIREMENTS.md M24-TECHNICAL-DESIGN.md M24-SOURCE-COMPARISON.md M24-DERIVATIVES.md M24-MACRO-CROSS-ASSET.md M24-MEANING-WORLD.md M24-BACKTEST.md M24-RELEASE-CHECKLIST.md; do test -f "$f"; done
+            m24-case-btc-2021.json m24-vercel-live.js m24-vercel-live-test.js api/m24/market.js api/m24/cross.js M24-VERCEL-RUNTIME.txt M24-REQUIREMENTS.md M24-TECHNICAL-DESIGN.md M24-SOURCE-COMPARISON.md M24-DERIVATIVES.md M24-MACRO-CROSS-ASSET.md M24-MEANING-WORLD.md M24-BACKTEST.md M24-RELEASE-CHECKLIST.md; do test -f "$f"; done
 
       - name: JavaScript syntax
         run: |
@@ -97,6 +98,17 @@ jobs:
           test -f m24.css
           test -f m24.js
           node -e "const v=require('./vercel.json'); if(v.builds) throw new Error('vercel.json must not restrict static deployment to index.html'); const r=(v.rewrites||[]).find(x=>x.source==='/'); if(!r || r.destination!=='/m24.html') throw new Error('root must rewrite to /m24.html');"
+
+      - name: Vercel live API contract test
+        run: |
+          test -f api/m24/market.js
+          test -f api/m24/cross.js
+          test -f m24-vercel-live.js
+          grep -q '/api/m24/market' m24-vercel-live.js
+          grep -q '/api/m24/cross' m24-vercel-live.js
+          grep -q 'm24-vercel-live.js' m24.html
+          grep -q 'LIVE VERCEL' m24.html
+          node m24-vercel-live-test.js
       - name: Cross-resolution Lab contract test
         run: node m24-resolution-test.js
       - name: Coinbase adapter contract test
@@ -230,13 +242,16 @@ jobs:
           fi
           grep -q 'm24.css' dist-m24-vercel/m24.html
           grep -q 'm24-world.js' dist-m24-vercel/m24.html
-          (cd dist-m24-vercel && zip -r ../Creabundalo_M24_D0.11.10_VERCEL_TESTED.zip .)
+          grep -q 'm24-vercel-live.js' dist-m24-vercel/m24.html
+          test -f dist-m24-vercel/api/m24/market.js
+          test -f dist-m24-vercel/api/m24/cross.js
+          (cd dist-m24-vercel && zip -r ../Creabundalo_M24_D0.11.11_LIVE_VERCEL_TESTED.zip .)
 
       - name: Upload tested Vercel bundle
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: m24-d0-11-10-vercel-tested
+          name: m24-d0-11-11-live-vercel-tested
           path: Creabundalo_M24_D0.11.10_VERCEL_TESTED.zip
           if-no-files-found: error
           retention-days: 14
