@@ -38,7 +38,20 @@ globalThis.M24VercelLive = (() => {
         const r=await this.fetchImpl('/api/m24/cross',{headers:{Accept:'application/json'},cache:'no-store'});
         if(!r?.ok)throw new Error('CROSS_HTTP_'+(r?.status??'NETWORK'));
         const x=await r.json();
-        return (x.items||[]).map(i=>({name:i.name,direction:i.direction,state:i.state,className:i.className,status:i.status,asOf:i.asOf,sourceQuality:i.quality}));
+        return (x.items||[]).map(i=>({
+          key:i.key,
+          name:i.name,
+          direction:i.direction,
+          state:i.state,
+          className:i.className,
+          status:i.status,
+          asOf:i.asOf,
+          sourceQuality:i.quality,
+          sourceUrl:i.source||null,
+          sourceFreshness:x.freshness||'DAILY_DELAYED',
+          sourceRetrievedAt:x.retrievedAt||null,
+          provenance:i.source?[{sourceId:'FRED',quality:i.quality||'OFFICIAL_OR_OFFICIAL_UPSTREAM',url:i.source,retrievedAt:x.retrievedAt||null}]:[]
+        }));
       }catch{return this.fallback.getCrossAssetState()}
     }
     async getHistoricalCase(id){return this.fallback.getHistoricalCase(id)}
