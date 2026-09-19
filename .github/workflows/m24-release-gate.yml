@@ -213,3 +213,19 @@ jobs:
           grep -q 'Laad historische case-batch' m24-cohort-ui.js
           grep -q 'm24-enrichment-ui.js' m24-lab-ui.js
           grep -q "LAB_RESULT" m24.js
+
+      - name: Package tested Vercel bundle
+        if: success()
+        run: |
+          zip -r Creabundalo_M24_D0.11.10_VERCEL_TESTED.zip . \
+            -x '.git/*' \
+            -x 'Creabundalo_M24_D0.11.10_VERCEL_TESTED.zip'
+
+      - name: Upload tested Vercel bundle
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: m24-d0-11-10-vercel-tested
+          path: Creabundalo_M24_D0.11.10_VERCEL_TESTED.zip
+          if-no-files-found: error
+          retention-days: 14
