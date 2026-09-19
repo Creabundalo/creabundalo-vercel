@@ -318,15 +318,28 @@ function handleCommand(raw){
 
 
 
-function renderAudit(){
+async function renderAudit(){
   const list=$('auditList');
   if(!list) return;
-  const events=window.CreaSemanticCore.audit(state,{limit:120}).slice().reverse();
+
+  let events=[];
+  const vault=window.CreaVault?.status?.();
+  if(vault?.initialized && vault.unlocked){
+    try{
+      await queueSemanticCommit();
+      events=(await window.CreaSemanticEventStore.listEvents()).slice(-120).reverse();
+    }catch{
+      events=window.CreaSemanticCore.audit(state,{limit:120}).slice().reverse();
+    }
+  }else{
+    events=window.CreaSemanticCore.audit(state,{limit:120}).slice().reverse();
+  }
+
   list.innerHTML='';
   if(!events.length){
     const empty=document.createElement('div');
     empty.className='audit-empty';
-    empty.textContent='Nog geen Semantic Core-events in deze state.';
+    empty.textContent='Nog geen Semantic Core-events.';
     list.appendChild(empty);
     return;
   }
@@ -339,7 +352,8 @@ function renderAudit(){
     const time=new Date(event.occurredAt);
     left.innerHTML='<strong></strong><small></small>';
     left.querySelector('strong').textContent=event.type;
-    left.querySelector('small').textContent=Number.isNaN(time.getTime())?event.occurredAt:time.toLocaleString('nl-NL');
+    left.querySelector('small').textContent=(Number.isNaN(time.getTime())?event.occurredAt:time.toLocaleString('nl-NL'))+
+      (Number.isFinite(Number(event.streamPosition))?' · #'+event.streamPosition:'');
     mid.innerHTML='<code></code><small></small>';
     mid.querySelector('code').textContent=event.eventId;
     mid.querySelector('small').textContent=(event.source?.surface||'')+(event.source?.adapter?' · '+event.source.adapter:'');
@@ -347,6 +361,32 @@ function renderAudit(){
     right.querySelector('code').textContent=JSON.stringify(event.payload);
     row.append(left,mid,right);
     list.appendChild(row);
+  }
+}
+
+async function verifySemanticReplay(){
+  const status=$('replayStatus');
+  const vault=window.CreaVault?.status?.();
+  if(!vault?.initialized || !vault.unlocked){
+    status.textContent='Replay check vereist een ontgrendelde Vault.';
+    status.classList.add('alert');
+    return;
+  }
+  status.textContent='Replay controleren…';
+  status.classList.remove('alert');
+  try{
+    await commitSemanticNow();
+    const result=await window.CreaSemanticEventStore.verifyReplay(state);
+    if(result.ok){
+      status.textContent='REPLAY OK · '+result.eventCount+' events · hash '+result.currentHash.slice(0,12)+'…';
+      status.classList.remove('alert');
+    }else{
+      status.textContent='REPLAY MISMATCH · projection '+(result.currentHash||'').slice(0,12)+'… · replay '+(result.replayHash||'').slice(0,12)+'…';
+      status.classList.add('alert');
+    }
+  }catch(err){
+    status.textContent='Replay check fout: '+err.message;
+    status.classList.add('alert');
   }
 }
 
@@ -949,6 +989,7 @@ $('verifyContinuityButton').onclick=verifyContinuity;
 $('analyzeRetentionButton').onclick=analyzeRetention;
 $('applyRetentionButton').onclick=applyRetention;
 $('refreshAuditButton').onclick=renderAudit;
+$('verifyReplayButton').onclick=verifySemanticReplay;
 $('vaultImportButton').onclick=()=>vaultImportInput.click();
 vaultImportInput.onchange=()=>importVaultSnapshot(vaultImportInput.files?.[0]);
 $('copyRecoveryButton').onclick=async()=>{
