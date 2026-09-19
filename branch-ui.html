@@ -82,6 +82,17 @@
             <div><strong>Restore</strong><small id="healthRestoreText">laden…</small></div>
           </article>
         </div>
+        <section class="continuity-retention">
+          <div>
+            <div class="label">RETENTIEPOLICY</div>
+            <strong>14 dagelijks · 12 wekelijks · 24 maandelijks</strong>
+            <small id="retentionSummary">Nog niet geanalyseerd.</small>
+          </div>
+          <div class="vault-actions">
+            <button id="analyzeRetentionButton" class="ghost" type="button">Analyseer backups</button>
+            <button id="applyRetentionButton" class="ghost" type="button">Ruim kandidaten op</button>
+          </div>
+        </section>
         <p id="healthPolicyText" class="continuity-policy">Privacy degradation is nooit een geldige fallback.</p>
       </section>
       <div class="zoom">
@@ -170,6 +181,7 @@
   <script src="vault-core.js"></script>
   <script src="vault-storage.js"></script>
   <script src="vault-health.js"></script>
+  <script src="vault-policy.js"></script>
   <script src="branch-ui.js"></script>
 </body>
 </html>
