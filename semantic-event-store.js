@@ -169,6 +169,139 @@
     };
   }
 
+
+  function mutationKey(event){
+    const p=event?.payload||{};
+    switch(event?.type){
+      case 'NODE_KIND_SET': return p.nodeId ? 'node:'+p.nodeId+':kind' : null;
+      case 'NODE_STATUS_SET': return p.nodeId ? 'node:'+p.nodeId+':status' : null;
+      case 'NODE_REPARENTED': return p.nodeId ? 'node:'+p.nodeId+':parentId' : null;
+      case 'NODE_EDGE_LABEL_SET': return p.nodeId ? 'node:'+p.nodeId+':edgeLabel' : null;
+      case 'NODE_PARKED': return p.nodeId ? 'node:'+p.nodeId+':status' : null;
+      default: return null;
+    }
+  }
+
+  function sharedEvents(events){
+    return events.filter(e=>(e.causal?.scope||window.CreaSemanticCore.eventScope(e.type))==='shared');
+  }
+
+  function bundleFromEvents(events,{vaultId=null}={}){
+    const device=window.CreaSemanticDevice?.status?.()||{};
+    return {
+      type:'CREABUNDALO_SEMANTIC_EVENT_BUNDLE',
+      version:1,
+      createdAt:new Date().toISOString(),
+      vaultId,
+      sourceDeviceId:device.deviceId||null,
+      events:sharedEvents(events)
+    };
+  }
+
+  async function exportSharedBundle(){
+    return bundleFromEvents(await listEvents(),{vaultId:window.CreaVault.status().vaultId||null});
+  }
+
+  function validateBundle(bundle){
+    if(bundle?.type!=='CREABUNDALO_SEMANTIC_EVENT_BUNDLE'||bundle?.version!==1||!Array.isArray(bundle.events)){
+      throw new Error('INVALID_SEMANTIC_BUNDLE');
+    }
+    const localVaultId=window.CreaVault.status().vaultId||null;
+    if(!bundle.vaultId || !localVaultId || bundle.vaultId!==localVaultId){
+      throw new Error('VAULT_LINEAGE_MISMATCH');
+    }
+    for(const event of bundle.events){
+      if(!window.CreaSemanticCore.validateEvent(event)) throw new Error('INVALID_BUNDLE_EVENT');
+      if((event.causal?.scope||window.CreaSemanticCore.eventScope(event.type))!=='shared'){
+        throw new Error('DEVICE_EVENT_IN_SHARED_BUNDLE');
+      }
+    }
+    return bundle;
+  }
+
+  function concurrentConflict(localEvent,remoteEvent){
+    const key=mutationKey(remoteEvent);
+    if(!key || key!==mutationKey(localEvent)) return false;
+    if(!localEvent.causal?.deviceId || !remoteEvent.causal?.deviceId) return false;
+    if(localEvent.causal.deviceId===remoteEvent.causal.deviceId) return false;
+    return window.CreaSemanticDevice.relation(localEvent,remoteEvent)==='concurrent';
+  }
+
+  async function previewMerge(bundle){
+    validateBundle(bundle);
+    const local=await listEvents();
+    const localIds=new Set(local.map(e=>e.eventId));
+    const incoming=bundle.events.filter(e=>!localIds.has(e.eventId));
+
+    const conflicts=[];
+    const accepted=[];
+    for(const remote of incoming){
+      const conflict=local
+        .filter(e=>mutationKey(e)===mutationKey(remote))
+        .filter(e=>concurrentConflict(e,remote))
+        .sort(window.CreaSemanticCore.compareEvents)
+        .at(-1);
+      if(conflict){
+        conflicts.push({
+          id:'conflict:'+conflict.eventId+':'+remote.eventId,
+          mutationKey:mutationKey(remote),
+          localEvent:conflict,
+          remoteEvent:remote
+        });
+      }else{
+        accepted.push(remote);
+      }
+    }
+
+    return {
+      sourceDeviceId:bundle.sourceDeviceId||null,
+      incoming:incoming.length,
+      accepted,
+      conflicts,
+      deduplicated:bundle.events.length-incoming.length
+    };
+  }
+
+  async function mergeBundle(bundle,currentState){
+    const preview=await previewMerge(bundle);
+    if(!preview.accepted.length){
+      return {...preview,state:currentState,appended:0};
+    }
+
+    for(const event of preview.accepted){
+      window.CreaSemanticDevice?.observe?.(event);
+    }
+
+    const metadata=await window.CreaVault.listRecordMetadata(EVENT_PREFIX);
+    const existingIds=new Set(metadata.map(m=>m.id));
+    const append=preview.accepted
+      .filter(e=>!existingIds.has(eventRecordId(e.eventId)))
+      .map(e=>({id:eventRecordId(e.eventId),value:e,privacyClass:'PRIVATE'}));
+
+    const all=[...(await listEvents()),...preview.accepted];
+    const replayed=window.CreaSemanticCore.replay(all);
+    replayed.integrations=structuredClone(currentState?.integrations||{});
+
+    await window.CreaVault.commitJSONBatch({
+      append,
+      upsert:[{
+        id:PROJECTION_ID,
+        value:projectionEnvelope(replayed),
+        privacyClass:'PRIVATE'
+      }]
+    });
+
+    return {
+      ...preview,
+      state:replayed,
+      appended:append.length
+    };
+  }
+
+  function resolutionPayload(event){
+    return structuredClone(event?.payload||{});
+  }
+
   async function stats(){
     const [events,projection,legacy]=await Promise.all([
       listEvents(),
@@ -186,6 +319,7 @@
 
   window.CreaSemanticEventStore={
     EVENT_PREFIX,PROJECTION_ID,LEGACY_AUDIT_ID,
-    ensureMigrated,commit,restore,listEvents,verifyReplay,stats
+    ensureMigrated,commit,restore,listEvents,verifyReplay,stats,
+    mutationKey,exportSharedBundle,previewMerge,mergeBundle,resolutionPayload
   };
 })();

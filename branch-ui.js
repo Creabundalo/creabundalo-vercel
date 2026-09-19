@@ -42,6 +42,8 @@ const vaultImportInput = $('vaultImportInput');
 const scalewaySyncToken = $('scalewaySyncToken');
 const overlayExtensionId = $('overlayExtensionId');
 const overlayBridgeStatus = $('overlayBridgeStatus');
+const deviceBundleInput = $('deviceBundleInput');
+let multiDeviceConflicts = [];
 
 function uid(prefix='n'){
   return window.CreaSemanticCore.uid(prefix);
@@ -317,6 +319,190 @@ function handleCommand(raw){
 
 
 
+
+
+function updateDeviceUi(){
+  const d=window.CreaSemanticDevice?.status?.()||{};
+  const identity=$('deviceIdentityText');
+  const clock=$('deviceClockText');
+  if(!d.initialized){
+    identity.textContent='Device identity niet geïnitialiseerd';
+    clock.textContent='';
+    return;
+  }
+  identity.textContent=(d.label||'Dit apparaat')+' · '+d.deviceId;
+  clock.textContent='seq '+d.seq+' · lamport '+d.lamport+' · '+Object.keys(d.vector||{}).length+' device(s) gezien';
+}
+
+async function renameDevice(){
+  const current=window.CreaSemanticDevice.status();
+  const name=prompt('Naam voor dit apparaat',current.label||'Dit apparaat');
+  if(name===null) return;
+  await window.CreaSemanticDevice.setLabel(name);
+  updateDeviceUi();
+}
+
+function downloadJson(filename,value){
+  const blob=new Blob([JSON.stringify(value,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+async function exportDeviceBundle(){
+  const vault=window.CreaVault.status();
+  if(!vault.initialized||!vault.unlocked){
+    vaultMessage('Ontgrendel eerst de Vault.',true);
+    return;
+  }
+  try{
+    await commitSemanticNow();
+    const bundle=await window.CreaSemanticEventStore.exportSharedBundle();
+    const encrypted=await window.CreaVault.sealJSON('semantic-device-bundle-v1',bundle);
+    const d=window.CreaSemanticDevice.status();
+    downloadJson(
+      'creabundalo-device-'+(d.deviceId||'unknown').slice(0,16)+'-'+new Date().toISOString().slice(0,10)+'.enc.json',
+      encrypted
+    );
+    $('multiDeviceStatus').textContent='Encrypted device bundle geëxporteerd · '+bundle.events.length+' gedeelde events.';
+  }catch(err){
+    vaultMessage('Device bundle export mislukt: '+err.message,true);
+  }
+}
+
+function conflictValue(event){
+  const p=event?.payload||{};
+  switch(event?.type){
+    case 'NODE_KIND_SET': return p.kind;
+    case 'NODE_STATUS_SET': return p.status;
+    case 'NODE_REPARENTED': return p.parentId;
+    case 'NODE_EDGE_LABEL_SET': return p.edgeLabel;
+    case 'NODE_PARKED': return 'paused';
+    default: return JSON.stringify(p);
+  }
+}
+
+function renderConflicts(){
+  const list=$('conflictList');
+  if(!list) return;
+  list.innerHTML='';
+  if(!multiDeviceConflicts.length) return;
+
+  for(const conflict of multiDeviceConflicts){
+    const row=document.createElement('article');
+    row.className='audit-row';
+
+    const left=document.createElement('div');
+    left.innerHTML='<strong></strong><small></small>';
+    left.querySelector('strong').textContent='CONFLICT';
+    left.querySelector('small').textContent=conflict.mutationKey;
+
+    const mid=document.createElement('div');
+    mid.innerHTML='<small></small><code></code>';
+    mid.querySelector('small').textContent='Lokaal';
+    mid.querySelector('code').textContent=String(conflictValue(conflict.localEvent));
+
+    const right=document.createElement('div');
+    right.innerHTML='<small></small><code></code><div class="vault-actions"></div>';
+    right.querySelector('small').textContent='Remote';
+    right.querySelector('code').textContent=String(conflictValue(conflict.remoteEvent));
+    const actions=right.querySelector('.vault-actions');
+
+    const localButton=document.createElement('button');
+    localButton.className='ghost';
+    localButton.type='button';
+    localButton.textContent='Houd lokaal';
+    localButton.onclick=()=>resolveMultiDeviceConflict(conflict.id,'local');
+
+    const remoteButton=document.createElement('button');
+    remoteButton.className='ghost';
+    remoteButton.type='button';
+    remoteButton.textContent='Neem remote';
+    remoteButton.onclick=()=>resolveMultiDeviceConflict(conflict.id,'remote');
+
+    actions.append(localButton,remoteButton);
+    row.append(left,mid,right);
+    list.appendChild(row);
+  }
+}
+
+async function resolveMultiDeviceConflict(conflictId,choice){
+  const conflict=multiDeviceConflicts.find(c=>c.id===conflictId);
+  if(!conflict) return;
+
+  try{
+    window.CreaSemanticDevice.observe(conflict.remoteEvent);
+
+    const imported=window.CreaSemanticCore.apply(state,conflict.remoteEvent,{record:true});
+    state=imported.state;
+    if(!imported.deduplicated) semanticOutbox.push(conflict.remoteEvent);
+
+    const winner=choice==='remote'?conflict.remoteEvent:conflict.localEvent;
+    coreDispatch(
+      winner.type,
+      window.CreaSemanticEventStore.resolutionPayload(winner),
+      {surface:'conflict-resolution',actor:'user'}
+    );
+
+    await commitSemanticNow();
+    multiDeviceConflicts=multiDeviceConflicts.filter(c=>c.id!==conflictId);
+    render();
+    renderConflicts();
+    updateDeviceUi();
+    $('multiDeviceStatus').textContent=multiDeviceConflicts.length
+      ? multiDeviceConflicts.length+' conflict(en) wachten nog op keuze.'
+      : 'Alle multi-device conflicten opgelost en als causal resolution-events vastgelegd.';
+  }catch(err){
+    vaultMessage('Conflict oplossen mislukt: '+err.message,true);
+  }
+}
+
+async function importDeviceBundle(file){
+  if(!file) return;
+  const vault=window.CreaVault.status();
+  if(!vault.initialized||!vault.unlocked){
+    vaultMessage('Ontgrendel eerst de Vault.',true);
+    deviceBundleInput.value='';
+    return;
+  }
+
+  try{
+    await commitSemanticNow();
+    const envelope=JSON.parse(await file.text());
+    const bundle=await window.CreaVault.openJSON('semantic-device-bundle-v1',envelope);
+    const preview=await window.CreaSemanticEventStore.previewMerge(bundle);
+    const result=await window.CreaSemanticEventStore.mergeBundle(bundle,state);
+
+    state=window.CreaSemanticCore.ensureState(result.state||state);
+    semanticOutbox=[];
+    semanticRevision=0;
+    semanticCommittedRevision=0;
+    multiDeviceConflicts=preview.conflicts;
+
+    render();
+    centerCurrent();
+    renderConflicts();
+    updateDeviceUi();
+
+    $('multiDeviceStatus').textContent=
+      'Import: '+preview.incoming+' nieuw · '+result.appended+' conflictvrij gemerged · '+
+      preview.conflicts.length+' conflict(en) · '+preview.deduplicated+' al bekend.';
+
+    if(preview.conflicts.length){
+      vaultMessage('Multi-device merge bevat '+preview.conflicts.length+' expliciete conflict(en). Kies per conflict lokaal of remote.',true);
+    }else{
+      vaultMessage('Multi-device bundle conflictvrij gemerged.');
+    }
+  }catch(err){
+    $('multiDeviceStatus').textContent='Import mislukt: '+err.message;
+    vaultMessage('Device bundle import mislukt: '+err.message,true);
+  }finally{
+    deviceBundleInput.value='';
+  }
+}
 
 async function renderAudit(){
   const list=$('auditList');
@@ -990,6 +1176,10 @@ $('analyzeRetentionButton').onclick=analyzeRetention;
 $('applyRetentionButton').onclick=applyRetention;
 $('refreshAuditButton').onclick=renderAudit;
 $('verifyReplayButton').onclick=verifySemanticReplay;
+$('renameDeviceButton').onclick=renameDevice;
+$('exportDeviceBundleButton').onclick=exportDeviceBundle;
+$('importDeviceBundleButton').onclick=()=>deviceBundleInput.click();
+deviceBundleInput.onchange=()=>importDeviceBundle(deviceBundleInput.files?.[0]);
 $('vaultImportButton').onclick=()=>vaultImportInput.click();
 vaultImportInput.onchange=()=>importVaultSnapshot(vaultImportInput.files?.[0]);
 $('copyRecoveryButton').onclick=async()=>{
@@ -1023,6 +1213,8 @@ viewport.addEventListener('pointerup',()=>{dragging=false;dragStart=null});
 viewport.addEventListener('pointercancel',()=>{dragging=false;dragStart=null});
 
 (async function startCreabundalo(){
+  await window.CreaSemanticDevice.init();
+  updateDeviceUi();
   await initVaultUI();
   render();
   requestAnimationFrame(centerCurrent);

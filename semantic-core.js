@@ -42,8 +42,11 @@
     }
     return false;
   }
+  function eventScope(type){
+    return ['NODE_FOCUSED','LENS_SET'].includes(type) ? 'device' : 'shared';
+  }
   function makeEvent(type,payload={},source={}){
-    return {
+    const event={
       schema:SCHEMA,
       eventId:uid(),
       type:String(type),
@@ -56,6 +59,10 @@
       },
       payload
     };
+    if(window.CreaSemanticDevice?.status?.().initialized){
+      window.CreaSemanticDevice.stamp(event,{scope:eventScope(event.type)});
+    }
+    return event;
   }
   function validateEvent(event){
     return !!(
@@ -198,15 +205,29 @@
   function emptyState(){
     return ensureState({nodes:[],currentId:null,lens:'all'});
   }
+  function compareEvents(a,b){
+    if(a.type==='PROJECTION_SEEDED' && b.type!=='PROJECTION_SEEDED') return -1;
+    if(b.type==='PROJECTION_SEEDED' && a.type!=='PROJECTION_SEEDED') return 1;
+
+    const ac=a.causal,bc=b.causal;
+    if(ac?.deviceId && bc?.deviceId){
+      const al=Number(ac.lamport)||0,bl=Number(bc.lamport)||0;
+      if(al!==bl) return al-bl;
+      const device=String(ac.deviceId).localeCompare(String(bc.deviceId));
+      if(device!==0) return device;
+      const seq=(Number(ac.seq)||0)-(Number(bc.seq)||0);
+      if(seq!==0) return seq;
+    }
+
+    const ap=Number.isFinite(Number(a.streamPosition))?Number(a.streamPosition):Number.MAX_SAFE_INTEGER;
+    const bp=Number.isFinite(Number(b.streamPosition))?Number(b.streamPosition):Number.MAX_SAFE_INTEGER;
+    if(ap!==bp) return ap-bp;
+    const at=Date.parse(a.occurredAt)||0,bt=Date.parse(b.occurredAt)||0;
+    if(at!==bt) return at-bt;
+    return String(a.eventId).localeCompare(String(b.eventId));
+  }
   function replay(events=[]){
-    const ordered=[...events].sort((a,b)=>{
-      const ap=Number.isFinite(Number(a.streamPosition))?Number(a.streamPosition):Number.MAX_SAFE_INTEGER;
-      const bp=Number.isFinite(Number(b.streamPosition))?Number(b.streamPosition):Number.MAX_SAFE_INTEGER;
-      if(ap!==bp) return ap-bp;
-      const at=Date.parse(a.occurredAt)||0,bt=Date.parse(b.occurredAt)||0;
-      if(at!==bt) return at-bt;
-      return String(a.eventId).localeCompare(String(b.eventId));
-    });
+    const ordered=[...events].sort(compareEvents);
     let state=emptyState();
     for(const event of ordered){
       const result=apply(state,event,{record:true});
@@ -228,6 +249,6 @@
 
   window.CreaSemanticCore={
     SCHEMA,VERSION,uid,safeText,ensureState,byId,ancestors,
-    makeEvent,validateEvent,apply,dispatch,importEvent,audit,emptyState,replay,projection
+    makeEvent,validateEvent,apply,dispatch,importEvent,audit,emptyState,replay,projection,eventScope,compareEvents
   };
 })();
