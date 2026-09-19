@@ -52,7 +52,10 @@ function save(){
   if(status?.initialized){
     if(status.unlocked){
       window.CreaVault.saveJSON(KEY,state,{privacyClass:'PRIVATE'})
-        .then(()=>window.CreaVaultHealth?.success?.('local'))
+        .then(async()=>{
+          await window.CreaVaultHealth?.success?.('local');
+          window.CreaVaultPolicy?.maybeAutoContinuity?.().catch(()=>{});
+        })
         .catch(err=>{window.CreaVaultHealth?.error?.('local',err);console.error('Vault save failed',err)});
     }
     return;
@@ -289,6 +292,13 @@ async function refreshContinuityHealth(){
 
   $('healthRestoreDot').className='continuity-dot '+healthClass(h.restore.lastError?'ERROR':(h.restore.lastSuccess?'OK':'UNKNOWN'));
   $('healthRestoreText').textContent='laatste herstel '+h.labels.restore+(h.restore.lastSource?' · '+h.restore.lastSource:'');
+
+  const warnings=window.CreaVaultPolicy?.continuityWarnings?.(h) || [];
+  const policyText=$('healthPolicyText');
+  policyText.classList.toggle('alert',warnings.length>0);
+  policyText.textContent=warnings.length
+    ? 'Aandacht: '+warnings.join(' · ')
+    : 'Continuïteit binnen policy. Privacy degradation is nooit een geldige fallback.';
 }
 async function sha256Text(text){
   const bytes=new TextEncoder().encode(text);
@@ -328,6 +338,47 @@ async function verifyContinuity(){
 
   await refreshContinuityHealth();
   vaultMessage(results.length?results.join(' · '):'Geen actieve externe provider om te controleren.');
+}
+
+
+async function analyzeRetention(){
+  const summary=$('retentionSummary');
+  try{
+    const preview=await window.CreaVaultPolicy.retentionPreview();
+    summary.textContent=preview.total+' snapshots · bewaren '+preview.keep.length+' · opruimkandidaten '+preview.delete.length;
+    summary.dataset.deleteCount=String(preview.delete.length);
+    vaultMessage('Retentie-analyse gereed. Er is nog niets verwijderd.');
+  }catch(err){
+    summary.textContent='Analyse niet beschikbaar: '+err.message;
+    summary.dataset.deleteCount='0';
+    vaultMessage('Retentie-analyse mislukt: '+err.message,true);
+  }
+}
+async function applyRetention(){
+  const summary=$('retentionSummary');
+  let preview;
+  try{
+    preview=await window.CreaVaultPolicy.retentionPreview();
+  }catch(err){
+    vaultMessage('Retentie-analyse mislukt: '+err.message,true);
+    return;
+  }
+  if(!preview.delete.length){
+    summary.textContent=preview.total+' snapshots · niets op te ruimen';
+    return;
+  }
+  const ok=confirm(
+    preview.delete.length+' oude encrypted backup(s) verwijderen? '+
+    'Volgens de policy blijven '+preview.keep.length+' herstelpunten bewaard.'
+  );
+  if(!ok) return;
+  try{
+    const result=await window.CreaVaultPolicy.applyRetention();
+    summary.textContent='Opgeruimd '+result.deleted+' · resterende herstelpunten '+result.preview.keep.length;
+    vaultMessage(result.deleted+' oude encrypted backup(s) verwijderd volgens de retentiepolicy.');
+  }catch(err){
+    vaultMessage('Opruimen mislukt: '+err.message,true);
+  }
 }
 
 function vaultMessage(message,isError=false){
@@ -598,6 +649,8 @@ $('backupAuthorizeButton').onclick=authorizeBackupFolder;
 $('backupNowButton').onclick=backupNowIndependent;
 $('backupRestoreButton').onclick=restoreLatestIndependent;
 $('verifyContinuityButton').onclick=verifyContinuity;
+$('analyzeRetentionButton').onclick=analyzeRetention;
+$('applyRetentionButton').onclick=applyRetention;
 $('vaultImportButton').onclick=()=>vaultImportInput.click();
 vaultImportInput.onchange=()=>importVaultSnapshot(vaultImportInput.files?.[0]);
 $('copyRecoveryButton').onclick=async()=>{
@@ -633,3 +686,4 @@ viewport.addEventListener('pointercancel',()=>{dragging=false;dragStart=null});
 render();
 requestAnimationFrame(centerCurrent);
 initVaultUI();
+window.CreaVaultPolicy?.start?.();
