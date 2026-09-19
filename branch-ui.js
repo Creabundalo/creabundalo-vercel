@@ -34,6 +34,7 @@ const vaultPassphrase = $('vaultPassphrase');
 const vaultRecoveryInput = $('vaultRecoveryInput');
 const recoveryBox = $('recoveryBox');
 const vaultRecoveryOutput = $('vaultRecoveryOutput');
+const vaultImportInput = $('vaultImportInput');
 
 function uid(prefix='n'){
   return globalThis.crypto?.randomUUID ? prefix+'_'+crypto.randomUUID() : prefix+'_'+Date.now()+'_'+Math.random().toString(16).slice(2);
@@ -350,6 +351,38 @@ async function lockVault(){
   render();
   requestAnimationFrame(centerCurrent);
 }
+async function exportVaultSnapshot(){
+  try{
+    const snapshot=await window.CreaVault.exportEncryptedSnapshot();
+    await window.CreaVaultStorage.write('LOCAL_DOWNLOAD',snapshot,{
+      privacyClass:'VAULT_HIGH',
+      metadata:{filename:'creabundalo-vault-'+new Date().toISOString().slice(0,10)+'.enc.json'}
+    });
+    vaultMessage('Encrypted snapshot geëxporteerd. De opslagadapter zag alleen ciphertext.');
+  }catch(err){
+    vaultMessage('Snapshot mislukt: '+err.message,true);
+  }
+}
+async function importVaultSnapshot(file){
+  if(!file) return;
+  const text=await file.text();
+  const status=window.CreaVault.status();
+  const overwrite=!status.initialized || confirm('Deze encrypted snapshot vervangt de huidige lokale Vault. Doorgaan?');
+  if(!overwrite) return;
+  try{
+    const result=await window.CreaVault.importEncryptedSnapshot(text,{overwrite:true});
+    localStorage.removeItem(KEY);
+    state=structuredClone(seed);
+    updateVaultUi();
+    render();
+    requestAnimationFrame(centerCurrent);
+    vaultMessage('Snapshot hersteld ('+result.importedRecords+' encrypted record(s)). Ontgrendel met de oorspronkelijke wachtzin of recovery key.');
+  }catch(err){
+    vaultMessage('Herstel mislukt: '+err.message,true);
+  }finally{
+    vaultImportInput.value='';
+  }
+}
 
 $('composer').addEventListener('submit',e=>{
   e.preventDefault();
@@ -373,7 +406,9 @@ $('vaultSetupButton').onclick=setupVault;
 $('vaultUnlockButton').onclick=unlockVault;
 $('vaultRecoverButton').onclick=recoverVault;
 $('vaultLockButton').onclick=lockVault;
-$('vaultBackupButton').onclick=()=>window.CreaVault.downloadEncryptedSnapshot().catch(err=>vaultMessage('Snapshot mislukt: '+err.message,true));
+$('vaultBackupButton').onclick=exportVaultSnapshot;
+$('vaultImportButton').onclick=()=>vaultImportInput.click();
+vaultImportInput.onchange=()=>importVaultSnapshot(vaultImportInput.files?.[0]);
 $('copyRecoveryButton').onclick=async()=>{
   if(vaultRecoveryOutput.value){
     await navigator.clipboard.writeText(vaultRecoveryOutput.value);
