@@ -103,7 +103,15 @@
           </article>
           <article class="continuity-card">
             <span class="continuity-dot" id="healthScalewayDot"></span>
-            <div><strong>Scaleway sync</strong><small id="healthScalewayText">laden…</small></div>
+            <div><strong>Vault snapshot</strong><small id="healthScalewayText">laden…</small></div>
+          </article>
+          <article class="continuity-card">
+            <span class="continuity-dot" id="healthSemanticSyncDot"></span>
+            <div>
+              <strong>Semantic event sync</strong>
+              <small id="healthSemanticSyncText">laden…</small>
+              <div class="vault-actions"><button id="semanticSyncNowButton" class="ghost" type="button">Sync events nu</button></div>
+            </div>
           </article>
           <article class="continuity-card">
             <span class="continuity-dot" id="healthBackupDot"></span>
@@ -225,6 +233,7 @@
   <script src="vault-core.js"></script>
   <script src="semantic-event-store.js"></script>
   <script src="vault-storage.js"></script>
+  <script src="semantic-cloud-sync.js"></script>
   <script src="vault-health.js"></script>
   <script src="vault-policy.js"></script>
   <script src="extension-bridge.js"></script>
