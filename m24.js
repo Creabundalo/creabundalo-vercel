@@ -257,7 +257,7 @@ globalThis.M24 = (() => {
       if(state.competence==='learning'&&state.mode==='lab') state.mode='analysis';
       refresh();
     });
-    $('.lens').forEach(b=>b.addEventListener('click',()=>{state.lens=b.dataset.lens;refresh()}));
+    $$('.lens').forEach(b=>b.addEventListener('click',()=>{state.lens=b.dataset.lens;refresh()}));
     $$('.mode').forEach(b=>b.addEventListener('click',()=>{state.mode=b.dataset.mode;if(state.mode==='lab'&&state.asset==='BTC'){state.resolution='W';$('#resolutionSelect').value='W'}refresh()}));
     $$('.breadcrumb button').forEach(b=>b.addEventListener('click',()=>{state.level=b.dataset.level;refresh()}));
     $$('[data-overlay]').forEach(i=>i.addEventListener('change',()=>{state.overlays[i.dataset.overlay]=i.checked;renderAll()}));
