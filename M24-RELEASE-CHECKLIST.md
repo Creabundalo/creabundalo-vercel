@@ -224,3 +224,15 @@ Current replay calibration remains below the n=30 display threshold in every cov
 - [x] Competence Projection has a deterministic contract test
 - [ ] GitHub M24 Release Gate green on release/m24-d0-11-12-competence
 - [ ] Vercel preview visually reviewed
+
+
+## D0.11.14 Live Wiring Chain
+- [x] Visible source chain: API → normalisation → Qubus → M24 → freshness
+- [x] Market source provenance shown for selected asset
+- [x] Cross-asset FRED provenance retained through Vercel adapter
+- [x] Cross-asset states stored as CROSS_ASSET_STATE records in Qubus
+- [x] Source gaps/fallbacks are visible and do not receive LIVE status
+- [x] Meaning/world/execution layers remain explicitly MODEL/SNAPSHOT/PAPER
+- [x] Source-chain contract test added
+- [ ] GitHub M24 Release Gate green on release/m24-d0-11-14-live-chain
+- [ ] Visual browser review
