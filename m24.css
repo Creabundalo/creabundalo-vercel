@@ -56,3 +56,14 @@ body[data-competence="expert"] .m24-shell{width:min(1560px,100%)}
   .source-health-panel{overflow-x:auto}
   .source-health-head,.source-health-row{min-width:920px}
 }
+
+.derivatives-panel{margin-bottom:12px}
+.derivatives-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.derivative-card,.derivatives-na{background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:12px}
+.derivative-card span,.derivatives-na span{display:block;color:var(--muted);font-size:10px}
+.derivative-card strong{display:block;margin:5px 0;font-size:17px}
+.derivative-card small{color:#7f8a7c;font-size:9px}
+.derivatives-reading{font-size:11px!important;line-height:1.35;color:var(--warn)}
+.derivatives-na{grid-column:1/-1;display:flex;gap:10px;align-items:center}
+.derivatives-na strong{font-size:12px;color:var(--warn)}
+@media(max-width:620px){.derivatives-grid{grid-template-columns:1fr}}
