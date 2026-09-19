@@ -138,11 +138,11 @@
     }
     const provider=get('INDEPENDENT_BACKUP');
     if(!independentBackupHandle){
-      if(provider) provider.mode='NEEDS_FOLDER';
+      if(provider){provider.mode='NEEDS_FOLDER';provider.folderName=null;}
       return 'NEEDS_FOLDER';
     }
     const allowed=await ensureDirectoryPermission(independentBackupHandle,{request:false});
-    if(provider) provider.mode=allowed?'AVAILABLE':'NEEDS_AUTH';
+    if(provider){provider.mode=allowed?'AVAILABLE':'NEEDS_AUTH';provider.folderName=independentBackupHandle.name;}
     return provider?.mode;
   }
   async function authorizeIndependentBackup(){
@@ -150,7 +150,7 @@
     if(!independentBackupHandle) throw new Error('BACKUP_FOLDER_NOT_CONFIGURED');
     const allowed=await ensureDirectoryPermission(independentBackupHandle,{request:true});
     const provider=get('INDEPENDENT_BACKUP');
-    if(provider) provider.mode=allowed?'AVAILABLE':'NEEDS_AUTH';
+    if(provider){provider.mode=allowed?'AVAILABLE':'NEEDS_AUTH';provider.folderName=independentBackupHandle.name;}
     if(!allowed) throw new Error('BACKUP_FOLDER_PERMISSION_DENIED');
     return provider.mode;
   }
