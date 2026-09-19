@@ -14,7 +14,7 @@ const seed = {
   ]
 };
 
-let state = load();
+let state = window.CreaSemanticCore.ensureState(load());
 let zoom = 1;
 let pan = {x: 120, y: 80};
 let dragging = false;
@@ -40,7 +40,12 @@ const overlayExtensionId = $('overlayExtensionId');
 const overlayBridgeStatus = $('overlayBridgeStatus');
 
 function uid(prefix='n'){
-  return globalThis.crypto?.randomUUID ? prefix+'_'+crypto.randomUUID() : prefix+'_'+Date.now()+'_'+Math.random().toString(16).slice(2);
+  return window.CreaSemanticCore.uid(prefix);
+}
+function coreDispatch(type,payload={},source={surface:'creabundalo-ui'}){
+  const result=window.CreaSemanticCore.dispatch(state,type,payload,source);
+  state=result.state;
+  return result;
 }
 function load(){
   try{
@@ -190,8 +195,8 @@ function applyTransform(){
 }
 function focusNode(id){
   if(!byId(id)) return;
-  state.currentId=id;
-  state.lens='all';
+  coreDispatch('NODE_FOCUSED',{nodeId:id});
+  coreDispatch('LENS_SET',{lens:'all'});
   render();
   centerCurrent();
 }
@@ -214,20 +219,19 @@ function goRoot(){
 function promote(){
   const c=current();
   if(!c) return;
-  c.kind='project';
-  c.status='active';
+  coreDispatch('NODE_KIND_SET',{nodeId:c.id,kind:'project'});
+  coreDispatch('NODE_STATUS_SET',{nodeId:c.id,status:'active'});
   render();
 }
 function park(){
   const c=current();
   if(!c) return;
-  c.status='paused';
-  const p=c.parentId;
+  coreDispatch('NODE_PARKED',{nodeId:c.id,focusParent:true});
   render();
-  if(p) focusNode(p);
+  centerCurrent();
 }
 function setLens(lens){
-  state.lens=lens;
+  coreDispatch('LENS_SET',{lens});
   render();
 }
 function titleFrom(text){
@@ -237,7 +241,7 @@ function titleFrom(text){
 function addQuestion(text){
   const parent=current();
   const node={
-    id:uid(),
+    id:uid('node'),
     title:titleFrom(text),
     parentId:parent.id,
     edgeLabel:text,
@@ -246,9 +250,8 @@ function addQuestion(text){
     status:'active',
     createdAt:Date.now()
   };
-  state.nodes.push(node);
-  state.currentId=node.id;
-  state.lens='all';
+  coreDispatch('NODE_CREATED',{node,focus:true});
+  coreDispatch('LENS_SET',{lens:'all'});
   render();
   centerCurrent();
 }
