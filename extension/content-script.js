@@ -96,8 +96,8 @@
         </div>
       </div>
       <div class="foot">
-        <span>SESSION ONLY</span>
-        <span>geen host-dataopslag</span>
+        <span>CORE BRIDGE · <b data-pending>0</b> pending</span>
+        <span>session encrypted later in Vault</span>
       </div>
     </section>
     <button class="toggle" data-show>C</button>
@@ -110,6 +110,7 @@
   let graph=null;
   let observer=null;
   let scanTimer=null;
+  let pending=0;
 
   const send=message=>new Promise(resolve=>{
     chrome.runtime.sendMessage(message,response=>resolve(response||{ok:false,error:'NO_RESPONSE'}));
@@ -129,8 +130,28 @@
     return t.length>62?t.slice(0,59)+'…':t;
   };
   const save=async()=>{
-    await send({type:'CREA_GRAPH_SET',graph});
+    const response=await send({type:'CREA_GRAPH_SET',graph});
+    pending=response?.pending??pending;
+    renderPending();
   };
+  const emit=async(type,payload={})=>{
+    const response=await send({
+      type:'CREA_EVENT_APPEND',
+      event:{
+        sessionId:graph.sessionId,
+        type,
+        source:{adapter:adapter.id,host:location.hostname},
+        payload
+      }
+    });
+    pending=response?.pending??pending;
+    renderPending();
+    return response;
+  };
+  function renderPending(){
+    const el=$('[data-pending]');
+    if(el) el.textContent=String(pending);
+  }
 
   function patternState(){
     const d=depth(graph.currentId);
@@ -163,7 +184,12 @@
       b.innerHTML='<strong></strong><small></small>';
       b.querySelector('strong').textContent=n.title;
       b.querySelector('small').textContent=(n.kind||'branch')+(n.status==='paused'?' · parked':'');
-      b.onclick=()=>{graph.currentId=n.id;save().then(render);};
+      b.onclick=async()=>{
+        graph.currentId=n.id;
+        await save();
+        await emit('NODE_FOCUSED',{nodeId:n.id});
+        render();
+      };
       tree.appendChild(b);
     }
   }
@@ -185,6 +211,19 @@
     graph.nodes.push(node);
     graph.currentId=node.id;
     await save();
+    await emit('BRANCH_CREATED',{
+      node:{
+        id:node.id,
+        parentId:node.parentId,
+        title:node.title,
+        edgeLabel:node.edgeLabel,
+        kind:node.kind,
+        status:node.status,
+        source:node.source,
+        createdAt:node.createdAt
+      }
+    });
+    await emit('NODE_FOCUSED',{nodeId:node.id});
     render();
   }
 
@@ -203,18 +242,34 @@
   $('[data-show]').onclick=()=>rail.classList.remove('hidden');
   $('[data-back]').onclick=async()=>{
     const c=current();
-    if(c.parentId){graph.currentId=c.parentId;await save();render();}
+    if(c.parentId){
+      graph.currentId=c.parentId;
+      await save();
+      await emit('NODE_FOCUSED',{nodeId:graph.currentId});
+      render();
+    }
   };
   $('[data-root]').onclick=async()=>{
     graph.currentId=ancestors(graph.currentId)[0]?.id||'root';
-    await save();render();
+    await save();
+    await emit('NODE_FOCUSED',{nodeId:graph.currentId});
+    render();
   };
   $('[data-project]').onclick=async()=>{
-    const c=current();c.kind='project';c.status='active';await save();render();
+    const c=current();
+    c.kind='project';c.status='active';
+    await save();
+    await emit('NODE_PROJECT_PROMOTED',{nodeId:c.id});
+    render();
   };
   $('[data-loose]').onclick=async()=>{
     const c=current();
-    if(c.id!=='root'){c.parentId='root';c.kind='branch';await save();render();}
+    if(c.id!=='root'){
+      c.parentId='root';c.kind='branch';
+      await save();
+      await emit('NODE_REPARENTED',{nodeId:c.id,parentId:'root'});
+      render();
+    }
   };
   $('[data-selection]').onclick=()=>{
     const text=globalThis.CreaOverlayAdapters.selection();
@@ -229,11 +284,13 @@
   async function init(){
     const response=await send({type:'CREA_GRAPH_GET'});
     graph=response?.graph||{
-      version:1,currentId:'root',
+      version:2,sessionId:uid(),currentId:'root',
       nodes:[{id:'root',parentId:null,title:'Huidige sessie',kind:'root',status:'active',createdAt:Date.now()}],
       seenTurnKeys:[]
     };
+    pending=response?.pending||0;
     render();
+    renderPending();
     await scanTurns();
 
     observer=new MutationObserver(()=>{
