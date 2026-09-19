@@ -84,3 +84,16 @@ textarea{resize:none;border:0;outline:0;background:transparent;color:var(--ink);
 .recovery-box{background:#fbfaf4}
 .vault-section small{color:var(--muted);line-height:1.4}
 @media(max-width:760px){.vault-pill{max-width:104px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+
+.continuity-panel{position:absolute;inset:28px;z-index:4;background:rgba(247,246,242,.96);border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:var(--shadow);overflow:auto}
+.continuity-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+.continuity-head h2{margin:3px 0 0;font-size:24px}
+.continuity-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.continuity-card{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px}
+.continuity-card strong{display:block;font-size:14px;margin-bottom:5px}
+.continuity-card small{display:block;color:var(--muted);line-height:1.45}
+.continuity-dot{width:10px;height:10px;border-radius:50%;background:#bbb;margin-top:4px;flex:0 0 auto}
+.continuity-dot.ok{background:#111}
+.continuity-dot.warn{background:#999}
+.continuity-dot.error{background:#000;box-shadow:0 0 0 3px rgba(0,0,0,.08)}
+.continuity-policy{margin:16px 2px 0;color:var(--muted);font-size:12px}
