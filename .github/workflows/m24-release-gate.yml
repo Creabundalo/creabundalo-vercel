@@ -214,12 +214,23 @@ jobs:
           grep -q 'm24-enrichment-ui.js' m24-lab-ui.js
           grep -q "LAB_RESULT" m24.js
 
-      - name: Package tested Vercel bundle
+      - name: Package clean M24-only Vercel bundle
         if: success()
         run: |
-          zip -r Creabundalo_M24_D0.11.10_VERCEL_TESTED.zip . \
-            -x '.git/*' \
-            -x 'Creabundalo_M24_D0.11.10_VERCEL_TESTED.zip'
+          rm -rf dist-m24-vercel
+          mkdir -p dist-m24-vercel
+          while IFS= read -r file; do
+            [ -z "$file" ] && continue
+            test -f "$file"
+            cp "$file" dist-m24-vercel/
+          done < M24-VERCEL-RUNTIME.txt
+          if find dist-m24-vercel -maxdepth 1 -type f \( -name 'M99-*' -o -name 'actio*' -o -name 'watch*' -o -name 'dashboard.html' \) | grep -q .; then
+            echo "Non-M24 file leaked into deployment bundle" >&2
+            exit 1
+          fi
+          grep -q 'm24.css' dist-m24-vercel/m24.html
+          grep -q 'm24-world.js' dist-m24-vercel/m24.html
+          (cd dist-m24-vercel && zip -r ../Creabundalo_M24_D0.11.10_VERCEL_TESTED.zip .)
 
       - name: Upload tested Vercel bundle
         if: success()
