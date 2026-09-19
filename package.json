@@ -1,0 +1,7 @@
+{
+  "name": "creabundalo-vercel",
+  "private": true,
+  "engines": {
+    "node": "22.x"
+  }
+}

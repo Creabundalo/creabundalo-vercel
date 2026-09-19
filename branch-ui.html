@@ -105,15 +105,29 @@
     </section>
 
     <section class="vault-section">
+      <label for="scalewaySyncToken">Scaleway sync · pilot</label>
+      <input id="scalewaySyncToken" type="password" autocomplete="off" placeholder="User-scoped sync token · wordt niet opgeslagen" />
+      <div class="vault-actions">
+        <button id="scalewayConnectButton" class="ghost" type="button">Activeer sync</button>
+        <button id="scalewaySyncButton" class="ghost" type="button">Sync nu</button>
+        <button id="scalewayRestoreButton" class="ghost" type="button">Herstel uit Scaleway</button>
+      </div>
+      <small>De browser krijgt nooit Scaleway access/secret keys. Alleen kortlevende upload/download-links.</small>
+    </section>
+
+    <section class="vault-section">
       <div class="vault-actions">
         <button id="vaultBackupButton" class="ghost" type="button">Exporteer encrypted snapshot</button>
+        <button id="vaultImportButton" class="ghost" type="button">Herstel uit snapshot</button>
+        <input id="vaultImportInput" class="hidden" type="file" accept=".json,application/json" />
         <button id="vaultLockButton" class="ghost" type="button">Vergrendel</button>
       </div>
-      <small>v0: lokale encryptie. Scaleway-sync en onafhankelijke backup volgen als adapters.</small>
+      <small>Proton/NAS blijft een aparte onafhankelijke backup-adapter en zit niet in de runtime-keten.</small>
     </section>
   </dialog>
 
   <script src="vault-core.js"></script>
+  <script src="vault-storage.js"></script>
   <script src="branch-ui.js"></script>
 </body>
 </html>

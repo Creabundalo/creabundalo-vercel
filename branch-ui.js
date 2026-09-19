@@ -34,6 +34,8 @@ const vaultPassphrase = $('vaultPassphrase');
 const vaultRecoveryInput = $('vaultRecoveryInput');
 const recoveryBox = $('recoveryBox');
 const vaultRecoveryOutput = $('vaultRecoveryOutput');
+const vaultImportInput = $('vaultImportInput');
+const scalewaySyncToken = $('scalewaySyncToken');
 
 function uid(prefix='n'){
   return globalThis.crypto?.randomUUID ? prefix+'_'+crypto.randomUUID() : prefix+'_'+Date.now()+'_'+Math.random().toString(16).slice(2);
@@ -278,6 +280,9 @@ function updateVaultUi(){
   $('vaultRecoverButton').disabled=!status.initialized || !!status.unlocked;
   $('vaultBackupButton').disabled=!status.initialized;
   $('vaultLockButton').disabled=!status.unlocked;
+  const syncMode=window.CreaVaultStorage?.get?.('SCALEWAY_SYNC')?.mode || 'DISABLED';
+  $('scalewaySyncButton').disabled=!status.initialized || syncMode!=='AVAILABLE';
+  $('scalewayRestoreButton').disabled=syncMode!=='AVAILABLE';
   if(status.mode==='UNINITIALIZED') vaultMessage('Nog geen kluis. Tot setup gebruikt deze v0 alleen lokale prototype-opslag.');
   if(status.mode==='LOCKED') vaultMessage('Kluis bestaat en is vergrendeld. Er wordt geen plaintext state naar localStorage geschreven.');
   if(status.mode==='UNLOCKED') vaultMessage('Kluis ontgrendeld. Branch-state wordt encrypted in IndexedDB opgeslagen.');
@@ -350,6 +355,80 @@ async function lockVault(){
   render();
   requestAnimationFrame(centerCurrent);
 }
+async function exportVaultSnapshot(){
+  try{
+    const snapshot=await window.CreaVault.exportEncryptedSnapshot();
+    await window.CreaVaultStorage.write('LOCAL_DOWNLOAD',snapshot,{
+      privacyClass:'VAULT_HIGH',
+      metadata:{filename:'creabundalo-vault-'+new Date().toISOString().slice(0,10)+'.enc.json'}
+    });
+    vaultMessage('Encrypted snapshot geëxporteerd. De opslagadapter zag alleen ciphertext.');
+  }catch(err){
+    vaultMessage('Snapshot mislukt: '+err.message,true);
+  }
+}
+function connectScaleway(){
+  const token=scalewaySyncToken.value.trim();
+  if(token.length<24){
+    vaultMessage('Sync-token ontbreekt of is te kort.',true);
+    return;
+  }
+  window.CreaVaultStorage.configureScaleway({token});
+  scalewaySyncToken.value='';
+  updateVaultUi();
+  vaultMessage('Scaleway sync geactiveerd voor deze sessie. Het token is niet lokaal opgeslagen.');
+}
+async function syncToScaleway(){
+  try{
+    const status=window.CreaVault.status();
+    if(!status.initialized) throw new Error('VAULT_NOT_INITIALIZED');
+    const snapshot=await window.CreaVault.exportEncryptedSnapshot();
+    await window.CreaVaultStorage.write('SCALEWAY_SYNC',snapshot,{privacyClass:'VAULT_HIGH'});
+    vaultMessage('Encrypted Vault naar Scaleway gesynchroniseerd. Alleen ciphertext is geüpload.');
+  }catch(err){
+    vaultMessage('Scaleway sync mislukt: '+err.message,true);
+  }
+}
+async function restoreFromScaleway(){
+  try{
+    const snapshot=await window.CreaVaultStorage.read('SCALEWAY_SYNC',{privacyClass:'VAULT_HIGH'});
+    if(!snapshot){
+      vaultMessage('Nog geen cloudsnapshot gevonden voor dit account.',true);
+      return;
+    }
+    const status=window.CreaVault.status();
+    if(status.initialized && !confirm('De cloudsnapshot vervangt de lokale Vault. Doorgaan?')) return;
+    const result=await window.CreaVault.importEncryptedSnapshot(snapshot,{overwrite:true});
+    localStorage.removeItem(KEY);
+    state=structuredClone(seed);
+    updateVaultUi();
+    render();
+    requestAnimationFrame(centerCurrent);
+    vaultMessage('Scaleway-snapshot hersteld ('+result.importedRecords+' encrypted record(s)). Ontgrendel met de oorspronkelijke wachtzin of recovery key.');
+  }catch(err){
+    vaultMessage('Cloudherstel mislukt: '+err.message,true);
+  }
+}
+async function importVaultSnapshot(file){
+  if(!file) return;
+  const text=await file.text();
+  const status=window.CreaVault.status();
+  const overwrite=!status.initialized || confirm('Deze encrypted snapshot vervangt de huidige lokale Vault. Doorgaan?');
+  if(!overwrite) return;
+  try{
+    const result=await window.CreaVault.importEncryptedSnapshot(text,{overwrite:true});
+    localStorage.removeItem(KEY);
+    state=structuredClone(seed);
+    updateVaultUi();
+    render();
+    requestAnimationFrame(centerCurrent);
+    vaultMessage('Snapshot hersteld ('+result.importedRecords+' encrypted record(s)). Ontgrendel met de oorspronkelijke wachtzin of recovery key.');
+  }catch(err){
+    vaultMessage('Herstel mislukt: '+err.message,true);
+  }finally{
+    vaultImportInput.value='';
+  }
+}
 
 $('composer').addEventListener('submit',e=>{
   e.preventDefault();
@@ -373,7 +452,12 @@ $('vaultSetupButton').onclick=setupVault;
 $('vaultUnlockButton').onclick=unlockVault;
 $('vaultRecoverButton').onclick=recoverVault;
 $('vaultLockButton').onclick=lockVault;
-$('vaultBackupButton').onclick=()=>window.CreaVault.downloadEncryptedSnapshot().catch(err=>vaultMessage('Snapshot mislukt: '+err.message,true));
+$('vaultBackupButton').onclick=exportVaultSnapshot;
+$('scalewayConnectButton').onclick=connectScaleway;
+$('scalewaySyncButton').onclick=syncToScaleway;
+$('scalewayRestoreButton').onclick=restoreFromScaleway;
+$('vaultImportButton').onclick=()=>vaultImportInput.click();
+vaultImportInput.onchange=()=>importVaultSnapshot(vaultImportInput.files?.[0]);
 $('copyRecoveryButton').onclick=async()=>{
   if(vaultRecoveryOutput.value){
     await navigator.clipboard.writeText(vaultRecoveryOutput.value);
