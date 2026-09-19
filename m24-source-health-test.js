@@ -26,11 +26,19 @@ const snapshot={
     asOf:'2026-09-19T12:00:00Z',
     provenance:[{sourceId:'BINANCE-USDM-PREMIUM-INDEX'}]
   },
-  derivativesRec:{id:'D1'}
+  derivativesRec:{id:'D1'},
+  options:{
+    sourceStatus:'OK',
+    freshness:'LIVE_OPTIONS',
+    quality:'PRIMARY_OPTIONS_EXCHANGE',
+    asOf:'2026-09-19T12:00:00Z',
+    provenance:[{sourceId:'DERIBIT-OPTIONS-BOOK-SUMMARY'}]
+  },
+  optionsRec:{id:'O1'}
 };
 
 const rows=H.build(snapshot);
-assert.equal(rows.length,6);
+assert.equal(rows.length,7);
 assert.equal(rows[0].source,'COINBASE-EXCHANGE');
 assert.equal(rows[0].api,'OK');
 assert.equal(rows[0].qubus,'STORED');
@@ -39,12 +47,16 @@ assert.equal(rows[1].source,'BINANCE-USDM-PREMIUM-INDEX');
 assert.equal(rows[1].api,'OK');
 assert.equal(rows[1].qubus,'STORED');
 assert.equal(rows[1].overall,'LIVE');
-assert.equal(rows[2].source,'FRED');
+assert.equal(rows[2].source,'DERIBIT-OPTIONS-BOOK-SUMMARY');
 assert.equal(rows[2].api,'OK');
 assert.equal(rows[2].qubus,'STORED');
-assert.equal(rows[2].asOf,'2026-09-19');
+assert.equal(rows[2].overall,'LIVE');
+assert.equal(rows[3].source,'FRED');
+assert.equal(rows[3].api,'OK');
 assert.equal(rows[3].qubus,'STORED');
-assert.equal(rows[5].m24,'SIMULATED_ONLY');
+assert.equal(rows[3].asOf,'2026-09-19');
+assert.equal(rows[4].qubus,'STORED');
+assert.equal(rows[6].m24,'SIMULATED_ONLY');
 
 const fallback=H.marketRow({market:{values:[1],sourceStatus:'FALLBACK',sourceFreshness:'SOURCE_GAP'},marketRec:{id:'M2'}});
 assert.equal(fallback.api,'GAP');
