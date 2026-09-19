@@ -119,6 +119,9 @@ const M24Core = (() => {
       const market = await this.provider.getMarketState(asset, context);
       const meaning = await this.provider.getMeaningState(asset, context);
       const cross = await this.provider.getCrossAssetState(asset, context);
+      const derivatives = typeof this.provider.getDerivativesState==='function'
+        ? await this.provider.getDerivativesState(asset, context)
+        : {asset,sourceStatus:'NOT_AVAILABLE',freshness:'N/A',quality:'N/A'};
       const marketRec = this.store.add(record('MARKET_STATE', market, {subjectId:asset,window:context.window,resolution:context.resolution,evidenceStatus:EVIDENCE.MECHANISM_VISIBLE,confidence:.95,provenance:market.provenance || []}));
       const meaningRec = this.store.add(record('MEANING_STATE', meaning, {subjectId:asset,window:context.window,resolution:context.resolution,evidenceStatus:EVIDENCE.PLAUSIBLE_INTERPRETATION,confidence:meaning.confidence ?? .6,provenance:meaning.provenance || []}));
       const crossRecs = (Array.isArray(cross)?cross:[]).map((item,index)=>this.store.add(record('CROSS_ASSET_STATE', item, {
@@ -129,8 +132,19 @@ const M24Core = (() => {
         confidence:item.status==='OK'?.9:.35,
         provenance:item.provenance || []
       })));
-      const trick = this.store.add(this.trickster.assess({subjectId:asset,narrativeScore:meaning.score,mechanismScore:market.mechanismScore,mechanisms:market.mechanisms || [],supportingIds:[marketRec.id,meaningRec.id,...crossRecs.map(r=>r.id)]}));
-      return {market,meaning,cross,trick,marketRec,meaningRec,crossRecs};
+      const derivativesRec = derivatives?.sourceStatus && derivatives.sourceStatus!=='NOT_AVAILABLE'
+        ? this.store.add(record('DERIVATIVES_STATE', derivatives, {
+            subjectId:asset,
+            window:context.window,
+            resolution:'DERIVATIVES',
+            evidenceStatus:derivatives.sourceStatus==='OK'?EVIDENCE.MECHANISM_VISIBLE:EVIDENCE.PLAUSIBLE_INTERPRETATION,
+            confidence:derivatives.sourceStatus==='OK'?.92:1,
+            provenance:derivatives.provenance || []
+          }))
+        : null;
+      const supportingIds=[marketRec.id,meaningRec.id,...crossRecs.map(r=>r.id),...(derivativesRec?[derivativesRec.id]:[])];
+      const trick = this.store.add(this.trickster.assess({subjectId:asset,narrativeScore:meaning.score,mechanismScore:market.mechanismScore,mechanisms:market.mechanisms || [],supportingIds}));
+      return {market,meaning,cross,derivatives,trick,marketRec,meaningRec,crossRecs,derivativesRec};
     }
   }
 
