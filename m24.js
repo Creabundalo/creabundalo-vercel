@@ -27,9 +27,12 @@ globalThis.M24 = (() => {
   async function initRuntime(){
     await loadScript('m24-core.js','M24Core');
     await loadScript('m24-data.js','M24Data');
+    await loadScript('m24-vercel-live.js','M24VercelLive');
     await loadScript('m24-historical.js','M24Historical');
     await loadScript('m24-lab.js','M24Lab');
-    const provider=new M24Historical.HistoricalProvider({fallback:new M24Data.MockProvider()});
+    const modelFallback=new M24Data.MockProvider();
+    const liveProvider=new M24VercelLive.VercelMarketProvider({fallback:modelFallback});
+    const provider=new M24Historical.HistoricalProvider({fallback:liveProvider});
     runtime=new M24Core.Runtime({provider});
     transactions=M24Data.paperTransactions.map(spec=>runtime.transactions.create({
       asset:spec.asset,direction:spec.direction,strategy:spec.strategy,entry:spec.entry,size:spec.size,
@@ -52,6 +55,15 @@ globalThis.M24 = (() => {
     $('#priceLine').setAttribute('d',linePath(pts));$('#priceArea').setAttribute('d',areaPath(pts));
     $('#assetTitle').textContent=`${a.name} — ${state.level} / ${state.resolution}`;
     $('#priceNow').textContent=a.price;$('#trendNow').textContent=a.trend;
+    const badge=$('#marketSourceBadge');
+    if(badge){
+      const source=a.sourceStatus||'MODEL';
+      badge.textContent=source+(a.sourceAsOf?' · '+a.sourceAsOf:'');
+      badge.dataset.state=source;
+      badge.title=[a.sourceFreshness,a.sourceQuality,a.sourceError].filter(Boolean).join(' · ');
+    }
+    const liveState=$('#livePriceStatus');
+    if(liveState){liveState.textContent=a.sourceStatus||'MODEL';liveState.dataset.state=a.sourceStatus||'MODEL';}
     $('#windowStart').textContent=a.window[0];$('#windowLabel').textContent=a.window[1];$('#windowEnd').textContent=a.window[2];
     renderFlags(pts,a);renderFib(pts);renderMomentum(pts);renderTrickster(pts);
   }
@@ -83,7 +95,14 @@ globalThis.M24 = (() => {
   }
 
   function renderCross(){
-    const g=$('#crossGrid');g.innerHTML=snapshot.cross.map(x=>`<div class="cross-card"><span>${x.name}</span><strong class="${x.className}">${x.direction}</strong><small>${x.state}</small></div>`).join('');
+    const g=$('#crossGrid');g.innerHTML=snapshot.cross.map(x=>`<div class="cross-card"><span>${x.name}</span><strong class="${x.className}">${x.direction}</strong><small>${x.state}${x.asOf?' · '+x.asOf:''}</small></div>`).join('');
+    const live=$('#liveCrossStatus');
+    if(live){
+      const hasGap=snapshot.cross.some(x=>x.status==='SOURCE_GAP');
+      const hasLive=snapshot.cross.some(x=>x.status==='OK');
+      live.textContent=hasLive?(hasGap?'PARTIAL':'DAILY'):'MODEL';
+      live.dataset.state=hasLive?(hasGap?'PARTIAL':'DELAYED'):'MODEL';
+    }
     $('#crossAssetPanel').classList.toggle('hidden',!state.overlays.cross);
   }
 
@@ -120,7 +139,12 @@ globalThis.M24 = (() => {
   function renderMode(){$$('.mode').forEach(b=>b.classList.toggle('active',b.dataset.mode===state.mode));$('#labPanel').classList.toggle('hidden',state.mode!=='lab');$('#overlayStrip').classList.toggle('hidden',state.mode==='story')}
   function renderLens(){$$('.lens').forEach(b=>b.classList.toggle('active',b.dataset.lens===state.lens))}
 
-  function renderAll(){renderChart();renderMeaning();renderCross();renderForecast();renderHistory();renderTransactions();renderObservations();renderBreadcrumb();renderMode();renderLens()}
+  function renderDataStatus(){
+    const meaning=$('#meaningLayerStatus');if(meaning){meaning.textContent='MODEL';meaning.dataset.state='MODEL';}
+    const world=$('#worldLayerStatus');if(world){world.textContent='SNAPSHOT';world.dataset.state='SNAPSHOT';}
+    const exec=$('#executionLayerStatus');if(exec){exec.textContent='PAPER';exec.dataset.state='PAPER';}
+  }
+  function renderAll(){renderChart();renderMeaning();renderCross();renderForecast();renderHistory();renderTransactions();renderObservations();renderBreadcrumb();renderMode();renderLens();renderDataStatus()}
 
   async function refresh(){
     snapshot=await runtime.snapshot(state.asset,{window:state.level,resolution:state.resolution,lens:state.lens,mode:state.mode});

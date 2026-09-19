@@ -15,19 +15,28 @@
         <h1>Augmented Market Viewer</h1>
       </div>
       <div class="status-block">
+        <span class="status-pill live-data">LIVE DATA</span>
         <span class="status-pill safety">SIMULATED_ONLY</span>
-        <span class="status-pill">v0.1</span>
+        <span class="status-pill">v0.2 · D0.11.11 LIVE VERCEL</span>
       </div>
     </header>
 
     <section class="control-row panel compact">
-      <label><span>Asset</span><select id="assetSelect"><option value="BTC">Bitcoin</option><option value="TSLA">Tesla</option><option value="OIL">WTI Oil</option><option value="SOL">Solana</option></select></label>
+      <label><span>Asset</span><select id="assetSelect"><option value="BTC">Bitcoin</option><option value="ETH">Ethereum</option><option value="TSLA">Tesla</option><option value="OIL">WTI Oil</option><option value="SOL">Solana</option></select></label>
       <label><span>Resolutie</span><select id="resolutionSelect"><option value="W">Week</option><option value="D" selected>Dag</option><option value="4H">4 uur</option><option value="1H">1 uur</option></select></label>
       <div class="button-group lens-group" aria-label="Interpretatielens">
         <button class="chip lens" data-lens="legacy">Legacy</button>
         <button class="chip lens active" data-lens="m24">M24</button>
         <button class="chip lens" data-lens="ai">AI-native</button>
       </div>
+    </section>
+
+    <section class="data-status panel compact" aria-label="Datastatus">
+      <span>PRIJS <strong id="livePriceStatus" class="source-state">LOADING</strong></span>
+      <span>CROSS-ASSET <strong id="liveCrossStatus" class="source-state">LOADING</strong></span>
+      <span>BETEKENIS <strong id="meaningLayerStatus" class="source-state">MODEL</strong></span>
+      <span>WORLD <strong id="worldLayerStatus" class="source-state">SNAPSHOT</strong></span>
+      <span>UITVOERING <strong id="executionLayerStatus" class="source-state">PAPER</strong></span>
     </section>
 
     <nav class="breadcrumb panel compact" aria-label="Tijdnavigatie">
@@ -41,10 +50,10 @@
       <article class="panel chart-panel">
         <div class="panel-head">
           <div><p class="eyebrow">PRIMARY CANVAS</p><h2 id="assetTitle">Bitcoin — lifecycle / selected episode</h2></div>
-          <div class="price-box"><strong id="priceNow">76.2k</strong><span id="trendNow">↘ zwak</span></div>
+          <div class="price-box"><strong id="priceNow">—</strong><span id="trendNow">laden…</span><small id="marketSourceBadge" class="source-badge">LOADING</small></div>
         </div>
         <div class="chart-wrap" id="chartWrap">
-          <svg id="marketChart" viewBox="0 0 1000 420" role="img" aria-label="M24 mock market chart">
+          <svg id="marketChart" viewBox="0 0 1000 420" role="img" aria-label="M24 live market chart">
             <defs><linearGradient id="area" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#d7ff64" stop-opacity=".22"/><stop offset="100%" stop-color="#d7ff64" stop-opacity="0"/></linearGradient></defs>
             <g class="grid-lines"><line x1="40" y1="70" x2="960" y2="70"/><line x1="40" y1="150" x2="960" y2="150"/><line x1="40" y1="230" x2="960" y2="230"/><line x1="40" y1="310" x2="960" y2="310"/></g>
             <path id="priceArea" class="area" d=""/><path id="priceLine" class="price-line" d=""/>
@@ -66,7 +75,7 @@
         <div class="panel-head"><div><p class="eyebrow">WHAT / WHY / MEANING</p><h2 id="storyTitle">Selecteer een vlag</h2></div><span id="evidenceBadge" class="evidence">MECHANISM_VISIBLE</span></div>
         <div id="storyBody" class="story-body">
           <p><strong>Wat zie je?</strong> De prijs vormt een tweede piek, terwijl momentum verzwakt.</p>
-          <p><strong>Wat speelt eronder?</strong> Mock-flow, leverage en cross-asset bevestiging lopen niet volledig mee.</p>
+          <p><strong>Wat speelt eronder?</strong> Flow, leverage en cross-asset bevestiging worden per bronlaag beoordeeld.</p>
           <p><strong>Betekeniswereld:</strong> Het zichtbare verhaal blijft bullish, maar de onderliggende kracht neemt af.</p>
           <p><strong>M24-lezing:</strong> Geen trade-signaal op zichzelf. Wachten op bevestiging.</p>
         </div>
@@ -75,7 +84,7 @@
     </section>
 
     <section id="crossAssetPanel" class="panel cross-panel">
-      <div class="panel-head"><div><p class="eyebrow">CROSS-ASSET</p><h2>Marktcontext</h2></div><span class="muted">mockdata</span></div>
+      <div class="panel-head"><div><p class="eyebrow">CROSS-ASSET</p><h2>Marktcontext</h2></div><span class="muted">Vercel API · daily context</span></div>
       <div class="cross-grid" id="crossGrid"></div>
     </section>
 
@@ -112,17 +121,26 @@
       <div id="sourceComparison" class="history-list"></div>
     </section>
 
+
+    <section class="panel lab-panel">
+      <div class="panel-head"><div><p class="eyebrow">STRATEGIC WORLD / ψ</p><h2>Actuele wereldstaat</h2></div><span class="status-pill">NO PROBABILITY</span></div>
+      <p class="footnote">Brongebonden huidige toestanden worden op mechanismen vergeleken met historische cases. Een ontbrekende analogie blijft expliciet COHORT_GAP; stale fast-market data mag geen actuele toestand activeren.</p>
+      <div id="m24WorldState" class="history-list">Strategic World laden…</div>
+    </section>
+
     <section class="panel observation-panel">
       <div class="panel-head"><div><p class="eyebrow">USER OBSERVATION</p><h2>Plaats je eigen vlag</h2></div></div>
       <div class="observation-input"><input id="observationInput" type="text" placeholder="bijv. volgens mij tweede top / momentum zwakker"><button id="addObservation" class="primary">+ vlag</button></div>
       <div id="observationLog" class="observation-log"></div>
     </section>
 
-    <footer class="footerline"><span>M24 v0.1 · local mock state · no broker execution</span><a href="M24-REQUIREMENTS.md">Requirements</a></footer>
+    <footer class="footerline"><span>M24 v0.2 · D0.11.11 LIVE VERCEL · live market / daily cross-asset · no broker execution</span><a href="M24-REQUIREMENTS.md">Requirements</a></footer>
   </main>
   <script src="m24-cases.js"></script>
   <script src="m24-coinbase.js"></script>
   <script src="m24-primary-lab.js"></script>
+  <script src="m24-world.js"></script>
+  <script src="m24-vercel-live.js"></script>
   <script src="m24.js"></script>
   <script src="m24-lab-ui.js"></script>
 </body>

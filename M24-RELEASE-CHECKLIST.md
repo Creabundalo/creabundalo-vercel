@@ -179,3 +179,33 @@ Release rule: M24 cannot progress from paper to real execution until historical 
 
 Current source-complete case count: **3/4**.
 Current replay calibration remains below the n=30 display threshold in every coverage-profile/horizon cohort.
+
+
+## D0.11.10 Strategic World / current-state gate
+- [x] Source-backed current-world snapshot is stored separately from historical cases
+- [x] Publication date / recency class is explicit per world state
+- [x] Stale fast-market evidence cannot activate a current mechanism
+- [x] Historical analog matching is structural overlap, not probability
+- [x] Multiple analogs can remain open simultaneously
+- [x] Domain requirements prevent false analog promotion (for example WTI requires physical + expiry/contract)
+- [x] COHORT_GAP is a valid output for new regimes such as stablecoin policy / defence expansion
+- [x] Scenario branches are conditional research paths, not predicted probabilities
+- [x] Static Vercel UI exposes Strategic World / ψ panel
+- [x] No live broker execution path is introduced
+- [ ] GitHub M24 Release Gate green on release/m24-d0-11-10
+- [ ] Vercel preview visually reviewed
+
+
+## D0.11.11 LIVE VERCEL gate
+- [x] Vercel is the active deployment target until the user explicitly activates Scaleway
+- [x] Scaleway remains LATER / NOT ACTIVE and is not required by this release
+- [x] Main market canvas uses Vercel serverless source adapters before any model fallback
+- [x] BTC / ETH / SOL use Coinbase Exchange market data
+- [x] WTI uses official-upstream daily data via FRED
+- [x] Tesla uses a public market-data feed and is labelled delayed/secondary
+- [x] Cross-asset panel uses a Vercel serverless FRED bundle
+- [x] Source failure becomes SOURCE_GAP / FALLBACK; never a fake live value
+- [x] UI visibly separates LIVE / DELAYED / MODEL / SNAPSHOT / PAPER
+- [x] Live data does not enable live order execution
+- [ ] M24 Release Gate green on release/m24-d0-11-11-live-vercel
+- [ ] Vercel preview visually reviewed
