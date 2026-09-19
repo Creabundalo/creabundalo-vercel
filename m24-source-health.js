@@ -26,6 +26,25 @@
     };
   }
 
+  function optionsRow(snapshot){
+    const o=snapshot?.options||{};
+    const status=String(o.sourceStatus||'NOT_AVAILABLE');
+    const applicable=!['NOT_AVAILABLE','NOT_APPLICABLE'].includes(status);
+    return {
+      id:'OPTIONS',
+      label:'Opties',
+      source:o.provenance?.[0]?.sourceId||(!applicable?'N/A':'DERIBIT'),
+      api:status==='OK'?'OK':status==='SOURCE_GAP'?'GAP':'N/A',
+      normalize:status==='OK'?'OK':status==='SOURCE_GAP'?'GAP':'N/A',
+      qubus:snapshot?.optionsRec?'STORED':status==='NOT_APPLICABLE'?'N/A':'GAP',
+      m24:status==='OK'?'ACTIVE':status==='NOT_APPLICABLE'?'N/A':'GAP',
+      freshness:o.freshness||'N/A',
+      asOf:o.asOf||null,
+      quality:o.quality||'N/A',
+      overall:status==='OK'?'LIVE':status==='NOT_APPLICABLE'?'N/A':status==='SOURCE_GAP'?'SOURCE_GAP':'N/A'
+    };
+  }
+
   function crossRow(snapshot){
     const items=Array.isArray(snapshot?.cross)?snapshot.cross:[];
     const ok=items.filter(x=>x.status==='OK').length;
@@ -117,8 +136,8 @@
   }
 
   function build(snapshot){
-    return [marketRow(snapshot),derivativesRow(snapshot),crossRow(snapshot),meaningRow(snapshot),worldRow(),executionRow()];
+    return [marketRow(snapshot),derivativesRow(snapshot),optionsRow(snapshot),crossRow(snapshot),meaningRow(snapshot),worldRow(),executionRow()];
   }
 
-  return {build,marketRow,derivativesRow,crossRow,meaningRow,worldRow,executionRow};
+  return {build,marketRow,derivativesRow,optionsRow,crossRow,meaningRow,worldRow,executionRow};
 });
