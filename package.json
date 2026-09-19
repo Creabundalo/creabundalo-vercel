@@ -3,5 +3,9 @@
   "private": true,
   "engines": {
     "node": "22.x"
+  },
+  "scripts": {
+    "test": "node tests/semantic-core.test.js",
+    "check": "node scripts/i24-check.js && npm test"
   }
 }

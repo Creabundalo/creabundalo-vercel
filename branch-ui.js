@@ -228,6 +228,9 @@ function render(){
   const chain=ancestors(state.currentId);
   $('breadcrumb').textContent=chain.map(n=>n.title).join('  ›  ');
   $('depthBadge').textContent='DEPTH '+depth(state.currentId);
+  const pattern=window.CreaPatternSaturation?.analyze?.(state)||{score:0,label:'open',confidence:0,reasons:[]};
+  $('patternBadge').textContent='PATROON · '+pattern.label.toLocaleUpperCase('nl-NL')+' '+Math.round(pattern.score*100)+'%';
+  $('patternBadge').title='Patroonverzadiging · vertrouwen '+Math.round(pattern.confidence*100)+'% · '+pattern.reasons.join(' · ');
   const c=current();
   $('currentMeta').textContent=`CURRENT: ${c.title} · ${c.kind.toUpperCase()} · ${c.status.toUpperCase()}`;
   document.querySelectorAll('.lens').forEach(b=>b.classList.toggle('active',b.dataset.lens===state.lens));
