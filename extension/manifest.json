@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Creabundalo Semantic Overlay",
+  "version": "0.1.0",
+  "description": "A thin semantic context layer for the AI you already use.",
+  "minimum_chrome_version": "114",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "action": {
+    "default_title": "Creabundalo · toon/verberg semantische laag"
+  },
+  "background": {
+    "service_worker": "service-worker.js"
+  }
+}
