@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Privacy-neutrale casusverkenning voor MV en MP." />
+  <title>MV — Casusverkenning</title>
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <p class="eyebrow">CASUS • PRIVACY-NEUTRAAL</p>
+      <h1>MV — casusverkenning</h1>
+      <p class="subtitle">Begrijpen wat er gebeurt, wat termen betekenen en welke vragen nog openstaan.</p>
+    </div>
+    <div class="status" title="Dit prototype verstuurt geen persoonlijke casusgegevens.">
+      <span class="dot"></span> lokaal prototype
+    </div>
+  </header>
+
+  <main>
+    <section class="ask-card" aria-labelledby="ask-title">
+      <div class="ask-head">
+        <div>
+          <p class="eyebrow">VRIJE VRAAG</p>
+          <h2 id="ask-title">Waar wil je meer over weten?</h2>
+        </div>
+        <button class="quiet" id="clearBtn" type="button">Wis</button>
+      </div>
+      <form id="askForm" class="ask-form">
+        <label class="sr-only" for="question">Stel een vraag</label>
+        <input id="question" name="question" autocomplete="off" placeholder="Typ je vraag zoals je hem zelf zou stellen…" />
+        <button type="submit">Bekijk</button>
+      </form>
+      <div class="chips" id="questionChips" aria-label="Voorbeeldvragen">
+        <button data-topic="medische-term">Wat betekent deze medische uitdrukking?</button>
+        <button data-topic="voeding">Kan voeding een rol spelen?</button>
+        <button data-topic="japan">Wat was het verhaal uit Japan?</button>
+        <button data-topic="autoimmuun">Wat is een auto-immuunziekte?</button>
+        <button data-topic="holistisch">Wat is een holistische kijk op geneeskunde?</button>
+        <button data-topic="behandeling">Waarom krijgt MV deze behandeling?</button>
+        <button data-topic="homeopathie">Wat is homeopathie eigenlijk?</button>
+        <button data-topic="spike">Wat is het spike-eiwit?</button>
+        <button data-topic="mrna">Wat is mRNA-therapie?</button>
+        <button data-topic="rechten">Wat mag MV zelf beslissen?</button>
+      </div>
+      <div id="answer" class="answer" aria-live="polite"></div>
+    </section>
+
+    <section class="three-lanes" aria-label="Drie hoofdingangen">
+      <article class="lane">
+        <div class="lane-no">01</div>
+        <h2>MV nu</h2>
+        <p>Wat is er feitelijk gebeurd?</p>
+        <ul>
+          <li>klachten en veranderingen</li>
+          <li>onderzoeken en uitslagen</li>
+          <li>diagnose of werkdiagnose</li>
+          <li>behandeling en medicatie</li>
+          <li>effect en volgende stap</li>
+        </ul>
+        <button class="open-topic" data-topic="status">Open casusstatus</button>
+      </article>
+
+      <article class="lane">
+        <div class="lane-no">02</div>
+        <h2>Begrijp de zorg</h2>
+        <p>Wat betekent de reguliere medische uitleg?</p>
+        <ul>
+          <li>term in gewone taal</li>
+          <li>wat is objectief gemeten?</li>
+          <li>welke conclusie trekt de arts?</li>
+          <li>wat weten we nog niet?</li>
+          <li>bron en medische richtlijn</li>
+        </ul>
+        <button class="open-topic" data-topic="medische-term">Vertaal medische taal</button>
+      </article>
+
+      <article class="lane">
+        <div class="lane-no">03</div>
+        <h2>Kijk breder</h2>
+        <p>Welke andere invalshoeken bestaan er?</p>
+        <ul>
+          <li>voeding, slaap en beweging</li>
+          <li>immuunsysteem en infecties</li>
+          <li>stress, psyche en zingeving</li>
+          <li>omgeving en blootstellingen</li>
+          <li>complementair en experimenteel</li>
+        </ul>
+        <button class="open-topic" data-topic="holistisch">Open holistische kaart</button>
+      </article>
+    </section>
+
+    <section class="lens-grid" aria-label="Casuslenzen">
+      <button class="lens" data-view="timeline"><span>TIJDLIJN</span><small>Wat gebeurde wanneer?</small></button>
+      <button class="lens" data-view="documents"><span>DOCUMENTEN</span><small>Uitslagen, brieven, artikelen</small></button>
+      <button class="lens" data-view="questions"><span>VRAGEN</span><small>Open en bewaarde vragen</small></button>
+      <button class="lens" data-view="sources"><span>BRONNEN</span><small>Van uitleg naar onderzoek</small></button>
+      <button class="lens" data-view="rights"><span>RECHTEN</span><small>Wie beslist wat?</small></button>
+      <button class="lens" data-view="explore"><span>ANDERE KIJK</span><small>Verken verklaringsmodellen</small></button>
+    </section>
+
+    <section class="panel" id="workspace">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">WERKRUIMTE</p>
+          <h2 id="workspaceTitle">Start hier</h2>
+        </div>
+        <p id="workspaceHint">Kies een lens of stel bovenaan een vrije vraag.</p>
+      </div>
+      <div id="workspaceBody" class="workspace-body"></div>
+    </section>
+
+    <section class="roles">
+      <article><b>MV</b><span>casuseigenaar</span><p>bepaalt wat hij wil onderzoeken en welke keuzes hij maakt</p></article>
+      <article><b>MP</b><span>partner</span><p>begrijpt, verzamelt, ondersteunt en stelt vragen</p></article>
+      <article><b>Facilitator</b><span>ondersteuning</span><p>ordent informatie, vertaalt termen en helpt bronnen vinden</p></article>
+      <article><b>Qubus</b><span>kennislaag</span><p>verbindt tijd, bronnen, hypothesen, documenten en vragen</p></article>
+    </section>
+
+    <section class="rule">
+      <strong>Werkregel</strong>
+      <p>We proberen niet vooraf te bewijzen wat MV heeft. We onderscheiden wat bekend is, wat aangenomen wordt, wat nog onbekend is en welke vragen medisch toetsbaar zijn.</p>
+    </section>
+  </main>
+
+  <footer>
+    <span>MV / MP • V0.1</span>
+    <span>Geen diagnose • geen behandelvoorschrift • wel inzicht en onderzoeksvragen</span>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
