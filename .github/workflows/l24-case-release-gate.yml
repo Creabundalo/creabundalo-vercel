@@ -1,0 +1,32 @@
+name: L24 Case Release Gate
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'case/**'
+      - '.github/workflows/l24-case-release-gate.yml'
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: JavaScript syntax
+        run: node --check case/app.js
+      - name: Required files
+        run: |
+          test -f case/index.html
+          test -f case/style.css
+          test -f case/app.js
+      - name: Privacy-neutral labels
+        run: |
+          grep -q 'MV' case/index.html
+          grep -q 'MP' case/index.html
+          ! grep -Eqi 'Mirjam|Marcel' case/index.html case/app.js
+      - name: Core interaction contract
+        run: |
+          grep -q 'Wat was het verhaal uit Japan?' case/index.html
+          grep -q 'Wat is een holistische kijk op geneeskunde?' case/index.html
+          grep -q 'localStorage' case/app.js
+          grep -q 'Rijksoverheid' case/app.js
